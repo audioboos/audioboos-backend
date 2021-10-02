@@ -9,8 +9,11 @@ namespace AudioBoos.Data.Models.DTO {
         string? LargeImage,
         string? SiteId,
         List<string>? Aliases = null,
+        List<AlbumDTO>? Albums = null,
         string? Id = null
     ) {
+        
+
         public static bool IsNullOrIncomplete(ArtistDTO? artistDto) {
             return artistDto is null || string.IsNullOrEmpty(artistDto.Name) ||
                    string.IsNullOrEmpty(artistDto.Description) ||

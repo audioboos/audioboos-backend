@@ -34,6 +34,8 @@ namespace AudioBoos.Server.Controllers {
         public async Task<ActionResult<ArtistDTO>> Get(string artistName) {
             var artist = await _artistRepository
                 .GetAll()
+                .Include(a => a.Albums)
+                .ThenInclude(a => a.Tracks)
                 .FirstOrDefaultAsync(r => r.Name.Equals(artistName));
             return artist != null ? Ok(artist.Adapt<ArtistDTO>()) : NotFound();
         }
