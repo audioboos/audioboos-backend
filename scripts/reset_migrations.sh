@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-
 PROJECT_ROOT=$HOME/dev/audioboos/audioboos-server
 SQLITEDB="$HOME/dev/audioboos/audioboos-server/audioboos.sqlite"
 export PGPASSWORD='hackme'
+export ASPNETCORE_ENVIRONMENT=Development
 
 echo $SQLITEDB
 
