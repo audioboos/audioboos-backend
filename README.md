@@ -1,2 +1,2 @@
-# audioboos-server
-Server API for AudioBoos
+# audioboos-backend
+Backend for AudioBoos
