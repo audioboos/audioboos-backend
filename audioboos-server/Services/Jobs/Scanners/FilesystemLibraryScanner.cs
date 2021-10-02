@@ -65,7 +65,7 @@ namespace AudioBoos.Server.Services.Jobs.Scanners {
             }, cancellationToken);
 
             string scanPath =
-                Path.Combine(_systemSettings.AudioPath, "The Housemartins");
+                Path.Combine(_systemSettings.AudioPath, "Etienne De Crécy");
             // Path.Combine("/home/fergalm/dev/audioboos/working/testing/problemscans/");
             //Path.Combine(_systemSettings.AudioPath, "Tegan & Sara/If it Was You");;
             var fileList = (await scanPath.GetAllAudioFiles())
