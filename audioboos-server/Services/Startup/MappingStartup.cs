@@ -1,5 +1,6 @@
 ﻿using AudioBoos.Data.Models.DTO;
 using AudioBoos.Data.Store;
+using Flurl;
 using Mapster;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +14,6 @@ namespace AudioBoos.Server.Services.Startup {
 
             TypeAdapterConfig<Artist, ArtistDTO>
                 .NewConfig()
-
                 .Map(dest => dest.Name, src => src.Name);
 
             TypeAdapterConfig<AlbumDTO, Album>
@@ -30,7 +30,13 @@ namespace AudioBoos.Server.Services.Startup {
 
             TypeAdapterConfig<Track, TrackDTO>
                 .NewConfig()
-                .ConstructUsing(src => new TrackDTO(src.Album.Name));
+                .ConstructUsing(src => new TrackDTO(src.Album.Name))
+                .Map(dest => dest.AudioUrl,
+                    src => new Url(config.GetSection("System").GetValue<string>("StreamUrl"))
+                        .SetQueryParams(new {
+                                trackId = src.Id
+                            },
+                            NullValueHandling.Remove));
 
             return services;
         }
