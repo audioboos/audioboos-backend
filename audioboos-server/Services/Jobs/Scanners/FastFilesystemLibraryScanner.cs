@@ -114,19 +114,19 @@ namespace AudioBoos.Server.Services.Jobs.Scanners {
                     await _artistRepository.InsertOrUpdate(
                         artist,
                         cancellationToken);
-                    // fileModel.Artist = artist;
+                    fileModel.Artist = artist;
 
                     var album = await _processAlbumInfo(file, artist, albumName, cancellationToken);
                     await _albumRepository.InsertOrUpdate(
                         album,
                         cancellationToken);
-                    // fileModel.Album = album;
+                    fileModel.Album = album;
 
                     var track = await _processTrackInfo(file, album, trackName, trackNumber, cancellationToken);
                     await _trackRepository.InsertOrUpdate(
                         track,
                         cancellationToken);
-                    // fileModel.Track = track;
+                    fileModel.Track = track;
 
                     trackScans++;
 
@@ -184,8 +184,12 @@ namespace AudioBoos.Server.Services.Jobs.Scanners {
                         await _albumRepository.GetByAlternativeNames(cancellationToken, albumName) ??
                         new Album(artist, albumName);
 
-            if (!string.IsNullOrEmpty(album.LargeImage) && !string.IsNullOrEmpty(album.SmallImage)) {
-                return album;
+            if (string.IsNullOrEmpty(album.LargeImage)) {
+                album.LargeImage = AlbumArtHelper.GetLargeAlbumImagePath(Path.GetDirectoryName(file));
+            }
+
+            if (string.IsNullOrEmpty(album.SmallImage)) {
+                album.SmallImage = AlbumArtHelper.GetSmallAlbumImagePath(Path.GetDirectoryName(file));
             }
 
             try {
@@ -194,7 +198,7 @@ namespace AudioBoos.Server.Services.Jobs.Scanners {
                     album.TaggingStatus = TaggingStatus.RemoteLookup;
                     // album.LastScanDate = DateTime.UtcNow;
                 } catch (Exception e) {
-                    _logger.LogError(e.Message);
+                    _logger.LogError("{Error}", e.Message);
                 }
             } catch (AlbumNotFoundException) {
             }

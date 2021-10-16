@@ -14,11 +14,11 @@ namespace AudioBoos.Data.Store {
             this.ArtistId = artist.Id;
         }
 
-        public DateTime ReleaseDate { get; set; }
+        public DateTime? ReleaseDate { get; set; }
 
-        public string SiteId { get; set; }
-        public string SmallImage { get; set; }
-        public string LargeImage { get; set; }
+        public string? SiteId { get; set; }
+        public string? SmallImage { get; set; }
+        public string? LargeImage { get; set; }
 
         public ICollection<Track> Tracks { get; set; }
 

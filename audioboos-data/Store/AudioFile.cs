@@ -11,8 +11,8 @@ namespace AudioBoos.Data.Store {
     ) : BaseEntity(ID3AlbumName) {
         public string Checksum { get; set; }
 
-        public Artist Artist { get; set; }
-        public Album Album { get; set; }
-        public Track Track { get; set; }
+        public Artist? Artist { get; set; }
+        public Album? Album { get; set; }
+        public Track? Track { get; set; }
     }
 }

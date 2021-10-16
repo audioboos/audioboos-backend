@@ -18,7 +18,7 @@ namespace AudioBoos.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("app")
-                .HasAnnotation("ProductVersion", "6.0.0-rc.1.21452.10")
+                .HasAnnotation("ProductVersion", "6.0.0-rc.2.21480.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -43,7 +43,6 @@ namespace AudioBoos.Data.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("LargeImage")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("LastScanDate")
@@ -53,15 +52,13 @@ namespace AudioBoos.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("ReleaseDate")
+                    b.Property<DateTime?>("ReleaseDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("SiteId")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("SmallImage")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("TaggingStatus")
@@ -352,22 +349,22 @@ namespace AudioBoos.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "ec83972e-7d52-4def-aede-cc140cb2ec07",
-                            ConcurrencyStamp = "48f29c69-ed21-4d75-a9ae-1e2d15a6dba5",
+                            Id = "9433d76d-2800-4a47-a502-0ff7c1b7acd2",
+                            ConcurrencyStamp = "7bbac877-22fa-438d-9ad1-bb633cfd07f3",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "63390aab-08e0-478d-983f-7bc22f457f35",
-                            ConcurrencyStamp = "27db0024-c315-4072-a08b-701a68bb200b",
+                            Id = "d72ba409-d24b-4b58-8bc3-bf7edc4a35a7",
+                            ConcurrencyStamp = "abc1b388-3fa0-4195-a13a-25f931d320f9",
                             Name = "Editor",
                             NormalizedName = "EDITOR"
                         },
                         new
                         {
-                            Id = "c78167e0-2549-444c-8c96-cbe6ae182dbf",
-                            ConcurrencyStamp = "5a3a60e0-6825-427a-9c00-340075983289",
+                            Id = "b5bea20d-1f77-429e-9113-5d1dc7b5b504",
+                            ConcurrencyStamp = "b930392a-9feb-47cb-a747-2736d9815572",
                             Name = "Viewer",
                             NormalizedName = "VIEWER"
                         });
