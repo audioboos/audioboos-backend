@@ -27,8 +27,7 @@ namespace AudioBoos.Server.Services.Startup {
                 options.WaitForJobsToComplete = true;
             });
 
-            // services.AddTransient<ILibraryScanner, CuratedFilesystemLibraryScanner>();
-            services.AddTransient<ILibraryScanner, FilesystemLibraryScanner>();
+            services.AddTransient<ILibraryScanner, FastFilesystemLibraryScanner>();
             return services;
         }
 

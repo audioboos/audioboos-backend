@@ -25,6 +25,11 @@ namespace AudioBoos.Server.Services.Tags {
                    _file.Tag.FirstPerformer;
         }
 
+        public string GetArtistDescription() {
+            return _file.Tag.FirstAlbumArtist ??
+                   _file.Tag.FirstPerformer;
+        }
+
         public string GetAlbumName() {
             return _file.Tag.Album;
         }
