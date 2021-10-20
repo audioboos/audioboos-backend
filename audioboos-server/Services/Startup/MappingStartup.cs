@@ -14,7 +14,15 @@ namespace AudioBoos.Server.Services.Startup {
 
             TypeAdapterConfig<Artist, ArtistDTO>
                 .NewConfig()
-                .Map(dest => dest.Name, src => src.Name);
+                .Map(dest => dest.Name, src => src.Name)
+                .Map(dest => dest.SmallImage,
+                    src => string.IsNullOrEmpty(src.SmallImage)
+                        ? "https://generative-placeholders.glitch.me/image?width=64&height=64&style=mondrian"
+                        : src.SmallImage)
+                .Map(dest => dest.LargeImage,
+                    src => string.IsNullOrEmpty(src.LargeImage)
+                        ? "https://generative-placeholders.glitch.me/image?width=600&height=300&style=mondrian"
+                        : src.SmallImage);
 
             TypeAdapterConfig<AlbumDTO, Album>
                 .NewConfig()
@@ -22,7 +30,11 @@ namespace AudioBoos.Server.Services.Startup {
 
             TypeAdapterConfig<Album, AlbumDTO>
                 .NewConfig()
-                .ConstructUsing(src => new AlbumDTO(src.Artist.Name));
+                .ConstructUsing(src => new AlbumDTO(src.Artist.Name))
+                .Map(dest => dest.SmallImage, 
+                    src => $"{config.GetSection("System").GetValue<string>("BaseUrl")}/image/album/{src.Id}?type=small")
+                .Map(dest => dest.SmallImage, 
+                    src => $"{config.GetSection("System").GetValue<string>("BaseUrl")}/image/album/{src.Id}?type=large");
 
             TypeAdapterConfig<TrackDTO, Track>
                 .NewConfig()

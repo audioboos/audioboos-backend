@@ -13,6 +13,9 @@ namespace AudioBoos.Data.Persistence {
             _context = context;
         }
 
+        public DbContextId __contextId() {
+            return _context.ContextId;
+        }
         public async Task<bool> Complete() {
             try {
                 var results = await _context.SaveChangesAsync();

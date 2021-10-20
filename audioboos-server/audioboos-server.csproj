@@ -13,19 +13,19 @@
         <PackageReference Include="mapster" Version="7.2.0" />
         <PackageReference Include="MetaBrainz.MusicBrainz" Version="3.0.2" />
         <PackageReference Include="MetaBrainz.MusicBrainz.CoverArt" Version="3.0.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.0-rc.1.21452.15" />
-        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.0-rc.1.21452.15" />
-        <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.0-rc.1.21452.15" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.0-rc.1.21452.10" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.0-rc.1.21452.10" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.0-rc.1.21452.10" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.0-rc.1.21452.10" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.0-rc.1.21452.10">
+        <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.0-rc.2.*" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.0-rc.2.*" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.0-rc.2.*" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.0-rc.2.*" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.0-rc.2.*" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.0-rc.2.*" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.0-rc.2.*" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.0-rc.2.*">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.12.1" />
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.0-rc.1" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.0-rc.2" />
         <PackageReference Include="Quartz" Version="3.3.3" />
         <PackageReference Include="Quartz.AspNetCore" Version="3.3.3" />
         <PackageReference Include="SendGrid" Version="9.24.2" />
@@ -41,10 +41,6 @@
         <Content Include="..\scripts\reset_migrations.sh">
             <Link>scripts\reset_migrations.sh</Link>
         </Content>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Folder Include="Data" />
     </ItemGroup>
 
     <ItemGroup>

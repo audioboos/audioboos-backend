@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AudioBoos.Data.Access;
@@ -12,16 +11,14 @@ using AudioBoos.Server.Services.AudioLookup;
 using AudioBoos.Server.Services.Exceptions.AudioLookup;
 using AudioBoos.Server.Services.Hubs;
 using AudioBoos.Server.Services.Tags;
-using Mapster;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace AudioBoos.Server.Services.Jobs.Scanners {
-    internal class FilesystemLibraryScanner : LibraryScanner {
-        public FilesystemLibraryScanner(
-            ILogger<FilesystemLibraryScanner> logger,
+    internal class FastFilesystemLibraryScanner : LibraryScanner {
+        public FastFilesystemLibraryScanner(ILogger<FastFilesystemLibraryScanner> logger,
             IRepository<AudioFile> audioFileRepository,
             IRepository<Artist> artistRepository,
             IRepository<Album> albumRepository,
@@ -32,7 +29,6 @@ namespace AudioBoos.Server.Services.Jobs.Scanners {
             IOptions<SystemSettings> systemSettings) : base(logger, audioFileRepository, artistRepository,
             albumRepository, messageClient, trackRepository, unitOfWork, lookupService, systemSettings) {
         }
-
 
         public override async Task<(int, int, int)> ScanLibrary(CancellationToken cancellationToken) {
             int artistScans = 0;
@@ -49,7 +45,6 @@ namespace AudioBoos.Server.Services.Jobs.Scanners {
 
             string scanPath =
                 Path.Combine(_systemSettings.AudioPath);
-            // Path.Combine("/home/fergalm/dev/audioboos/working/testing/problemscans/");
             //Path.Combine(_systemSettings.AudioPath, "Tegan & Sara/If it Was You");;
             var fileList = (await scanPath.GetAllAudioFiles())
                 /*.Where(f => f.Contains("Confess")).ToList()*/
@@ -59,10 +54,6 @@ namespace AudioBoos.Server.Services.Jobs.Scanners {
             int currentFile = 0;
             foreach (var file in fileList) {
                 try {
-                    if (file.Contains("Confess")) {
-                        _logger.LogDebug("Here");
-                    }
-
                     _logger.LogDebug("Scanning:  {File}", file);
                     await _messageClient.Clients.All.SendAsync("QueueJobMessage", new JobMessage() {
                         Message = $"Scanning: {new FileInfo(file).Name}",
@@ -75,7 +66,6 @@ namespace AudioBoos.Server.Services.Jobs.Scanners {
                     var trackName = tagger.GetTrackName();
                     var trackNumber = tagger.GetTrackNumber();
                     var catalogueId = tagger.GetAlbumCatalogueNumber();
-                    var checksum = await tagger.GetChecksum();
 
                     if (string.IsNullOrEmpty(artistName) || string.IsNullOrEmpty(albumName) ||
                         string.IsNullOrEmpty(trackName)) {
@@ -94,33 +84,36 @@ namespace AudioBoos.Server.Services.Jobs.Scanners {
                                         albumName,
                                         trackName);
 
-                    // fileModel.LastScanDate = DateTime.UtcNow;
-                    fileModel.Checksum = checksum;
+                    fileModel.LastScanDate = DateTime.UtcNow;
                     await _audioFileRepository.InsertOrUpdate(
                         fileModel,
                         cancellationToken);
+                    await _unitOfWork.Complete();
 
-                    var artist = await _processArtistInfo(file, artistName, cancellationToken);
+                    var artist = await _processArtistInfo(file, artistName, tagger, cancellationToken);
                     await _artistRepository.InsertOrUpdate(
                         artist,
                         cancellationToken);
-                    // fileModel.Artist = artist;
+                    fileModel.Artist = artist;
+                    await _unitOfWork.Complete();
 
                     var album = await _processAlbumInfo(file, artist, albumName, cancellationToken);
                     await _albumRepository.InsertOrUpdate(
                         album,
                         cancellationToken);
-                    // fileModel.Album = album;
+                    fileModel.Album = album;
+                    await _unitOfWork.Complete();
 
                     var track = await _processTrackInfo(file, album, trackName, trackNumber, cancellationToken);
                     await _trackRepository.InsertOrUpdate(
                         track,
                         cancellationToken);
-                    // fileModel.Track = track;
-
-                    trackScans++;
+                    fileModel.Track = track;
+                    await _unitOfWork.Complete();
 
                     await _unitOfWork.Complete();
+
+                    trackScans++;
                 } catch (ArtistNotFoundException e) {
                     //TODO: dunno.... guess we should do something??
                     _logger.LogError("Error scanning {File}", e.Message);
@@ -137,6 +130,8 @@ namespace AudioBoos.Server.Services.Jobs.Scanners {
                 }
             }
 
+            await _unitOfWork.Complete();
+
             await _messageClient.Clients.All.SendAsync("QueueJobMessage", new JobMessage() {
                 Message = "",
                 Percentage = 0
@@ -148,7 +143,7 @@ namespace AudioBoos.Server.Services.Jobs.Scanners {
         }
 
         private async Task<Artist> _processArtistInfo(string file, string artistName,
-            CancellationToken cancellationToken) {
+            TagLibTagService tagger, CancellationToken cancellationToken) {
             var artist = await _artistRepository.GetByFile(file, cancellationToken) ??
                          await _artistRepository.GetByName(artistName, cancellationToken) ??
                          await _artistRepository.GetByAlternativeNames(cancellationToken, artistName) ??
@@ -159,18 +154,8 @@ namespace AudioBoos.Server.Services.Jobs.Scanners {
             }
 
             try {
-                var artistDTO = await _lookupService.LookupArtistInfo(
-                    artist.Name,
-                    cancellationToken);
-                if (artistDTO is not null) {
-                    artist = artistDTO.Adapt<Artist>();
-                    if (!artistName.Equals(artistDTO.Name) &&
-                        !artist.AlternativeNames.Contains(artistName)) {
-                        artist.AlternativeNames.Add(artistName);
-                    }
-
-                    artist.TaggingStatus = TaggingStatus.RemoteLookup;
-                }
+                artist.Description = tagger.GetArtistDescription();
+                artist.TaggingStatus = TaggingStatus.MP3TagsOnly;
             } catch (ArtistNotFoundException) {
             }
 
@@ -184,29 +169,21 @@ namespace AudioBoos.Server.Services.Jobs.Scanners {
                         await _albumRepository.GetByAlternativeNames(cancellationToken, albumName) ??
                         new Album(artist, albumName);
 
-            if (!string.IsNullOrEmpty(album.LargeImage) && !string.IsNullOrEmpty(album.SmallImage)) {
-                return album;
+            if (string.IsNullOrEmpty(album.LargeImage)) {
+                album.LargeImage = AlbumArtHelper.GetLargeAlbumImagePath(Path.GetDirectoryName(file));
+            }
+
+            if (string.IsNullOrEmpty(album.SmallImage)) {
+                album.SmallImage = AlbumArtHelper.GetSmallAlbumImagePath(Path.GetDirectoryName(file));
             }
 
             try {
-                var albumDTO = await _lookupService.LookupAlbumInfo(
-                    artist.Name,
-                    albumName,
-                    cancellationToken);
-                if (!string.IsNullOrEmpty(albumDTO?.Name)) {
-                    try {
-                        album = albumDTO.Adapt<Album>();
-                        if (!albumName.Equals(albumDTO.Name) &&
-                            !album.AlternativeNames.Contains(albumName)) {
-                            album.AlternativeNames.Add(albumName);
-                        }
-
-                        album.ArtistId = artist.Id;
-                        album.TaggingStatus = TaggingStatus.RemoteLookup;
-                        // album.LastScanDate = DateTime.UtcNow;
-                    } catch (Exception e) {
-                        _logger.LogError(e.Message);
-                    }
+                try {
+                    album.ArtistId = artist.Id;
+                    album.TaggingStatus = TaggingStatus.RemoteLookup;
+                    // album.LastScanDate = DateTime.UtcNow;
+                } catch (Exception e) {
+                    _logger.LogError("{Error}", e.Message);
                 }
             } catch (AlbumNotFoundException) {
             }

@@ -35,8 +35,7 @@ namespace AudioBoos.Server.Tests {
                 .AddDbContext<AudioBoosContext>(
                     options => options.UseNpgsql(
                         configuration.GetConnectionString("PostgresDefaultConnection")
-                    ),
-                    ServiceLifetime.Transient);
+                    ));
 
             serviceCollection.AddLogging();
 

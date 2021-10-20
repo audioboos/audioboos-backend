@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Mapster;
 
 #nullable enable
 namespace AudioBoos.Data.Models.DTO {
@@ -8,7 +9,7 @@ namespace AudioBoos.Data.Models.DTO {
             ArtistName = artistName;
         }
 
-        public string? Id { get; set; }
+        [AdaptIgnore] public string? Id { get; set; }
         public string Name { get; set; }
         public string ArtistName { get; set; }
         public string Description { get; set; }

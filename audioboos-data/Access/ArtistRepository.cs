@@ -19,20 +19,25 @@ namespace AudioBoos.Data.Access {
             var artist = await this._context.Tracks
                 .Where(a => a.PhysicalPath.ToLower().Equals(name.ToLower()))
                 .Select(r => r.Album.Artist)
-                .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
             return artist;
         }
 
         public override async Task<Artist>
             InsertOrUpdate(Artist entity, CancellationToken cancellationToken = default) {
-            await _context.Artists.AddOrUpdate(
-                _context,
-                model => model.Id.Equals(entity.Id) ||
-                         model.Name.Equals(entity.Name),
-                entity,
-                _logger);
+            var existing =
+                    await _context.Artists
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(
+                            a => a.Name.Equals(entity.Name),
+                            cancellationToken: cancellationToken)
+                ;
 
+            if (existing is not null) {
+                entity.Id = existing.Id;
+            }
+
+            this._context.Update(entity);
             return entity;
         }
     }
