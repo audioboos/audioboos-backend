@@ -15,20 +15,28 @@ namespace AudioBoos.Data.Access {
             _logger = logger;
         }
 
-        public override async Task<Album> GetByFile(string name, CancellationToken cancellationToken = default) {
+        public override async Task<Album?> GetByFile(string name, CancellationToken cancellationToken = default) {
             var album = await this._context.Tracks
                 .Where(a => a.PhysicalPath.ToLower().Equals(name.ToLower()))
+                .Include(r => r.Album.Artist)
                 .Select(r => r.Album)
                 .FirstOrDefaultAsync(cancellationToken);
             return album;
         }
 
         public override async Task<Album> InsertOrUpdate(Album entity, CancellationToken cancellationToken = default) {
-            await _context.Albums.AddOrUpdate(
-                _context,
-                model => ((model.Name.Equals(entity.Name) && model.Artist.Id.Equals(entity.ArtistId))),
-                entity,
-                _logger);
+            var existing =
+                await _context.Albums
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(
+                        a => a.Name.Equals(entity.Name) && a.Artist.Id.Equals(entity.ArtistId),
+                        cancellationToken: cancellationToken);
+
+            if (existing is not null) {
+                entity.Id = existing.Id;
+            }
+
+            this._context.Update(entity);
             return entity;
         }
     }

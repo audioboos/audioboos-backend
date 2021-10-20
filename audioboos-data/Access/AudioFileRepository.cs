@@ -15,8 +15,9 @@ namespace AudioBoos.Data.Access {
             _logger = logger;
         }
 
-        public override async Task<AudioFile> GetByFile(string name, CancellationToken cancellationToken = default) {
+        public override async Task<AudioFile?> GetByFile(string name, CancellationToken cancellationToken = default) {
             var file = await this._context.AudioFiles
+                .AsNoTrackingWithIdentityResolution()
                 .Where(a => a.PhysicalPath.ToLower().Equals(name.ToLower()))
                 .FirstOrDefaultAsync(cancellationToken);
             return file;
@@ -24,13 +25,20 @@ namespace AudioBoos.Data.Access {
 
         public override async Task<AudioFile> InsertOrUpdate(AudioFile entity,
             CancellationToken cancellationToken = default) {
-            return await _context.AudioFiles.AddOrUpdate(
-                _context,
-                model =>
-                    model.PhysicalPath.Equals(entity.PhysicalPath) ||
-                    model.Id.Equals(entity.Id),
-                entity,
-                _logger);
+            var existing =
+                await _context.AudioFiles
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(
+                        f => f.PhysicalPath.Equals(entity.PhysicalPath),
+                        cancellationToken: cancellationToken);
+
+            if (existing is not null) {
+                _logger.LogDebug("Entity: {Existing} found, updating existing", existing.Id);
+                entity.Id = existing.Id;
+            }
+
+            this._context.Update(entity);
+            return entity;
         }
     }
 }

@@ -272,10 +272,10 @@ namespace AudioBoos.Data.Migrations
                     ID3ArtistName = table.Column<string>(type: "text", nullable: false),
                     ID3AlbumName = table.Column<string>(type: "text", nullable: false),
                     ID3TrackName = table.Column<string>(type: "text", nullable: false),
-                    Checksum = table.Column<string>(type: "text", nullable: false),
                     ArtistId = table.Column<Guid>(type: "uuid", nullable: true),
                     AlbumId = table.Column<Guid>(type: "uuid", nullable: true),
                     TrackId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Checksum = table.Column<string>(type: "text", nullable: true),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: true),
                     TaggingStatus = table.Column<int>(type: "integer", nullable: false),
@@ -312,9 +312,9 @@ namespace AudioBoos.Data.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "9433d76d-2800-4a47-a502-0ff7c1b7acd2", "7bbac877-22fa-438d-9ad1-bb633cfd07f3", "Admin", "ADMIN" },
-                    { "b5bea20d-1f77-429e-9113-5d1dc7b5b504", "b930392a-9feb-47cb-a747-2736d9815572", "Viewer", "VIEWER" },
-                    { "d72ba409-d24b-4b58-8bc3-bf7edc4a35a7", "abc1b388-3fa0-4195-a13a-25f931d320f9", "Editor", "EDITOR" }
+                    { "1d6a7752-9d0f-4697-8cea-db102e40783d", "7a73934c-d12c-471d-9e0a-052f5aa0c02c", "Viewer", "VIEWER" },
+                    { "73b41674-098a-4c46-82c2-169a354f08c6", "86c711e8-ee32-4186-a651-76b5fab2e819", "Admin", "ADMIN" },
+                    { "c1c85021-12e1-4583-9d2b-420fdcc29d5e", "9d61f87e-cfd2-4e78-8ad2-c0e69a09b214", "Editor", "EDITOR" }
                 });
 
             migrationBuilder.CreateIndex(

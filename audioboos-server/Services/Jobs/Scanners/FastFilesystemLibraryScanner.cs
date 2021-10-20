@@ -7,6 +7,7 @@ using AudioBoos.Data.Models.Settings;
 using AudioBoos.Data.Persistence.Interfaces;
 using AudioBoos.Data.Store;
 using AudioBoos.Server.Helpers;
+using AudioBoos.Server.Services.AudioLookup;
 using AudioBoos.Server.Services.Exceptions.AudioLookup;
 using AudioBoos.Server.Services.Hubs;
 using AudioBoos.Server.Services.Tags;
@@ -16,17 +17,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace AudioBoos.Server.Services.Jobs.Scanners {
-    public class FastFilesystemLibraryScanner : ILibraryScanner {
-        private readonly SemaphoreSlim __scanLock = new(1, 1);
-        private readonly ILogger _logger;
-        private readonly IRepository<AudioFile> _audioFileRepository;
-        private readonly IRepository<Artist> _artistRepository;
-        private readonly IRepository<Album> _albumRepository;
-        private readonly IHubContext<JobHub> _messageClient;
-        private readonly IRepository<Track> _trackRepository;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly SystemSettings _systemSettings;
-
+    internal class FastFilesystemLibraryScanner : LibraryScanner {
         public FastFilesystemLibraryScanner(ILogger<FastFilesystemLibraryScanner> logger,
             IRepository<AudioFile> audioFileRepository,
             IRepository<Artist> artistRepository,
@@ -34,18 +25,12 @@ namespace AudioBoos.Server.Services.Jobs.Scanners {
             IHubContext<JobHub> messageClient,
             IRepository<Track> trackRepository,
             IUnitOfWork unitOfWork,
-            IOptions<SystemSettings> systemSettings) {
-            _logger = logger;
-            _audioFileRepository = audioFileRepository;
-            _artistRepository = artistRepository;
-            _albumRepository = albumRepository;
-            _messageClient = messageClient;
-            _trackRepository = trackRepository;
-            _unitOfWork = unitOfWork;
-            _systemSettings = systemSettings.Value;
+            IAudioLookupService lookupService,
+            IOptions<SystemSettings> systemSettings) : base(logger, audioFileRepository, artistRepository,
+            albumRepository, messageClient, trackRepository, unitOfWork, lookupService, systemSettings) {
         }
 
-        public async Task<(int, int, int)> ScanLibrary(CancellationToken cancellationToken) {
+        public override async Task<(int, int, int)> ScanLibrary(CancellationToken cancellationToken) {
             int artistScans = 0;
             int albumScans = 0;
             int trackScans = 0;
@@ -59,7 +44,7 @@ namespace AudioBoos.Server.Services.Jobs.Scanners {
             }, cancellationToken);
 
             string scanPath =
-                Path.Combine(_systemSettings.AudioPath, "Air");
+                Path.Combine(_systemSettings.AudioPath);
             //Path.Combine(_systemSettings.AudioPath, "Tegan & Sara/If it Was You");;
             var fileList = (await scanPath.GetAllAudioFiles())
                 /*.Where(f => f.Contains("Confess")).ToList()*/
@@ -69,10 +54,6 @@ namespace AudioBoos.Server.Services.Jobs.Scanners {
             int currentFile = 0;
             foreach (var file in fileList) {
                 try {
-                    if (file.Contains("Confess")) {
-                        _logger.LogDebug("Here");
-                    }
-
                     _logger.LogDebug("Scanning:  {File}", file);
                     await _messageClient.Clients.All.SendAsync("QueueJobMessage", new JobMessage() {
                         Message = $"Scanning: {new FileInfo(file).Name}",
@@ -85,7 +66,6 @@ namespace AudioBoos.Server.Services.Jobs.Scanners {
                     var trackName = tagger.GetTrackName();
                     var trackNumber = tagger.GetTrackNumber();
                     var catalogueId = tagger.GetAlbumCatalogueNumber();
-                    var checksum = await tagger.GetChecksum();
 
                     if (string.IsNullOrEmpty(artistName) || string.IsNullOrEmpty(albumName) ||
                         string.IsNullOrEmpty(trackName)) {
@@ -104,33 +84,36 @@ namespace AudioBoos.Server.Services.Jobs.Scanners {
                                         albumName,
                                         trackName);
 
-                    // fileModel.LastScanDate = DateTime.UtcNow;
-                    fileModel.Checksum = checksum;
+                    fileModel.LastScanDate = DateTime.UtcNow;
                     await _audioFileRepository.InsertOrUpdate(
                         fileModel,
                         cancellationToken);
+                    await _unitOfWork.Complete();
 
                     var artist = await _processArtistInfo(file, artistName, tagger, cancellationToken);
                     await _artistRepository.InsertOrUpdate(
                         artist,
                         cancellationToken);
                     fileModel.Artist = artist;
+                    await _unitOfWork.Complete();
 
                     var album = await _processAlbumInfo(file, artist, albumName, cancellationToken);
                     await _albumRepository.InsertOrUpdate(
                         album,
                         cancellationToken);
                     fileModel.Album = album;
+                    await _unitOfWork.Complete();
 
                     var track = await _processTrackInfo(file, album, trackName, trackNumber, cancellationToken);
                     await _trackRepository.InsertOrUpdate(
                         track,
                         cancellationToken);
                     fileModel.Track = track;
-
-                    trackScans++;
+                    await _unitOfWork.Complete();
 
                     await _unitOfWork.Complete();
+
+                    trackScans++;
                 } catch (ArtistNotFoundException e) {
                     //TODO: dunno.... guess we should do something??
                     _logger.LogError("Error scanning {File}", e.Message);
@@ -146,6 +129,8 @@ namespace AudioBoos.Server.Services.Jobs.Scanners {
                     _logger.LogError("File scan error {Error}", e.Message);
                 }
             }
+
+            await _unitOfWork.Complete();
 
             await _messageClient.Clients.All.SendAsync("QueueJobMessage", new JobMessage() {
                 Message = "",
@@ -170,7 +155,7 @@ namespace AudioBoos.Server.Services.Jobs.Scanners {
 
             try {
                 artist.Description = tagger.GetArtistDescription();
-                artist.TaggingStatus = TaggingStatus.RemoteLookup;
+                artist.TaggingStatus = TaggingStatus.MP3TagsOnly;
             } catch (ArtistNotFoundException) {
             }
 

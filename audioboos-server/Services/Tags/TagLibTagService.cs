@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
-using TagLib;
+using AudioBoos.Server.Services;
 
 namespace AudioBoos.Server.Services.Tags {
     public class TagLibTagService : MustInitialize<string>, ITagService {

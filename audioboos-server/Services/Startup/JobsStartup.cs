@@ -14,12 +14,15 @@ namespace AudioBoos.Server.Services.Startup {
 
                 q.UseMicrosoftDependencyInjectionJobFactory();
 
-                var jobKey = new JobKey("UpdateLibrary");
-                q.AddJob<UpdateLibraryJob>(opts => opts.WithIdentity(jobKey).StoreDurably());
+                var libraryJobKey = new JobKey("UpdateLibrary");
+                q.AddJob<UpdateLibraryJob>(opts => opts.WithIdentity(libraryJobKey).StoreDurably());
                 q.AddTrigger(opts => opts
-                    .ForJob(jobKey)
+                    .ForJob(libraryJobKey)
                     .WithIdentity("UpdateLibrary-trigger")
                     .WithDailyTimeIntervalSchedule(x => x.WithInterval(24, IntervalUnit.Hour)));
+
+                var scanArtistsJobKey = new JobKey("ScanArtists");
+                q.AddJob<ScanArtistsJob>(opts => opts.WithIdentity(scanArtistsJobKey).StoreDurably());
             });
 
             services.AddQuartzServer(options => {

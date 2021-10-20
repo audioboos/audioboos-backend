@@ -9,15 +9,18 @@ namespace AudioBoos.Server.Services.Jobs {
         private readonly ILogger<UpdateLibraryJob> _logger;
         private readonly ILibraryScanner _scanner;
 
-        public string JobName => "UpdateLibrary";
+        public string JobName => "ScanArtists";
 
         public UpdateLibraryJob(ILogger<UpdateLibraryJob> logger, ILibraryScanner scanner) {
             _logger = logger;
             _scanner = scanner;
         }
 
-        public Task Execute(IJobExecutionContext context) {
-            return _scanner.ScanLibrary(context.CancellationToken);
+        public async Task Execute(IJobExecutionContext context) {
+            await _scanner.ScanLibrary(context.CancellationToken);
+            await _scanner.UpdateUnscannedArtists(context.CancellationToken);
+            await _scanner.UpdateChecksums(context.CancellationToken);
+            _logger.LogInformation("Update Library Job Complete");
         }
     }
 }

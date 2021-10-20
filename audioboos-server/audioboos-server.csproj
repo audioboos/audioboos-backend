@@ -44,10 +44,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Data" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\audioboos-data\audioboos-data.csproj" />
     </ItemGroup>
 

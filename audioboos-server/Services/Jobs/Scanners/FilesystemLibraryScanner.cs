@@ -19,39 +19,22 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace AudioBoos.Server.Services.Jobs.Scanners {
-    public class FilesystemLibraryScanner : ILibraryScanner {
-        private readonly SemaphoreSlim __scanLock = new(1, 1);
-        private readonly ILogger _logger;
-        private readonly IRepository<AudioFile> _audioFileRepository;
-        private readonly IRepository<Artist> _artistRepository;
-        private readonly IRepository<Album> _albumRepository;
-        private readonly IHubContext<JobHub> _messageClient;
-        private readonly IRepository<Track> _trackRepository;
-        private readonly IAudioLookupService _lookupService;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly SystemSettings _systemSettings;
-
-        public FilesystemLibraryScanner(ILogger<FilesystemLibraryScanner> logger,
+    internal class FilesystemLibraryScanner : LibraryScanner {
+        public FilesystemLibraryScanner(
+            ILogger<FilesystemLibraryScanner> logger,
             IRepository<AudioFile> audioFileRepository,
             IRepository<Artist> artistRepository,
             IRepository<Album> albumRepository,
             IHubContext<JobHub> messageClient,
             IRepository<Track> trackRepository,
-            IAudioLookupService lookupService,
             IUnitOfWork unitOfWork,
-            IOptions<SystemSettings> systemSettings) {
-            _logger = logger;
-            _audioFileRepository = audioFileRepository;
-            _artistRepository = artistRepository;
-            _albumRepository = albumRepository;
-            _messageClient = messageClient;
-            _trackRepository = trackRepository;
-            _lookupService = lookupService;
-            _unitOfWork = unitOfWork;
-            _systemSettings = systemSettings.Value;
+            IAudioLookupService lookupService,
+            IOptions<SystemSettings> systemSettings) : base(logger, audioFileRepository, artistRepository,
+            albumRepository, messageClient, trackRepository, unitOfWork, lookupService, systemSettings) {
         }
 
-        public async Task<(int, int, int)> ScanLibrary(CancellationToken cancellationToken) {
+
+        public override async Task<(int, int, int)> ScanLibrary(CancellationToken cancellationToken) {
             int artistScans = 0;
             int albumScans = 0;
             int trackScans = 0;
