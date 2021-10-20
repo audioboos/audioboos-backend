@@ -14,6 +14,7 @@ namespace AudioBoos.Server.Services.Startup {
 
             TypeAdapterConfig<Artist, ArtistDto>
                 .NewConfig()
+                .Map(dest => dest.Id, src => src.Id.ToString())
                 .Map(dest => dest.Name, src => src.Name)
                 .Map(dest => dest.SmallImage,
                     src => string.IsNullOrEmpty(src.SmallImage)
@@ -31,10 +32,12 @@ namespace AudioBoos.Server.Services.Startup {
             TypeAdapterConfig<Album, AlbumDto>
                 .NewConfig()
                 .ConstructUsing(src => new AlbumDto(src.Artist.Name))
-                .Map(dest => dest.SmallImage, 
+                .Map(dest => dest.Id, src => src.Id.ToString())
+                .Map(dest => dest.SmallImage,
                     src => $"{config.GetSection("System").GetValue<string>("BaseUrl")}/image/album/{src.Id}?type=small")
-                .Map(dest => dest.SmallImage, 
-                    src => $"{config.GetSection("System").GetValue<string>("BaseUrl")}/image/album/{src.Id}?type=large");
+                .Map(dest => dest.SmallImage,
+                    src =>
+                        $"{config.GetSection("System").GetValue<string>("BaseUrl")}/image/album/{src.Id}?type=large");
 
             TypeAdapterConfig<TrackDto, Track>
                 .NewConfig()
@@ -43,6 +46,7 @@ namespace AudioBoos.Server.Services.Startup {
             TypeAdapterConfig<Track, TrackDto>
                 .NewConfig()
                 .ConstructUsing(src => new TrackDto(src.Album.Name))
+                .Map(dest => dest.Id, src => src.Id.ToString())
                 .Map(dest => dest.AudioUrl,
                     src => new Url(config.GetSection("System").GetValue<string>("StreamUrl"))
                         .SetQueryParams(new {
