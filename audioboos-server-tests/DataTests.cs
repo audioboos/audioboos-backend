@@ -8,29 +8,27 @@ using AudioBoos.Data.Persistence.Interfaces;
 using AudioBoos.Data.Store;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using Xunit;
 
 namespace AudioBoos.Server.Tests {
     public class DataTests : IClassFixture<DbFixture> {
-        private ServiceProvider _serviceProvider;
+        private readonly ServiceProvider _serviceProvider;
 
         public DataTests(DbFixture fixture) {
             _serviceProvider = fixture.ServiceProvider;
         }
 
         [Fact]
-        public async Task Test_Insert_AudioFile() {
-            await using var context = _serviceProvider.GetService<AudioBoosContext>();
-            if (context is null) {
-                Assert.False(true, "Unable to get context");
-                return;
-            }
+        public async Task Test_Insert_AudioFile_Raw() {
+            using var scope = _serviceProvider.CreateScope();
+            await using var context = scope.ServiceProvider.GetRequiredService<AudioBoosContext>();
 
             var audioFile = new AudioFile(
-                "/tmp/audio.mp3",
-                "Artist",
-                "Album",
-                "Track");
+                "/tmp/Test_Insert_AudioFile_Raw_audio.mp3",
+                "Test_Insert_AudioFile_Raw_Artist",
+                "Test_Insert_AudioFile_Raw_Album",
+                "Test_Insert_AudioFile_Raw_Track");
             Assert.True(audioFile.Id.Equals(Guid.Empty));
             context.AudioFiles.Add(audioFile);
             await context.SaveChangesAsync();
@@ -39,85 +37,55 @@ namespace AudioBoos.Server.Tests {
         }
 
         [Fact]
-        public async Task Test_Upsert_AudioFile() {
-            var audioFileRepository = _serviceProvider.GetService<IRepository<AudioFile>>();
-            var unitOfWork = _serviceProvider.GetService<IUnitOfWork>();
-            if (audioFileRepository is null || unitOfWork is null) {
-                Assert.False(true, "Unable to get AudioFileRepository");
-                return;
-            }
-
-            var audioFile = new AudioFile(
-                "/tmp/audio.mp3",
-                "Artist",
-                "Album",
-                "Track");
-            audioFile.Checksum = "INITIAL";
-            Assert.True(audioFile.Id.Equals(Guid.Empty));
-
-            var newRecord = await audioFileRepository.InsertOrUpdate(audioFile);
-            await unitOfWork.Complete();
-
-            Assert.False(audioFile.Id.Equals(Guid.Empty));
-
-            newRecord.Checksum = "POST";
-            var upserted = await audioFileRepository.InsertOrUpdate(audioFile);
-            Assert.True(upserted.Checksum.Equals("POST"));
-
-            var found = await audioFileRepository.GetByFile(audioFile.PhysicalPath);
-            Assert.True(found?.Checksum.Equals("POST"));
-        }
-
-        [Fact]
-        public async Task Test_Insert() {
-            var audioFileRepository = _serviceProvider.GetService<IRepository<AudioFile>>();
-            var artistRepository = _serviceProvider.GetService<IRepository<Artist>>();
-            var trackRepository = _serviceProvider.GetService<IRepository<Track>>();
-            var albumRepository = _serviceProvider.GetService<IRepository<Album>>();
-            var unitOfWork = _serviceProvider.GetService<IUnitOfWork>();
-            await using var context = _serviceProvider.GetService<AudioBoosContext>();
-
-            if (audioFileRepository is null || artistRepository is null || trackRepository is null ||
-                albumRepository is null || unitOfWork is null || context is null) {
-                Assert.False(true, "Unable to get repositories from DI");
-                return;
-            }
+        public async Task Test_Insert_AudioFile_Repository() {
+            using var scope = _serviceProvider.CreateScope();
+            var audioFileRepository = scope.ServiceProvider.GetRequiredService<IRepository<AudioFile>>();
 
             var audioFile = await audioFileRepository.InsertOrUpdate(
                 new AudioFile(
-                    "/tmp/audio.mp3",
-                    "Artist",
-                    "Album",
-                    "Track"));
-            await unitOfWork.Complete();
+                    "/tmp/Test_Insert_AudioFile_Repository_audio.mp3",
+                    "Test_Insert_AudioFile_Repository_Artist",
+                    "Test_Insert_AudioFile_Repository_Album",
+                    "Test_Insert_AudioFile_Repository_Track"));
+            audioFile.Checksum = "Pre Save Test Checksum";
+            await audioFileRepository.Context.SaveChangesAsync();
+            Assert.Equal(1, audioFileRepository.Context.AudioFiles.Count());
+            Assert.Equal(1, audioFileRepository.GetAll().Count());
+            audioFile.Checksum = "Post Save Test Checksum";
 
-            var artist = await artistRepository.InsertOrUpdate(new Artist("Test Artist One") {
-                Description = "Test Artist One Description",
-            });
+            await audioFileRepository.InsertOrUpdate(audioFile);
 
-            var album = await albumRepository.InsertOrUpdate(new Album(artist, "Test Artist One - Album One"));
+            var test = await audioFileRepository.GetByFile("/tmp/Test_Insert_AudioFile_Repository_audio.mp3");
+            Assert.Equal("Post Save Test Checksum", test?.Checksum);
+        }
 
-            await unitOfWork.Complete();
+        [Fact]
+        public async Task Test_Insert_Artist() {
+            using var scope = _serviceProvider.CreateScope();
+            var artistRepository = scope.ServiceProvider.GetRequiredService<IRepository<Artist>>();
 
-            Assert.True(context.AudioFiles.Where(
-                    i => i.Id.Equals(audioFile.Id))?.Count() == 1,
-                "One Audio File Inserted");
+            var artist = await artistRepository.InsertOrUpdate(
+                new Artist("Test_Insert_Artist_Artist"));
+            artist.Description = "Pre Save Test Description";
+            await artistRepository.Context.SaveChangesAsync();
+            Assert.Equal(1, artistRepository.Context.Artists.Count());
+            Assert.Equal(1, artistRepository.GetAll().Count());
+            artist.Description = "Post Save Test Description";
 
-            Assert.True(context.Artists.Count().Equals(1), "One Artist Inserted");
-            Assert.True(context.Albums.Count().Equals(1), "One Album Inserted");
-            Assert.True(context.Tracks.Count().Equals(1), "One Track Inserted");
+            await artistRepository.InsertOrUpdate(artist);
+            await artistRepository.Context.SaveChangesAsync();
+
+            var test = await artistRepository.GetByName("Test_Insert_Artist_Artist");
+            Assert.Equal("Post Save Test Description", test?.Description);
         }
 
         [Fact]
         public async Task Test_AlternativeNames() {
-            await using var context = _serviceProvider.GetService<AudioBoosContext>();
-            if (context is null) {
-                Assert.False(true, "Unable to get context");
-                return;
-            }
+            using var scope = _serviceProvider.CreateScope();
+            await using var context = scope.ServiceProvider.GetRequiredService<AudioBoosContext>();
 
-            var artist = new Artist("Test Artist One") {
-                Description = "Test Artist One Description",
+            var artist = new Artist("Test_AlternativeNames_Artist") {
+                Description = "Test_AlternativeNames_Artist_Description",
                 AlternativeNames = new List<string> {"Alt 1", "Alt 2"}
             };
 

@@ -12,7 +12,7 @@ namespace AudioBoos.Data.Access {
         protected readonly AudioBoosContext _context;
         private DbSet<TEntity> _entities;
 
-        public DbContext Context { get => _context; }
+        public AudioBoosContext Context { get => _context; }
 
         protected AbstractRepository(AudioBoosContext context) {
             this._context = context;
@@ -21,6 +21,10 @@ namespace AudioBoos.Data.Access {
 
         public DbSet<TEntity> GetAll() {
             return _entities;
+        }
+
+        public async Task<TEntity?> GetById(string id, CancellationToken cancellationToken = default) {
+            return await GetById(Guid.Parse(id), cancellationToken);
         }
 
         public async Task<TEntity?> GetById(Guid id, CancellationToken cancellationToken = default) {
@@ -39,7 +43,7 @@ namespace AudioBoos.Data.Access {
             CancellationToken cancellationToken = default) {
             DbSet<TEntity> result = this._context.Set<TEntity>();
             return await func(result)
-                .AsNoTracking()
+                .AsNoTrackingWithIdentityResolution()
                 .FirstOrDefaultAsync(e =>
                     e.Name.ToUpper().Equals(name.ToUpper()), cancellationToken);
         }
@@ -49,7 +53,7 @@ namespace AudioBoos.Data.Access {
         public async Task<TEntity?> GetByAlternativeNames(CancellationToken cancellationToken = default,
             params string[] names) {
             var results = (await this._context.Set<TEntity>()
-                    .AsNoTracking()
+                    .AsNoTrackingWithIdentityResolution()
                     .ToListAsync(cancellationToken))
                 .FirstOrDefault(t => t
                     .AlternativeNames

@@ -1,5 +1,5 @@
 ﻿/*
-namespace AudioBoos.Server.Services.Jobs.Scanners {
+namespace AudioBoos.API.Services.Jobs.Scanners {
     /// <summary>
     /// This scanner will work perfectly for me but probably not for other users
     /// Will probably also be super shitty if we move to a SAAS offering

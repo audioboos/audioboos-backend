@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using AudioBoos.Server.Services;
 
 namespace AudioBoos.Server.Services.Tags {
     public class TagLibTagService : MustInitialize<string>, ITagService {
@@ -21,6 +22,11 @@ namespace AudioBoos.Server.Services.Tags {
         }
 
         public string GetArtistName() {
+            return _file.Tag.FirstAlbumArtist ??
+                   _file.Tag.FirstPerformer;
+        }
+
+        public string GetArtistDescription() {
             return _file.Tag.FirstAlbumArtist ??
                    _file.Tag.FirstPerformer;
         }

@@ -19,22 +19,7 @@ namespace AudioBoos.Server.Controllers {
         [HttpGet]
         [Produces("text/plain")]
         public async Task<IActionResult> Ping() {
-            var audioFile = new AudioFile(
-                "/tmp/audio.mp3",
-                "Artist",
-                "Album",
-                "Track");
-            audioFile.Checksum = "INITIAL";
-
-            var newRecord = await _audioFileRepository.InsertOrUpdate(audioFile);
-            await _unitOfWork.Complete();
-
-            newRecord.Checksum = "POST";
-            var upserted = await _audioFileRepository.InsertOrUpdate(audioFile);
-
-            var found = await _audioFileRepository.GetByFile(audioFile.PhysicalPath);
-
-            return Ok(found);
+            return await Task.FromResult(Ok("Pong"));
         }
     }
 }

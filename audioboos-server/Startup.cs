@@ -3,9 +3,9 @@ using AudioBoos.Data.Access;
 using AudioBoos.Data.Persistence;
 using AudioBoos.Data.Persistence.Interfaces;
 using AudioBoos.Data.Store;
+using AudioBoos.Server.Services.Startup;
 using AudioBoos.Server.Services.Email;
 using AudioBoos.Server.Services.Hubs;
-using AudioBoos.Server.Services.Startup;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -101,15 +101,6 @@ namespace AudioBoos.Server {
 
             AudioBoosDbInitializer.SeedUsers(userManager);
 
-            // using var scope = app.ApplicationServices.CreateScope();
-            // using var context = scope.ServiceProvider.GetService<AudioBoosContext>();
-            //     if (env.IsDevelopment()) {
-            //         context?.Database.ExecuteSqlRaw("DROP SCHEMA IF EXISTS app CASCADE");
-            //         context?.Database.ExecuteSqlRaw("DROP SCHEMA IF EXISTS auth CASCADE");
-            //         context?.Database.ExecuteSqlRaw("DROP TABLE IF EXISTS public.__EFMigrationsHistory");
-            //     }
-            //
-            //     context?.Database.Migrate();
         }
     }
 }

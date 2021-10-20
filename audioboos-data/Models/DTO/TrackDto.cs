@@ -1,7 +1,7 @@
 ﻿#nullable enable
 namespace AudioBoos.Data.Models.DTO {
-    public class TrackDTO {
-        public TrackDTO(string artistName) {
+    public class TrackDto {
+        public TrackDto(string artistName) {
             AlbumName = artistName;
         }
 
@@ -12,7 +12,7 @@ namespace AudioBoos.Data.Models.DTO {
         public string AudioUrl { get; set; }
         public string SiteId { get; set; }
 
-        public static bool IsNullOrIncomplete(TrackDTO? trackDto) {
+        public static bool IsNullOrIncomplete(TrackDto? trackDto) {
             return trackDto is null || string.IsNullOrEmpty(trackDto.Name);
         }
     }

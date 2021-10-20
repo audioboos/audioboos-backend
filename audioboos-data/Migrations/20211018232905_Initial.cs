@@ -157,10 +157,10 @@ namespace AudioBoos.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    ReleaseDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    SiteId = table.Column<string>(type: "text", nullable: false),
-                    SmallImage = table.Column<string>(type: "text", nullable: false),
-                    LargeImage = table.Column<string>(type: "text", nullable: false),
+                    ReleaseDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    SiteId = table.Column<string>(type: "text", nullable: true),
+                    SmallImage = table.Column<string>(type: "text", nullable: true),
+                    LargeImage = table.Column<string>(type: "text", nullable: true),
                     ArtistId = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: true),
@@ -272,10 +272,10 @@ namespace AudioBoos.Data.Migrations
                     ID3ArtistName = table.Column<string>(type: "text", nullable: false),
                     ID3AlbumName = table.Column<string>(type: "text", nullable: false),
                     ID3TrackName = table.Column<string>(type: "text", nullable: false),
-                    Checksum = table.Column<string>(type: "text", nullable: false),
                     ArtistId = table.Column<Guid>(type: "uuid", nullable: true),
                     AlbumId = table.Column<Guid>(type: "uuid", nullable: true),
                     TrackId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Checksum = table.Column<string>(type: "text", nullable: true),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: true),
                     TaggingStatus = table.Column<int>(type: "integer", nullable: false),
@@ -312,9 +312,9 @@ namespace AudioBoos.Data.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "ec83972e-7d52-4def-aede-cc140cb2ec07", "48f29c69-ed21-4d75-a9ae-1e2d15a6dba5", "Admin", "ADMIN" },
-                    { "63390aab-08e0-478d-983f-7bc22f457f35", "27db0024-c315-4072-a08b-701a68bb200b", "Editor", "EDITOR" },
-                    { "c78167e0-2549-444c-8c96-cbe6ae182dbf", "5a3a60e0-6825-427a-9c00-340075983289", "Viewer", "VIEWER" }
+                    { "1d6a7752-9d0f-4697-8cea-db102e40783d", "7a73934c-d12c-471d-9e0a-052f5aa0c02c", "Viewer", "VIEWER" },
+                    { "73b41674-098a-4c46-82c2-169a354f08c6", "86c711e8-ee32-4186-a651-76b5fab2e819", "Admin", "ADMIN" },
+                    { "c1c85021-12e1-4583-9d2b-420fdcc29d5e", "9d61f87e-cfd2-4e78-8ad2-c0e69a09b214", "Editor", "EDITOR" }
                 });
 
             migrationBuilder.CreateIndex(

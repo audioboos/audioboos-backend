@@ -26,7 +26,7 @@ namespace AudioBoos.Server.Services.AudioLookup {
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<ArtistDTO>
+        public async Task<ArtistInfoLookupDto>
             LookupArtistInfo(string artistName, CancellationToken cancellationToken = default) {
             var request = $"/database/search?q={Uri.EscapeDataString(artistName)}&type=artist";
             try {
@@ -53,12 +53,16 @@ namespace AudioBoos.Server.Services.AudioLookup {
                             await artistResult.Content.ReadAsStreamAsync(cancellationToken),
                             cancellationToken: cancellationToken);
 
-                        var parsed = new ArtistDTO(
-                            //Fix discogs putting (2) or (3) at the end of artist name
-                            Regex.Replace(
+                        //Fix discogs putting (2) or (3) at the end of artist name
+                        var sanitisedName = Regex.Replace(
                                 artist?.name ?? "Unknown artist",
                                 @"\(\d+\)",
-                                string.Empty).Trim(),
+                                string.Empty)
+                            .Trim()
+                            .ToTitleCase();
+
+                        var parsed = new ArtistInfoLookupDto(
+                            sanitisedName,
                             artist?.profile ?? string.Empty,
                             string.Empty, //TODO: Find genre info from Discogs
                             artist?.images.FirstOrDefault(r => r.type.Equals("secondary"))
@@ -67,8 +71,7 @@ namespace AudioBoos.Server.Services.AudioLookup {
                                 ?.resource_url ?? string.Empty,
                             artist?.id.ToString() ?? string.Empty,
                             artist?
-                                .aliases?
-                                .Select(r => r.name)
+                                .aliases.Select(r => r.name)
                                 .ToList() ?? Array.Empty<string>().ToList()
                         );
                         return parsed;
@@ -85,7 +88,7 @@ namespace AudioBoos.Server.Services.AudioLookup {
             }
         }
 
-        public async Task<AlbumDTO> LookupAlbumInfo(string artistName, string albumName,
+        public async Task<AlbumInfoLookupDTO> LookupAlbumInfo(string artistName, string albumName,
             CancellationToken cancellationToken = default) {
             var request =
                 $"/database/search?artist={Uri.EscapeDataString(artistName)}&title={Uri.EscapeDataString(albumName)}&type=album";
@@ -120,17 +123,19 @@ namespace AudioBoos.Server.Services.AudioLookup {
 
                     var regex = @$"{artistName} ?\(?\d?\)? ?[–,-] ?"; //Fuck discogs weird ass hyphens
                     try {
-                        var parsed = new AlbumDTO(artistName) {
-                            Name = Regex.Replace(
-                                album.title,
-                                regex,
-                                string.Empty,
-                                RegexOptions.IgnoreCase).ToTitleCase(),
-                            Description = album.style.Count != 0 ? string.Join("\n", album.style) : string.Empty,
-                            SiteId = $"{album.id}",
-                            LargeImage = album.cover_image,
-                            SmallImage = album.cover_image
-                        };
+                        var sanitisedAlbumName = Regex.Replace(
+                            album.title,
+                            regex,
+                            string.Empty,
+                            RegexOptions.IgnoreCase).ToTitleCase();
+                        var parsed = new AlbumInfoLookupDTO(
+                            artistName,
+                            sanitisedAlbumName,
+                            album.style.Count != 0 ? string.Join("\n", album.style) : string.Empty,
+                            $"{album.id}",
+                            album.cover_image,
+                            album.cover_image
+                        );
                         return parsed;
                     } catch (Exception parsedException) {
                         _logger.LogError(

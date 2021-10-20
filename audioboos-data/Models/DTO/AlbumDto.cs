@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
+using Mapster;
 
 #nullable enable
 namespace AudioBoos.Data.Models.DTO {
-    public record AlbumDTO {
-        public AlbumDTO(string artistName) {
+    public record AlbumDto {
+        public AlbumDto(string artistName) {
             ArtistName = artistName;
         }
 
@@ -17,10 +18,10 @@ namespace AudioBoos.Data.Models.DTO {
 
         public DateTime ReleaseDate { get; set; }
 
-        public List<TrackDTO>? Tracks { get; set; }
+        public List<TrackDto>? Tracks { get; set; }
         public string? SiteId { get; set; }
 
-        public static bool IsNullOrIncomplete(AlbumDTO? albumDto) {
+        public static bool IsNullOrIncomplete(AlbumDto? albumDto) {
             return albumDto is null || string.IsNullOrEmpty(albumDto.ArtistName) ||
                    string.IsNullOrEmpty(albumDto.Name) ||
                    string.IsNullOrEmpty(albumDto.Description) ||

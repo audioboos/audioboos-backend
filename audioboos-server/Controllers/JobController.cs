@@ -21,7 +21,7 @@ namespace AudioBoos.Server.Controllers {
         }
 
         [HttpPost("start")]
-        public async Task<ActionResult<JobStartDTO>> StartJob([FromQuery] string name,
+        public async Task<ActionResult<JobStartDto>> StartJob([FromQuery] string name,
             CancellationToken cancellationToken) {
             var scheduler = await _schedulerFactory.GetScheduler(cancellationToken);
             try {

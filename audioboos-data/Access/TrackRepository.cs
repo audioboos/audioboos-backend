@@ -8,9 +8,9 @@ namespace AudioBoos.Data.Access {
     public class TrackRepository : AbstractRepository<Track> {
         public TrackRepository(AudioBoosContext context) : base(context) { }
 
-        public override async Task<Track> GetByFile(string fileName, CancellationToken cancellationToken = default) {
+        public override async Task<Track?> GetByFile(string fileName, CancellationToken cancellationToken = default) {
             return await _context.Tracks
-                .AsNoTracking()
+                .AsNoTrackingWithIdentityResolution()
                 .FirstOrDefaultAsync(
                     t => t.PhysicalPath.Equals(fileName),
                     cancellationToken);

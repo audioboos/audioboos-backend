@@ -88,15 +88,15 @@ namespace AudioBoos.Server.Controllers {
 
         [Authorize]
         [HttpGet("p")]
-        public async Task<ActionResult<AuthPingDTO>> OnPingAsync() {
-            return await Task.FromResult(Ok(new AuthPingDTO {
+        public async Task<ActionResult<AuthPingDto>> OnPingAsync() {
+            return await Task.FromResult(Ok(new AuthPingDto {
                 Success = true,
                 Message = "pong"
             }));
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> OnRegisterAsync([FromBody] RegisterDTO request) {
+        public async Task<IActionResult> OnRegisterAsync([FromBody] RegisterDto request) {
             if (!ModelState.IsValid) {
                 return StatusCode(500);
             }
@@ -124,7 +124,7 @@ namespace AudioBoos.Server.Controllers {
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> OnLoginAsync([FromBody] LoginDTO request) {
+        public async Task<IActionResult> OnLoginAsync([FromBody] LoginDto request) {
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password)) {
                 return Unauthorized();
