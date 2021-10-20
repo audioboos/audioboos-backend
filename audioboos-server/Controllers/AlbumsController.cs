@@ -19,7 +19,7 @@ namespace AudioBoos.Server.Controllers {
         }
 
         [HttpGet("{artistName}")]
-        public async Task<ActionResult<List<AlbumDTO>>> Get(string artistName) {
+        public async Task<ActionResult<List<AlbumDto>>> Get(string artistName) {
             var albums = await _albumsRepository
                 .GetAll()
                 .Include(a => a.Artist)
@@ -30,13 +30,13 @@ namespace AudioBoos.Server.Controllers {
             //TODO: This should be ordered by album release date
             var response = albums
                 .OrderBy(a => a.Name)
-                .Adapt<List<AlbumDTO>>();
+                .Adapt<List<AlbumDto>>();
 
             return response;
         }
 
         [HttpGet("{artistName}/{albumName}")]
-        public async Task<ActionResult<AlbumDTO>> GetSingle(string artistName, string albumName) {
+        public async Task<ActionResult<AlbumDto>> GetSingle(string artistName, string albumName) {
             var album = await _albumsRepository
                 .GetAll()
                 .Include(a => a.Tracks)
@@ -50,7 +50,7 @@ namespace AudioBoos.Server.Controllers {
 
             album.Tracks = album.Tracks.OrderBy(c => c.TrackNumber).ToList();
 
-            return Ok(album.Adapt<AlbumDTO>());
+            return Ok(album.Adapt<AlbumDto>());
         }
     }
 }

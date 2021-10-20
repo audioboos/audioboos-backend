@@ -21,23 +21,23 @@ namespace AudioBoos.Server.Controllers {
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<ArtistDTO>>> Get() {
+        public async Task<ActionResult<List<ArtistDto>>> Get() {
             var artists = await _artistRepository
                 .GetAll()
                 .OrderBy(r => r.Name)
                 .ToListAsync();
-            var results = artists.Adapt<List<ArtistDTO>>();
+            var results = artists.Adapt<List<ArtistDto>>();
             return Ok(results);
         }
 
         [HttpGet("{artistName}")]
-        public async Task<ActionResult<ArtistDTO>> Get(string artistName) {
+        public async Task<ActionResult<ArtistDto>> Get(string artistName) {
             var artist = await _artistRepository
                 .GetAll()
                 .Include(a => a.Albums)
                 .ThenInclude(a => a.Tracks.OrderBy(t => t.TrackNumber))
                 .FirstOrDefaultAsync(r => r.Name.Equals(artistName));
-            return artist != null ? Ok(artist.Adapt<ArtistDTO>()) : NotFound();
+            return artist != null ? Ok(artist.Adapt<ArtistDto>()) : NotFound();
         }
     }
 }

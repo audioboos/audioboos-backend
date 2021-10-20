@@ -14,8 +14,8 @@ namespace AudioBoos.Server.Controllers {
         }
 
         [HttpGet]
-        public ActionResult<SettingsDTO> Get() {
-            return new SettingsDTO(_systemSettings.Hostname);
+        public ActionResult<SettingsDto> Get() {
+            return new SettingsDto(_systemSettings.Hostname);
         }
     }
 }

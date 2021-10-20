@@ -1,7 +1,7 @@
 #nullable enable
 
 namespace AudioBoos.Data.Models.DTO {
-    public record ArtistDTO(
+    public record ArtistDto(
         string Name,
         string? Description,
         string? Genre,
@@ -9,12 +9,10 @@ namespace AudioBoos.Data.Models.DTO {
         string? LargeImage,
         string? SiteId,
         List<string>? Aliases = null,
-        List<AlbumDTO>? Albums = null,
+        List<AlbumDto>? Albums = null,
         string? Id = null
     ) {
-        
-
-        public static bool IsNullOrIncomplete(ArtistDTO? artistDto) {
+        public static bool IsNullOrIncomplete(ArtistDto? artistDto) {
             return artistDto is null || string.IsNullOrEmpty(artistDto.Name) ||
                    string.IsNullOrEmpty(artistDto.Description) ||
                    string.IsNullOrEmpty(artistDto.LargeImage) ||
