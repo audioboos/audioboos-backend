@@ -11,13 +11,15 @@ using Microsoft.EntityFrameworkCore;
 namespace AudioBoos.Server.Controllers {
     [ApiController]
     [Route("[controller]")]
-    public class AlbumsController : ControllerBase {
+    public class AlbumController : ControllerBase {
         private readonly IRepository<Album> _albumsRepository;
 
-        public AlbumsController(IRepository<Album> albumsRepository) {
+        public AlbumController(IRepository<Album> albumsRepository) {
             _albumsRepository = albumsRepository;
         }
 
+        //TODO: API methods are a bit unclear here
+        //TODO: endpoint is /album{***} but most methods return plural 
         [HttpGet("{artistName}")]
         public async Task<ActionResult<List<AlbumDto>>> Get(string artistName) {
             var albums = await _albumsRepository
