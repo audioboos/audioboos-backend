@@ -59,31 +59,32 @@ internal abstract class LibraryScanner : ILibraryScanner {
             .GetAll()
             .Where(a => string.IsNullOrEmpty(a.SmallImage) || string.IsNullOrEmpty(a.LargeImage) ||
                         string.IsNullOrEmpty(a.Description))
+            // .Where(a => a.Name.Equals("Cathy Davey"))
             .ToListAsync(cancellationToken);
 
         foreach (var artist in unscannedArtists) {
             _logger.LogDebug("Looking up info for {Artist}", artist.Name);
             try {
-                var album = await _lookupService.LookupArtistInfo(
+                var remoteArtistInfo = await _lookupService.LookupArtistInfo(
                     artist.Name,
                     cancellationToken);
-                if (album is null) {
+                if (remoteArtistInfo is null) {
                     continue;
                 }
 
-                var updated = album.Adapt(artist);
-                updated.TaggingStatus = TaggingStatus.MP3TagsOnly;
+                var updated = remoteArtistInfo.Adapt(artist);
+                updated.TaggingStatus = TaggingStatus.RemoteLookup;
 
                 await _artistRepository.InsertOrUpdate(updated, cancellationToken);
+                await _unitOfWork.Complete();
             } catch (ArtistNotFoundException) {
                 _logger.LogWarning("Artist {Artist} not found in {Scanner}", artist.Name, _lookupService.Name);
             } catch (Exception e) {
                 _logger.LogError("Failure finding artist {Artist} in {Scanner}", artist.Name, _lookupService.Name);
-                _logger.LogError(e.Message);
+                _logger.LogError("{Error}", e.Message);
             }
         }
-
-        await _unitOfWork.Complete();
+        _logger.LogInformation("Finished processing artists");
     }
 
     public async Task UpdateChecksums(CancellationToken cancellationToken) {
