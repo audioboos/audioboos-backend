@@ -17,7 +17,7 @@ namespace AudioBoos.Server.Services.Jobs {
         }
 
         public async Task Execute(IJobExecutionContext context) {
-            await _scanner.ScanLibrary(context.CancellationToken);
+            // await _scanner.ScanLibrary(context.CancellationToken);
             await _scanner.UpdateUnscannedArtists(context.CancellationToken);
             await _scanner.UpdateChecksums(context.CancellationToken);
             _logger.LogInformation("Update Library Job Complete");

@@ -37,6 +37,6 @@ namespace AudioBoos.Data.Models.AudioLookups {
         public List<string> urls { get; set; }
         public List<string> namevariations { get; set; }
         public string data_quality { get; set; }
-        public List<Alias> aliases { get; set; }
+        public List<Alias>? aliases { get; set; }
     }
 }

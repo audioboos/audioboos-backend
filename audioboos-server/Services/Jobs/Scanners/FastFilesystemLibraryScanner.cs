@@ -44,7 +44,7 @@ namespace AudioBoos.Server.Services.Jobs.Scanners {
             }, cancellationToken);
 
             string scanPath =
-                Path.Combine(_systemSettings.AudioPath);
+                Path.Combine(_systemSettings.AudioPath, "Adam And The Ants");
             //Path.Combine(_systemSettings.AudioPath, "Tegan & Sara/If it Was You");;
             var fileList = (await scanPath.GetAllAudioFiles())
                 /*.Where(f => f.Contains("Confess")).ToList()*/

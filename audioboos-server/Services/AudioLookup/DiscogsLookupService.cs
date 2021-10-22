@@ -26,6 +26,8 @@ namespace AudioBoos.Server.Services.AudioLookup {
             _httpClientFactory = httpClientFactory;
         }
 
+        public string Name => "Discogs";
+
         public async Task<ArtistInfoLookupDto>
             LookupArtistInfo(string artistName, CancellationToken cancellationToken = default) {
             var request = $"/database/search?q={Uri.EscapeDataString(artistName)}&type=artist";
@@ -71,7 +73,7 @@ namespace AudioBoos.Server.Services.AudioLookup {
                                 ?.resource_url ?? string.Empty,
                             artist?.id.ToString() ?? string.Empty,
                             artist?
-                                .aliases.Select(r => r.name)
+                                .aliases?.Select(r => r.name)
                                 .ToList() ?? Array.Empty<string>().ToList()
                         );
                         return parsed;

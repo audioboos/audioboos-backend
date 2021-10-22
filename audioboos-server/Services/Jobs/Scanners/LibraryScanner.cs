@@ -7,6 +7,7 @@ using AudioBoos.Data.Models.Settings;
 using AudioBoos.Data.Persistence.Interfaces;
 using AudioBoos.Data.Store;
 using AudioBoos.Server.Services.AudioLookup;
+using AudioBoos.Server.Services.Exceptions.AudioLookup;
 using AudioBoos.Server.Services.Hubs;
 using AudioBoos.Server.Services.Tags;
 using Mapster;
@@ -60,20 +61,26 @@ internal abstract class LibraryScanner : ILibraryScanner {
                         string.IsNullOrEmpty(a.Description))
             .ToListAsync(cancellationToken);
 
-        var options = new ParallelOptions {MaxDegreeOfParallelism = 10, CancellationToken = cancellationToken};
         foreach (var artist in unscannedArtists) {
             _logger.LogDebug("Looking up info for {Artist}", artist.Name);
-            var albumDTO = await _lookupService.LookupArtistInfo(
-                artist.Name,
-                cancellationToken);
-            if (albumDTO is null) {
-                continue;
+            try {
+                var album = await _lookupService.LookupArtistInfo(
+                    artist.Name,
+                    cancellationToken);
+                if (album is null) {
+                    continue;
+                }
+
+                var updated = album.Adapt(artist);
+                updated.TaggingStatus = TaggingStatus.MP3TagsOnly;
+
+                await _artistRepository.InsertOrUpdate(updated, cancellationToken);
+            } catch (ArtistNotFoundException) {
+                _logger.LogWarning("Artist {Artist} not found in {Scanner}", artist.Name, _lookupService.Name);
+            } catch (Exception e) {
+                _logger.LogError("Failure finding artist {Artist} in {Scanner}", artist.Name, _lookupService.Name);
+                _logger.LogError(e.Message);
             }
-
-            var updated = albumDTO.Adapt(artist);
-            updated.TaggingStatus = TaggingStatus.MP3TagsOnly;
-
-            await _artistRepository.InsertOrUpdate(updated, cancellationToken);
         }
 
         await _unitOfWork.Complete();
