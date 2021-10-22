@@ -3,6 +3,7 @@
         None,
         Failed,
         MP3TagsOnly,
-        RemoteLookup
+        RemoteLookup,
+        ManualUpdate,
     }
 }

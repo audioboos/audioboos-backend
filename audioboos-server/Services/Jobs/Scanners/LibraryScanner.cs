@@ -59,7 +59,8 @@ internal abstract class LibraryScanner : ILibraryScanner {
             .GetAll()
             .Where(a => string.IsNullOrEmpty(a.SmallImage) || string.IsNullOrEmpty(a.LargeImage) ||
                         string.IsNullOrEmpty(a.Description))
-            // .Where(a => a.Name.Equals("Cathy Davey"))
+            .Where(a => a.TaggingStatus != TaggingStatus.ManualUpdate) //never auto scan manually updated artists
+            .Where(a => a.Name.Equals("Bleep & Booster"))
             .ToListAsync(cancellationToken);
 
         foreach (var artist in unscannedArtists) {
@@ -84,6 +85,7 @@ internal abstract class LibraryScanner : ILibraryScanner {
                 _logger.LogError("{Error}", e.Message);
             }
         }
+
         _logger.LogInformation("Finished processing artists");
     }
 

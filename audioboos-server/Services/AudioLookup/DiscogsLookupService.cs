@@ -55,9 +55,14 @@ namespace AudioBoos.Server.Services.AudioLookup {
                             await artistResult.Content.ReadAsStreamAsync(cancellationToken),
                             cancellationToken: cancellationToken);
 
+                        if (artist is null) {
+                            throw new ArtistNotFoundException(
+                                $"Artist {artistName} not found in discogs\n\tRequest: {client.BaseAddress}/{request}");
+                        }
+
                         //Fix discogs putting (2) or (3) at the end of artist name
                         var sanitisedName = Regex.Replace(
-                                artist?.name ?? "Unknown artist",
+                                artist.name,
                                 @"\(\d+\)",
                                 string.Empty)
                             .Trim()
@@ -65,27 +70,30 @@ namespace AudioBoos.Server.Services.AudioLookup {
 
                         var parsed = new ArtistInfoLookupDto(
                             sanitisedName,
-                            artist?.profile ?? string.Empty,
+                            artist.profile ?? string.Empty,
                             string.Empty, //TODO: Find genre info from Discogs
-                            artist?.images.FirstOrDefault(r => r.type.Equals("secondary"))
-                                ?.resource_url ?? string.Empty,
-                            artist?.images.FirstOrDefault(r => r.type.Equals("primary"))
-                                ?.resource_url ?? string.Empty,
-                            artist?.id.ToString() ?? string.Empty,
-                            artist?
+                            artist
+                                .images?
+                                .FirstOrDefault(r => r.type.Equals("secondary"))?.resource_url ?? string.Empty,
+                            artist
+                                .images?
+                                .FirstOrDefault(r => r.type.Equals("primary"))?.resource_url ??
+                            string.Empty,
+                            artist.id.ToString() ?? string.Empty,
+                            artist
                                 .aliases?.Select(r => r.name)
                                 .ToList() ?? Array.Empty<string>().ToList()
                         );
                         return parsed;
                     }
                 } catch (HttpRequestException e) {
-                    _logger.LogError($"Error getting info for artist: {artistName}\n\t{e.Message}");
+                    _logger.LogError("Error getting info for artist: {ArtistName}\n\t{Error}", artistName, e.Message);
                 }
 
                 throw new ArtistNotFoundException(
                     $"Artist {artistName} not found in discogs\n\tRequest: {client.BaseAddress}/{request}");
             } catch (Exception e) {
-                _logger.LogError($"Unable to create discogs http client {e.Message}");
+                _logger.LogError("Unable to create discogs http client {Error}", e.Message);
                 throw;
             }
         }

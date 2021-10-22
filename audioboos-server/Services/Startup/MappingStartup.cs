@@ -18,12 +18,12 @@ namespace AudioBoos.Server.Services.Startup {
                 .Map(dest => dest.Name, src => src.Name)
                 .Map(dest => dest.SmallImage,
                     src => string.IsNullOrEmpty(src.SmallImage)
-                        ? "https://generative-placeholders.glitch.me/image?width=64&height=64&style=mondrian"
+                        ? string.Empty
                         : src.SmallImage)
                 .Map(dest => dest.LargeImage,
                     src => string.IsNullOrEmpty(src.LargeImage)
-                        ? "https://generative-placeholders.glitch.me/image?width=600&height=300&style=mondrian"
-                        : src.SmallImage);
+                        ? string.Empty
+                        : src.LargeImage);
 
             TypeAdapterConfig<AlbumDto, Album>
                 .NewConfig()
