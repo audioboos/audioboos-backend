@@ -3,19 +3,19 @@ using AudioBoos.Data.Models.Settings;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
-namespace AudioBoos.Server.Controllers {
-    [ApiController]
-    [Route("[controller]")]
-    public class SettingsController : ControllerBase {
-        private readonly SystemSettings _systemSettings;
+namespace AudioBoos.Server.Controllers; 
 
-        public SettingsController(IOptions<SystemSettings> systemSettings) {
-            _systemSettings = systemSettings.Value;
-        }
+[ApiController]
+[Route("[controller]")]
+public class SettingsController : ControllerBase {
+    private readonly SystemSettings _systemSettings;
 
-        [HttpGet]
-        public ActionResult<SettingsDto> Get() {
-            return new SettingsDto(_systemSettings.Hostname);
-        }
+    public SettingsController(IOptions<SystemSettings> systemSettings) {
+        _systemSettings = systemSettings.Value;
+    }
+
+    [HttpGet]
+    public ActionResult<SettingsDto> Get() {
+        return new SettingsDto(_systemSettings.Hostname);
     }
 }

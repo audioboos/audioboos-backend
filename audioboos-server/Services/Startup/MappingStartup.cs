@@ -5,56 +5,53 @@ using Mapster;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AudioBoos.Server.Services.Startup {
-    public static class MappingStartup {
-        public static IServiceCollection AddMapping(this IServiceCollection services, IConfiguration config) {
-            TypeAdapterConfig<ArtistDto, Artist>
-                .NewConfig()
-                .ConstructUsing(src => new Artist(src.Name));
+namespace AudioBoos.Server.Services.Startup; 
 
-            TypeAdapterConfig<Artist, ArtistDto>
-                .NewConfig()
-                .Map(dest => dest.Id, src => src.Id.ToString())
-                .Map(dest => dest.Name, src => src.Name)
-                .Map(dest => dest.SmallImage,
-                    src => string.IsNullOrEmpty(src.SmallImage)
-                        ? string.Empty
-                        : src.SmallImage)
-                .Map(dest => dest.LargeImage,
-                    src => string.IsNullOrEmpty(src.LargeImage)
-                        ? string.Empty
-                        : src.LargeImage);
+public static class MappingStartup {
+    public static IServiceCollection AddMapping(this IServiceCollection services, IConfiguration config) {
+        TypeAdapterConfig<ArtistDto, Artist>
+            .NewConfig()
+            .ConstructUsing(src => new Artist(src.Name));
 
-            TypeAdapterConfig<AlbumDto, Album>
-                .NewConfig()
-                .ConstructUsing(src => new Album(src.Name));
+        TypeAdapterConfig<Artist, ArtistDto>
+            .NewConfig()
+            .Map(dest => dest.Id, src => src.Id.ToString())
+            .Map(dest => dest.Name, src => src.Name)
+            .Map(dest => dest.SmallImage,
+                src => $"{config.GetSection("System").GetValue<string>("BaseUrl")}/image/album/{src.Id}?type=small")
+            .Map(dest => dest.SmallImage,
+                src =>
+                    $"{config.GetSection("System").GetValue<string>("BaseUrl")}/image/album/{src.Id}?type=large");
 
-            TypeAdapterConfig<Album, AlbumDto>
-                .NewConfig()
-                .ConstructUsing(src => new AlbumDto(src.Artist.Name))
-                .Map(dest => dest.Id, src => src.Id.ToString())
-                .Map(dest => dest.SmallImage,
-                    src => $"{config.GetSection("System").GetValue<string>("BaseUrl")}/image/album/{src.Id}?type=small")
-                .Map(dest => dest.SmallImage,
-                    src =>
-                        $"{config.GetSection("System").GetValue<string>("BaseUrl")}/image/album/{src.Id}?type=large");
+        TypeAdapterConfig<AlbumDto, Album>
+            .NewConfig()
+            .ConstructUsing(src => new Album(src.Name));
 
-            TypeAdapterConfig<TrackDto, Track>
-                .NewConfig()
-                .ConstructUsing(src => new Track(src.AlbumName));
+        TypeAdapterConfig<Album, AlbumDto>
+            .NewConfig()
+            .ConstructUsing(src => new AlbumDto(src.Artist.Name))
+            .Map(dest => dest.Id, src => src.Id.ToString())
+            .Map(dest => dest.SmallImage,
+                src => $"{config.GetSection("System").GetValue<string>("BaseUrl")}/image/album/{src.Id}?type=small")
+            .Map(dest => dest.SmallImage,
+                src =>
+                    $"{config.GetSection("System").GetValue<string>("BaseUrl")}/image/album/{src.Id}?type=large");
 
-            TypeAdapterConfig<Track, TrackDto>
-                .NewConfig()
-                .ConstructUsing(src => new TrackDto(src.Album.Name))
-                .Map(dest => dest.Id, src => src.Id.ToString())
-                .Map(dest => dest.AudioUrl,
-                    src => new Url(config.GetSection("System").GetValue<string>("StreamUrl"))
-                        .SetQueryParams(new {
-                                trackId = src.Id
-                            },
-                            NullValueHandling.Remove));
+        TypeAdapterConfig<TrackDto, Track>
+            .NewConfig()
+            .ConstructUsing(src => new Track(src.AlbumName));
 
-            return services;
-        }
+        TypeAdapterConfig<Track, TrackDto>
+            .NewConfig()
+            .ConstructUsing(src => new TrackDto(src.Album.Name))
+            .Map(dest => dest.Id, src => src.Id.ToString())
+            .Map(dest => dest.AudioUrl,
+                src => new Url(config.GetSection("System").GetValue<string>("StreamUrl"))
+                    .SetQueryParams(new {
+                            trackId = src.Id
+                        },
+                        NullValueHandling.Remove));
+
+        return services;
     }
 }

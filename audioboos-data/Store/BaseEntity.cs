@@ -6,20 +6,20 @@ using System.ComponentModel.DataAnnotations.Schema;
 using AudioBoos.Data.Persistence.Interfaces;
 using Mapster;
 
-namespace AudioBoos.Data.Store {
-    public abstract record BaseEntity(
-        [Required] string Name) : IBaseEntity {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [AdaptIgnore]
-        public Guid Id { get; set; }
+namespace AudioBoos.Data.Store; 
 
-        public string? Description { get; set; }
+public abstract record BaseEntity(
+    [Required] string Name) : IBaseEntity {
+    [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    [AdaptIgnore]
+    public Guid Id { get; set; }
 
-        [Required] public TaggingStatus TaggingStatus { get; set; } = TaggingStatus.None;
+    public string? Description { get; set; }
 
-        public List<string> AlternativeNames { get; set; } = new();
+    [Required] public TaggingStatus TaggingStatus { get; set; } = TaggingStatus.None;
 
-        public DateTime FirstScanDate { get; set; }
-        public DateTime LastScanDate { get; set; }
-    }
+    public List<string> AlternativeNames { get; set; } = new();
+
+    public DateTime FirstScanDate { get; set; }
+    public DateTime LastScanDate { get; set; }
 }

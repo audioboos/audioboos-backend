@@ -9,7 +9,7 @@ using MetaBrainz.MusicBrainz.CoverArt;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace AudioBoos.Server.Services.AudioLookup {
+namespace AudioBoos.Server.Services.AudioLookup; 
 //     public class MusicBrainzLookupService : IAudioLookupService {
 //         private readonly ILogger<MusicBrainzLookupService> _logger;
 //         private readonly SystemSettings _settings;
@@ -70,4 +70,3 @@ namespace AudioBoos.Server.Services.AudioLookup {
 //             throw new NotImplementedException();
 //         }
 //     }
-}

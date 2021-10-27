@@ -10,27 +10,27 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace AudioBoos.Server.Services.Jobs.Scanners {
-    /// <summary>
-    /// This provides a better scanner for "unstructured" audio libraries
-    /// Best guess would be to index all audio files and work backwards from there 
-    /// </summary>
-    internal class UnstructuredLibraryScanner : LibraryScanner {
-        public UnstructuredLibraryScanner(ILogger<UnstructuredLibraryScanner> logger,
-            IRepository<AudioFile> audioFileRepository,
-            IRepository<Artist> artistRepository,
-            IRepository<Album> albumRepository,
-            IHubContext<JobHub> messageClient,
-            IRepository<Track> trackRepository,
-            IUnitOfWork unitOfWork,
-            IAudioLookupService lookupService,
-            IOptions<SystemSettings> systemSettings) : base(logger, audioFileRepository, artistRepository,
-            albumRepository, messageClient, trackRepository, unitOfWork, lookupService, systemSettings) {
-        }
+namespace AudioBoos.Server.Services.Jobs.Scanners; 
 
-        public override async Task<(int, int, int)> ScanLibrary(CancellationToken cancellationToken) {
-            _logger.LogInformation("Starting unstructured library scan");
-            return await Task.FromResult((0, 0, 0));
-        }
+/// <summary>
+/// This provides a better scanner for "unstructured" audio libraries
+/// Best guess would be to index all audio files and work backwards from there 
+/// </summary>
+internal class UnstructuredLibraryScanner : LibraryScanner {
+    public UnstructuredLibraryScanner(ILogger<UnstructuredLibraryScanner> logger,
+        IRepository<AudioFile> audioFileRepository,
+        IRepository<Artist> artistRepository,
+        IRepository<Album> albumRepository,
+        IHubContext<JobHub> messageClient,
+        IRepository<Track> trackRepository,
+        IUnitOfWork unitOfWork,
+        IAudioLookupService lookupService,
+        IOptions<SystemSettings> systemSettings) : base(logger, audioFileRepository, artistRepository,
+        albumRepository, messageClient, trackRepository, unitOfWork, lookupService, systemSettings) {
+    }
+
+    public override async Task<(int, int, int)> ScanLibrary(CancellationToken cancellationToken) {
+        _logger.LogInformation("Starting unstructured library scan");
+        return await Task.FromResult((0, 0, 0));
     }
 }

@@ -9,35 +9,35 @@ using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
-namespace AudioBoos.Server.Controllers {
-    [ApiController]
-    // [Authorize]
-    [Route("[controller]")]
-    public class ArtistsController : ControllerBase {
-        private readonly IRepository<Artist> _artistRepository;
+namespace AudioBoos.Server.Controllers; 
 
-        public ArtistsController(IRepository<Artist> artistRepository) {
-            _artistRepository = artistRepository;
-        }
+[ApiController]
+// [Authorize]
+[Route("[controller]")]
+public class ArtistsController : ControllerBase {
+    private readonly IRepository<Artist> _artistRepository;
 
-        [HttpGet]
-        public async Task<ActionResult<List<ArtistDto>>> Get() {
-            var artists = await _artistRepository
-                .GetAll()
-                .OrderBy(r => r.Name)
-                .ToListAsync();
-            var results = artists.Adapt<List<ArtistDto>>();
-            return Ok(results);
-        }
+    public ArtistsController(IRepository<Artist> artistRepository) {
+        _artistRepository = artistRepository;
+    }
 
-        [HttpGet("{artistName}")]
-        public async Task<ActionResult<ArtistDto>> Get(string artistName) {
-            var artist = await _artistRepository
-                .GetAll()
-                .Include(a => a.Albums)
-                .ThenInclude(a => a.Tracks.OrderBy(t => t.TrackNumber))
-                .FirstOrDefaultAsync(r => r.Name.Equals(artistName));
-            return artist != null ? Ok(artist.Adapt<ArtistDto>()) : NotFound();
-        }
+    [HttpGet]
+    public async Task<ActionResult<List<ArtistDto>>> Get() {
+        var artists = await _artistRepository
+            .GetAll()
+            .OrderBy(r => r.Name)
+            .ToListAsync();
+        var results = artists.Adapt<List<ArtistDto>>();
+        return Ok(results);
+    }
+
+    [HttpGet("{artistName}")]
+    public async Task<ActionResult<ArtistDto>> Get(string artistName) {
+        var artist = await _artistRepository
+            .GetAll()
+            .Include(a => a.Albums)
+            .ThenInclude(a => a.Tracks.OrderBy(t => t.TrackNumber))
+            .FirstOrDefaultAsync(r => r.Name.Equals(artistName));
+        return artist != null ? Ok(artist.Adapt<ArtistDto>()) : NotFound();
     }
 }

@@ -10,63 +10,63 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit.Sdk;
 
-namespace AudioBoos.Server.Tests {
-    public class DbFixture {
-        private static readonly object _lock = new();
-        private static bool _databaseInitialized;
-        public ServiceProvider ServiceProvider { get; }
+namespace AudioBoos.Server.Tests; 
 
-        public DbFixture() {
-            var serviceCollection = new ServiceCollection();
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile(
-                    path: "appsettings.json",
-                    optional: false,
-                    reloadOnChange: true)
-                .Build();
-            // serviceCollection
-            //     .AddDbContext<AudioBoosContext>(
-            //         options => options.UseSqlite(
-            //             _configuration.GetConnectionString("SQLiteDefaultConnection"),
-            //         ServiceLifetime.Transient);        
+public class DbFixture {
+    private static readonly object _lock = new();
+    private static bool _databaseInitialized;
+    public ServiceProvider ServiceProvider { get; }
 
-            serviceCollection
-                .AddDbContext<AudioBoosContext>(
-                    options => options.UseNpgsql(
-                        configuration.GetConnectionString("PostgresDefaultConnection")
-                    ));
+    public DbFixture() {
+        var serviceCollection = new ServiceCollection();
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile(
+                path: "appsettings.json",
+                optional: false,
+                reloadOnChange: true)
+            .Build();
+        // serviceCollection
+        //     .AddDbContext<AudioBoosContext>(
+        //         options => options.UseSqlite(
+        //             _configuration.GetConnectionString("SQLiteDefaultConnection"),
+        //         ServiceLifetime.Transient);        
 
-            serviceCollection.AddLogging();
+        serviceCollection
+            .AddDbContext<AudioBoosContext>(
+                options => options.UseNpgsql(
+                    configuration.GetConnectionString("PostgresDefaultConnection")
+                ));
 
-            serviceCollection.AddScoped<IRepository<AudioFile>, AudioFileRepository>();
-            serviceCollection.AddScoped<IRepository<Artist>, ArtistRepository>();
-            serviceCollection.AddScoped<IRepository<Album>, AlbumRepository>();
-            serviceCollection.AddScoped<IRepository<Track>, TrackRepository>();
-            serviceCollection.AddScoped<IUnitOfWork, UnitOfWork>();
-            serviceCollection.AddScoped<IEmailSender, EmailSender>();
+        serviceCollection.AddLogging();
 
-            ServiceProvider = serviceCollection.BuildServiceProvider();
+        serviceCollection.AddScoped<IRepository<AudioFile>, AudioFileRepository>();
+        serviceCollection.AddScoped<IRepository<Artist>, ArtistRepository>();
+        serviceCollection.AddScoped<IRepository<Album>, AlbumRepository>();
+        serviceCollection.AddScoped<IRepository<Track>, TrackRepository>();
+        serviceCollection.AddScoped<IUnitOfWork, UnitOfWork>();
+        serviceCollection.AddScoped<IEmailSender, EmailSender>();
 
-            Seed();
-        }
+        ServiceProvider = serviceCollection.BuildServiceProvider();
 
-        private void Seed() {
-            lock (_lock) {
-                if (_databaseInitialized) {
-                    return;
-                }
+        Seed();
+    }
 
-                using var context = ServiceProvider.GetService<AudioBoosContext>();
-                if (context is null) {
-                    throw new NullException("Unable to get db context");
-                }
-
-                context.Database.EnsureDeleted();
-                context.Database.EnsureCreated();
-                context.SaveChanges();
-                _databaseInitialized = true;
+    private void Seed() {
+        lock (_lock) {
+            if (_databaseInitialized) {
+                return;
             }
+
+            using var context = ServiceProvider.GetService<AudioBoosContext>();
+            if (context is null) {
+                throw new NullException("Unable to get db context");
+            }
+
+            context.Database.EnsureDeleted();
+            context.Database.EnsureCreated();
+            context.SaveChanges();
+            _databaseInitialized = true;
         }
     }
 }

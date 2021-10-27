@@ -5,37 +5,37 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;
 
-namespace AudioBoos.Server.Services.Startup {
-    public static class JobsStartup {
-        public static IServiceCollection AddAudioBoosJobs(this IServiceCollection services, IConfiguration config) {
-            services.AddQuartz(q => {
-                q.SchedulerId = "AudioBoos-Server-Core";
-                q.SchedulerName = "AudioBoos Scheduler";
+namespace AudioBoos.Server.Services.Startup; 
 
-                q.UseMicrosoftDependencyInjectionJobFactory();
+public static class JobsStartup {
+    public static IServiceCollection AddAudioBoosJobs(this IServiceCollection services, IConfiguration config) {
+        services.AddQuartz(q => {
+            q.SchedulerId = "AudioBoos-Server-Core";
+            q.SchedulerName = "AudioBoos Scheduler";
 
-                var libraryJobKey = new JobKey("UpdateLibrary");
-                q.AddJob<UpdateLibraryJob>(opts => opts.WithIdentity(libraryJobKey).StoreDurably());
-                q.AddTrigger(opts => opts
-                    .ForJob(libraryJobKey)
-                    .WithIdentity("UpdateLibrary-trigger")
-                    .WithDailyTimeIntervalSchedule(x => x.WithInterval(24, IntervalUnit.Hour)));
+            q.UseMicrosoftDependencyInjectionJobFactory();
 
-                var scanArtistsJobKey = new JobKey("ScanArtists");
-                q.AddJob<ScanArtistsJob>(opts => opts.WithIdentity(scanArtistsJobKey).StoreDurably());
-            });
+            var libraryJobKey = new JobKey("UpdateLibrary");
+            q.AddJob<UpdateLibraryJob>(opts => opts.WithIdentity(libraryJobKey).StoreDurably());
+            q.AddTrigger(opts => opts
+                .ForJob(libraryJobKey)
+                .WithIdentity("UpdateLibrary-trigger")
+                .WithDailyTimeIntervalSchedule(x => x.WithInterval(24, IntervalUnit.Hour)));
 
-            services.AddQuartzServer(options => {
-                // when shutting down we want jobs to complete gracefully
-                options.WaitForJobsToComplete = true;
-            });
+            var scanArtistsJobKey = new JobKey("ScanArtists");
+            q.AddJob<ScanArtistsJob>(opts => opts.WithIdentity(scanArtistsJobKey).StoreDurably());
+        });
 
-            services.AddTransient<ILibraryScanner, FastFilesystemLibraryScanner>();
-            return services;
-        }
+        services.AddQuartzServer(options => {
+            // when shutting down we want jobs to complete gracefully
+            options.WaitForJobsToComplete = true;
+        });
 
-        public static IApplicationBuilder UseAudioBoosJobs(this IApplicationBuilder app) {
-            return app;
-        }
+        services.AddTransient<ILibraryScanner, FastFilesystemLibraryScanner>();
+        return services;
+    }
+
+    public static IApplicationBuilder UseAudioBoosJobs(this IApplicationBuilder app) {
+        return app;
     }
 }
