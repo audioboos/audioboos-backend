@@ -53,6 +53,8 @@
 
     <ItemGroup>
         <EmbeddedResource Include="Resources/default-album.png" />
+        <None Remove="Resources\default-artist.png" />
+        <EmbeddedResource Include="Resources\default-artist.png" />
     </ItemGroup>
 
     <ItemGroup>

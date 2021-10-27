@@ -38,8 +38,11 @@ public class ImageController : ControllerBase {
 
         var image = type.Equals("small") ? artist.SmallImage : artist.LargeImage;
 
+        //TODO: switch??
         return string.IsNullOrEmpty(image)
-            ? Ok(await TextImageGenerator.CreateArtistAvatarImage(artist.Name))
+            ? type.Equals("small") ?
+                File(await TextImageGenerator.CreateArtistAvatarImage(artist.Name), "image/png") :
+                File(await TextImageGenerator.CreateArtistImage(artist.Name), "image/png")
             : Ok(image);
     }
 
@@ -54,7 +57,7 @@ public class ImageController : ControllerBase {
         var image = type.Equals("small") ? album.SmallImage : album.LargeImage;
 
         return string.IsNullOrEmpty(image)
-            ? Ok(await TextImageGenerator.CreateAlbumImage(album.Artist.Name, album.Name))
+            ? File(await TextImageGenerator.CreateAlbumImage(album.Artist.Name, album.Name), "image/png")
             : GetFileDirect(image);
     }
 

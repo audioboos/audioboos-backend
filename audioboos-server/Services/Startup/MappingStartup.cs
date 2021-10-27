@@ -5,7 +5,7 @@ using Mapster;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AudioBoos.Server.Services.Startup; 
+namespace AudioBoos.Server.Services.Startup;
 
 public static class MappingStartup {
     public static IServiceCollection AddMapping(this IServiceCollection services, IConfiguration config) {
@@ -19,7 +19,7 @@ public static class MappingStartup {
             .Map(dest => dest.Name, src => src.Name)
             .Map(dest => dest.SmallImage,
                 src => $"{config.GetSection("System").GetValue<string>("BaseUrl")}/image/artist/{src.Id}?type=small")
-            .Map(dest => dest.SmallImage,
+            .Map(dest => dest.LargeImage,
                 src =>
                     $"{config.GetSection("System").GetValue<string>("BaseUrl")}/image/artist/{src.Id}?type=large");
 

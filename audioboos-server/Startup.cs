@@ -65,11 +65,11 @@ public class Startup {
 
         services.AddSignalR();
 
-        services
-            .AddImageSharp()
-            .Configure<PhysicalFileSystemCacheOptions>(options => {
-                options.CacheFolder = "different-cache";
-            });
+        // services
+        //     .AddImageSharp()
+        //     .Configure<PhysicalFileSystemCacheOptions>(options => {
+        //         options.CacheFolder = "different-cache";
+        //     });
 
         services.AddControllers();
         services.AddSwaggerGen(c => {

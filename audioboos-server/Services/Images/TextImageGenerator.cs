@@ -6,25 +6,25 @@ using System.Threading.Tasks;
 using AudioBoos.Server.Helpers;
 using AudioBoos.Server.Services.Utils;
 
-namespace AudioBoos.Server.Services.Images; 
+namespace AudioBoos.Server.Services.Images;
 
 public static class TextImageGenerator {
-    private static async Task<Image> _loadImage() {
-        var image = Image.FromStream(await ResourceReader.ReadResourceAsByteArray("default-album.png"));
+    private static async Task<Image> _loadImage(string imageName) {
+        var image = Image.FromStream(await ResourceReader.ReadResourceAsByteArray(imageName));
         return image;
     }
 
     public static async Task<byte[]> CreateArtistAvatarImage(string artistName) {
         using var bitmap = new Bitmap(50, 50);
         using Graphics g = Graphics.FromImage(bitmap);
-        g.Clear(Color.White);
-        using (Brush b = new SolidBrush(ColorTranslator.FromHtml("#eeeeee"))) {
+        g.Clear(Color.Transparent);
+        using (Brush b = new SolidBrush(ColorTranslator.FromHtml("#96BC99"))) {
             g.FillEllipse(b, 0, 0, 49, 49);
         }
 
         g.DrawString(artistName.TrimTheFromStart()[..1],
-            new Font(FontFamily.GenericSansSerif, 12, FontStyle.Regular),
-            new SolidBrush(Color.Black), 10, 15);
+            new Font(FontFamily.GenericSansSerif, 24, FontStyle.Regular),
+            new SolidBrush(ColorTranslator.FromHtml("#EAC94B")), 13, 5);
 
         await using var ms = new MemoryStream();
         bitmap.Save(ms, ImageFormat.Png);
@@ -32,11 +32,33 @@ public static class TextImageGenerator {
         return ms.ToArray();
     }
 
+    public static async Task<byte[]> CreateArtistImage(string artistName) {
+        var artistTextRect = new RectangleF(7, 7, 290, 200);
+
+        var image = await _loadImage("default-artist.png");
+        using Graphics g = Graphics.FromImage(image);
+
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+        g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+        StringFormat sf = new StringFormat();
+        sf.Alignment = StringAlignment.Center;
+        sf.LineAlignment = StringAlignment.Center;
+
+        g.DrawString(artistName, new Font(FontFamily.GenericSansSerif, 32, FontStyle.Bold), Brushes.PapayaWhip,
+            artistTextRect, sf);
+
+
+        await using var ms = new MemoryStream();
+        image.Save(ms, ImageFormat.Png);
+        return ms.ToArray();
+    }
+
     public static async Task<byte[]> CreateAlbumImage(string artistName, string albumName) {
         var artistTextRect = new RectangleF(12, 7, 290, 200);
         var albumTextRect = new RectangleF(12, 200, 290, 100);
 
-        var image = await _loadImage();
+        var image = await _loadImage("default-album.png");
         using Graphics g = Graphics.FromImage(image);
 
         g.SmoothingMode = SmoothingMode.AntiAlias;
