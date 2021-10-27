@@ -18,10 +18,10 @@ public static class MappingStartup {
             .Map(dest => dest.Id, src => src.Id.ToString())
             .Map(dest => dest.Name, src => src.Name)
             .Map(dest => dest.SmallImage,
-                src => $"{config.GetSection("System").GetValue<string>("BaseUrl")}/image/album/{src.Id}?type=small")
+                src => $"{config.GetSection("System").GetValue<string>("BaseUrl")}/image/artist/{src.Id}?type=small")
             .Map(dest => dest.SmallImage,
                 src =>
-                    $"{config.GetSection("System").GetValue<string>("BaseUrl")}/image/album/{src.Id}?type=large");
+                    $"{config.GetSection("System").GetValue<string>("BaseUrl")}/image/artist/{src.Id}?type=large");
 
         TypeAdapterConfig<AlbumDto, Album>
             .NewConfig()

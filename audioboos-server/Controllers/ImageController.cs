@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AudioBoos.Data.Access;
@@ -9,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
-namespace AudioBoos.Server.Controllers; 
+namespace AudioBoos.Server.Controllers;
 
 [ApiController]
 [Route("[controller]")]
@@ -27,6 +28,11 @@ public class ImageController : ControllerBase {
 
     [HttpGet("artist/{artistId}")]
     public async Task<IActionResult> GetArtistImage(string artistId, [FromQuery] string type) {
+        var cacheFile = Path.Combine(_systemSettings.ImagePath, "artist", artistId);
+        if (System.IO.File.Exists(cacheFile)) {
+            return GetFileDirect(cacheFile);
+        }
+
         var artist = await _artistRepository.GetById(artistId);
         if (artist is null) return NotFound();
 
@@ -34,7 +40,7 @@ public class ImageController : ControllerBase {
 
         return string.IsNullOrEmpty(image)
             ? Ok(await TextImageGenerator.CreateArtistAvatarImage(artist.Name))
-            : GetFileDirect(image);
+            : Ok(image);
     }
 
     [HttpGet("album/{albumId}")]
