@@ -1,10 +1,15 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using AudioBoos.Data.Access;
 using AudioBoos.Data.Models.Settings;
 using AudioBoos.Data.Store;
+using AudioBoos.Server.Services.Images;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using SixLabors.ImageSharp;
 
 namespace AudioBoos.Server.Controllers {
     [ApiController]
@@ -23,14 +28,22 @@ namespace AudioBoos.Server.Controllers {
 
         [HttpGet("album/{albumId}")]
         public async Task<IActionResult> GetAlbumImage(string albumId, [FromQuery] string type) {
-            var album = await _albumRepository.GetById(albumId);
+            var album = await _albumRepository.GetAll()
+                .Where(a => a.Id.Equals(Guid.Parse(albumId)))
+                .Include(a => a.Artist)
+                .FirstOrDefaultAsync();
             if (album is null) return NotFound();
 
             var image = type.Equals("small") ? album.SmallImage : album.LargeImage;
 
             return string.IsNullOrEmpty(image)
-                ? Ok("https://live.staticflickr.com/7062/6979126489_cd9b8bc323_b.jpg")
+                ? await GeneratePlaceholderImage(album.Artist.Name, album.Name)
                 : GetFileDirect(image);
+        }
+
+        public async Task<IActionResult> GeneratePlaceholderImage(string artistName, string albumName) {
+            var image = await TextImageGenerator.CreateAlbumImage(artistName, albumName, 300, 300);
+            return File(image, "image/png");
         }
 
         public IActionResult GetFileDirect(string path) {
