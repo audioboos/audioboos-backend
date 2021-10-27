@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;
 
-namespace AudioBoos.Server.Services.Startup; 
+namespace AudioBoos.Server.Services.Startup;
 
 public static class JobsStartup {
     public static IServiceCollection AddAudioBoosJobs(this IServiceCollection services, IConfiguration config) {
@@ -15,12 +15,12 @@ public static class JobsStartup {
 
             q.UseMicrosoftDependencyInjectionJobFactory();
 
-            var libraryJobKey = new JobKey("UpdateLibrary");
-            q.AddJob<UpdateLibraryJob>(opts => opts.WithIdentity(libraryJobKey).StoreDurably());
-            q.AddTrigger(opts => opts
-                .ForJob(libraryJobKey)
-                .WithIdentity("UpdateLibrary-trigger")
-                .WithDailyTimeIntervalSchedule(x => x.WithInterval(24, IntervalUnit.Hour)));
+            q.AddJob<CacheImagesJob>(opts => opts.WithIdentity(new JobKey("CacheImages")).StoreDurably());
+            q.AddJob<UpdateLibraryJob>(opts => opts.WithIdentity(new JobKey("UpdateLibrary")).StoreDurably())
+                .AddTrigger(opts => opts
+                    .ForJob(new JobKey("UpdateLibrary"))
+                    .WithIdentity("UpdateLibrary-trigger")
+                    .WithDailyTimeIntervalSchedule(x => x.WithInterval(24, IntervalUnit.Hour)));
 
             var scanArtistsJobKey = new JobKey("ScanArtists");
             q.AddJob<ScanArtistsJob>(opts => opts.WithIdentity(scanArtistsJobKey).StoreDurably());

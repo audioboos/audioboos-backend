@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AudioBoos.Data.Access;
@@ -9,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
-namespace AudioBoos.Server.Controllers; 
+namespace AudioBoos.Server.Controllers;
 
 [ApiController]
 [Route("[controller]")]
@@ -27,14 +28,22 @@ public class ImageController : ControllerBase {
 
     [HttpGet("artist/{artistId}")]
     public async Task<IActionResult> GetArtistImage(string artistId, [FromQuery] string type) {
+        var cacheFile = Path.Combine(_systemSettings.ImagePath, "artist", artistId);
+        if (System.IO.File.Exists(cacheFile)) {
+            return GetFileDirect(cacheFile);
+        }
+
         var artist = await _artistRepository.GetById(artistId);
         if (artist is null) return NotFound();
 
         var image = type.Equals("small") ? artist.SmallImage : artist.LargeImage;
 
+        //TODO: switch??
         return string.IsNullOrEmpty(image)
-            ? Ok(await TextImageGenerator.CreateArtistAvatarImage(artist.Name))
-            : GetFileDirect(image);
+            ? type.Equals("small") ?
+                File(await TextImageGenerator.CreateArtistAvatarImage(artist.Name), "image/png") :
+                File(await TextImageGenerator.CreateArtistImage(artist.Name), "image/png")
+            : Ok(image);
     }
 
     [HttpGet("album/{albumId}")]
@@ -48,7 +57,7 @@ public class ImageController : ControllerBase {
         var image = type.Equals("small") ? album.SmallImage : album.LargeImage;
 
         return string.IsNullOrEmpty(image)
-            ? Ok(await TextImageGenerator.CreateAlbumImage(album.Artist.Name, album.Name))
+            ? File(await TextImageGenerator.CreateAlbumImage(album.Artist.Name, album.Name), "image/png")
             : GetFileDirect(image);
     }
 
