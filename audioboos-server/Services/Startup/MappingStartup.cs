@@ -33,9 +33,8 @@ public static class MappingStartup {
             .Map(dest => dest.Id, src => src.Id.ToString())
             .Map(dest => dest.SmallImage,
                 src => $"{config.GetSection("System").GetValue<string>("BaseUrl")}/image/album/{src.Id}?type=small")
-            .Map(dest => dest.SmallImage,
-                src =>
-                    $"{config.GetSection("System").GetValue<string>("BaseUrl")}/image/album/{src.Id}?type=large");
+            .Map(dest => dest.LargeImage,
+                src => $"{config.GetSection("System").GetValue<string>("BaseUrl")}/image/album/{src.Id}?type=large");
 
         TypeAdapterConfig<TrackDto, Track>
             .NewConfig()

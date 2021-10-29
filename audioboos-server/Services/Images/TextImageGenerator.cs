@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Drawing.Text;
 using System.IO;
 using System.Threading.Tasks;
 using AudioBoos.Server.Helpers;
@@ -12,6 +13,13 @@ public static class TextImageGenerator {
     private static async Task<Image> _loadImage(string imageName) {
         var image = Image.FromStream(await ResourceReader.ReadResourceAsByteArray(imageName));
         return image;
+    }
+
+    private static Font _loadFont(float fontSize = 36f, string fontName = "Roboto-Regular", string fontType = "ttf",
+        FontStyle fontStyle = FontStyle.Regular) {
+        var collection = new PrivateFontCollection();
+        collection.AddFontFile(Path.Combine("./Resources/Fonts/", $"{fontName}.{fontType}"));
+        return new Font(collection.Families[0], fontSize, fontStyle);
     }
 
     public static async Task<byte[]> CreateArtistAvatarImage(string artistName) {
@@ -45,8 +53,12 @@ public static class TextImageGenerator {
         sf.Alignment = StringAlignment.Center;
         sf.LineAlignment = StringAlignment.Center;
 
-        g.DrawString(artistName, new Font(FontFamily.GenericSansSerif, 32, FontStyle.Bold), Brushes.PapayaWhip,
-            artistTextRect, sf);
+        g.DrawString(
+            artistName,
+            _loadFont(32),
+            Brushes.PapayaWhip,
+            artistTextRect, sf
+        );
 
 
         await using var ms = new MemoryStream();
@@ -55,8 +67,8 @@ public static class TextImageGenerator {
     }
 
     public static async Task<byte[]> CreateAlbumImage(string artistName, string albumName) {
-        var artistTextRect = new RectangleF(12, 7, 290, 200);
-        var albumTextRect = new RectangleF(12, 200, 290, 100);
+        var artistTextRect = new RectangleF(12, 7, 260, 200);
+        var albumTextRect = new RectangleF(12, 200, 260, 100);
 
         var image = await _loadImage("default-album.png");
         using Graphics g = Graphics.FromImage(image);
@@ -66,12 +78,23 @@ public static class TextImageGenerator {
         g.PixelOffsetMode = PixelOffsetMode.HighQuality;
         StringFormat sf = new StringFormat();
         sf.Alignment = StringAlignment.Near;
-        sf.LineAlignment = StringAlignment.Center;
+        sf.LineAlignment = StringAlignment.Near;
 
-        g.DrawString(artistName, new Font(FontFamily.GenericSansSerif, 32, FontStyle.Bold), Brushes.PapayaWhip,
-            artistTextRect, sf);
-        g.DrawString(albumName, new Font(FontFamily.GenericSansSerif, 16, FontStyle.Bold), Brushes.Black,
-            albumTextRect, sf);
+        g.DrawString(
+            artistName,
+            _loadFont(32),
+            Brushes.PapayaWhip,
+            artistTextRect,
+            sf
+        );
+        sf.LineAlignment = StringAlignment.Center;
+        g.DrawString(
+            albumName,
+            _loadFont(16),
+            new SolidBrush(ColorTranslator.FromHtml("#EB4557")),
+            albumTextRect,
+            sf
+        );
 
         await using var ms = new MemoryStream();
         image.Save(ms, ImageFormat.Png);
