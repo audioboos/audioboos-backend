@@ -38,3 +38,5 @@ msbuild.wrn
 appsettings.development.json
 .idea/
 .vscode/
+
+prod.env

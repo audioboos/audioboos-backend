@@ -1,0 +1,27 @@
+version: "3"
+services:
+  server:
+    #    image: fergalmoran/audioboos-server
+    build:
+      context: ./
+      dockerfile: Dockerfile
+
+    env_file:
+      - prod.env
+    
+    container_name: audioboos-server
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "5931:80"
+  db:
+    image: postgres
+    container_name: audioboos-db
+    env_file:
+      - prod.env
+    volumes:
+      - database-data:/var/lib/postgresql/data/
+
+volumes:
+  database-data:
