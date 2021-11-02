@@ -2,7 +2,7 @@
 using AudioBoos.Server.Services.AudioLookup;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AudioBoos.Server.Services.Startup; 
+namespace AudioBoos.Server.Services.Startup;
 
 public static class HttpClientsStartup {
     // private const string USER_AGENT = "AudioBoos-API/0.1 +https://audioboos.com";
@@ -10,7 +10,8 @@ public static class HttpClientsStartup {
 
     public static IServiceCollection AddAudioBoosHttpClients(this IServiceCollection services) {
         // services.AddTransient<IAudioLookupService, TheAudioDBLookupService>();
-        services.AddTransient<IAudioLookupService, DiscogsLookupService>();
+        services.AddTransient<IAudioLookupService, MusicBrainzLookupService>();
+        services.AddTransient<DiscogsLookupService>();
 
         services.AddHttpClient("discogs", c => {
                 c.BaseAddress = new Uri("https://api.discogs.com/");

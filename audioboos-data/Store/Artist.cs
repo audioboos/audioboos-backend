@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
-namespace AudioBoos.Data.Store; 
+namespace AudioBoos.Data.Store;
 
 [Index(nameof(Name), IsUnique = true)]
 public record Artist(string Name) : BaseEntity(Name) {
@@ -18,6 +18,11 @@ public record Artist(string Name) : BaseEntity(Name) {
     public List<string>? Aliases { get; set; }
 
     public ICollection<Album>? Albums { get; set; }
+
+    public static bool IsIncomplete(BaseEntity entity) =>
+        !BaseEntity.IsIncomplete(entity) ||
+        !string.IsNullOrEmpty((entity as Artist)?.SmallImage) ||
+        !string.IsNullOrEmpty((entity as Artist)?.LargeImage);
 
     public string GetNormalisedName() => (Name.ToLower().StartsWith("the") ? Name.Remove(0, 3) : Name).Trim();
 }

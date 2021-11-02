@@ -2,12 +2,12 @@
 using System.Threading.Tasks;
 using AudioBoos.Data.Models.DTO;
 
-namespace AudioBoos.Server.Services.AudioLookup; 
+namespace AudioBoos.Server.Services.AudioLookup;
 
 public interface IAudioLookupService {
     string Name { get; }
     Task<ArtistInfoLookupDto> LookupArtistInfo(string artistName, CancellationToken cancellationToken);
 
-    Task<AlbumInfoLookupDTO> LookupAlbumInfo(string artistName, string albumName,
+    Task<AlbumInfoLookupDto> LookupAlbumInfo(string artistName, string albumName, string albumId,
         CancellationToken cancellationToken);
 }

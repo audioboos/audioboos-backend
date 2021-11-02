@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 
-namespace AudioBoos.Data.Store; 
+namespace AudioBoos.Data.Store;
 
 [Index(nameof(ArtistId), nameof(Name), IsUnique = true)]
 public record Album : BaseEntity {
@@ -25,4 +23,9 @@ public record Album : BaseEntity {
 
     [Required] public Guid ArtistId { get; set; }
     [Required] public Artist Artist { get; set; }
+
+    public static bool IsIncomplete(BaseEntity entity) =>
+        !BaseEntity.IsIncomplete(entity) ||
+        !string.IsNullOrEmpty((entity as Album)?.SmallImage) ||
+        !string.IsNullOrEmpty((entity as Album)?.LargeImage);
 }

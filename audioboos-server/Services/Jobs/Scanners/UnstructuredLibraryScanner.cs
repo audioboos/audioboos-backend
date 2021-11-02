@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace AudioBoos.Server.Services.Jobs.Scanners; 
+namespace AudioBoos.Server.Services.Jobs.Scanners;
 
 /// <summary>
 /// This provides a better scanner for "unstructured" audio libraries
@@ -29,7 +29,7 @@ internal class UnstructuredLibraryScanner : LibraryScanner {
         albumRepository, messageClient, trackRepository, unitOfWork, lookupService, systemSettings) {
     }
 
-    public override async Task<(int, int, int)> ScanLibrary(CancellationToken cancellationToken) {
+    public override async Task<(int, int, int)> ScanLibrary(bool deepScan, CancellationToken cancellationToken) {
         _logger.LogInformation("Starting unstructured library scan");
         return await Task.FromResult((0, 0, 0));
     }

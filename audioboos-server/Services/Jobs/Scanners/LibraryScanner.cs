@@ -52,16 +52,52 @@ internal abstract class LibraryScanner : ILibraryScanner {
         _systemSettings = systemSettings.Value;
     }
 
-    public abstract Task<(int, int, int)> ScanLibrary(CancellationToken cancellationToken);
+    public abstract Task<(int, int, int)> ScanLibrary(bool deepScan, CancellationToken cancellationToken);
+
+    public async Task UpdateUnscannedAlbums(CancellationToken cancellationToken) {
+        _logger.LogInformation("Scanning unscanned albums");
+        var unscannedAlbums = _albumRepository
+                .GetAll()
+                .AsNoTracking()
+                .Include(a => a.Artist)
+                .Where(a => a.TaggingStatus != TaggingStatus.ManualUpdate)
+                .ToList()
+                .Where(a => Album.IsIncomplete(a) || a.TaggingStatus.Equals(TaggingStatus.MP3TagsOnly))
+            // .Where(a => a.Artist.Name.Equals("Bauhaus"))
+            ;
+
+        foreach (var album in unscannedAlbums) {
+            try {
+                _logger.LogInformation("Scanning {Album}", album.Name);
+                var remoteAlbumInfo = await _lookupService.LookupAlbumInfo(
+                    album.Artist.Name,
+                    album.Name,
+                    album.Id.ToString(),
+                    cancellationToken);
+                if (remoteAlbumInfo is null) {
+                    continue;
+                }
+
+                var updated = remoteAlbumInfo.Adapt(album);
+                updated.TaggingStatus = TaggingStatus.RemoteLookup;
+                updated.LastScanDate = DateTime.Now;
+                await _albumRepository.InsertOrUpdate(updated, cancellationToken);
+                await _unitOfWork.Complete();
+            } catch (AlbumNotFoundException e) {
+                _logger.LogError("Unable to find album info for {Artist} - {Album}", album.Artist.Name, album.Name);
+            }
+        }
+
+        _logger.LogInformation("Finished scanning albums");
+    }
 
     public async Task UpdateUnscannedArtists(CancellationToken cancellationToken) {
-        var unscannedArtists = await _artistRepository
+        var unscannedArtists = _artistRepository
             .GetAll()
-            .Where(a => string.IsNullOrEmpty(a.SmallImage) || string.IsNullOrEmpty(a.LargeImage) ||
-                        string.IsNullOrEmpty(a.Description))
+            .AsNoTracking()
             .Where(a => a.TaggingStatus != TaggingStatus.ManualUpdate) //never auto scan manually updated artists
-            .Where(a => a.Name.Equals("Bleep & Booster"))
-            .ToListAsync(cancellationToken);
+            .ToList()
+            .Where(a => Artist.IsIncomplete(a) || a.TaggingStatus.Equals(TaggingStatus.MP3TagsOnly));
 
         foreach (var artist in unscannedArtists) {
             _logger.LogDebug("Looking up info for {Artist}", artist.Name);
@@ -95,7 +131,6 @@ internal abstract class LibraryScanner : ILibraryScanner {
             .Where(a => string.IsNullOrEmpty(a.Checksum))
             .ToListAsync(cancellationToken);
 
-        var options = new ParallelOptions {MaxDegreeOfParallelism = 10, CancellationToken = cancellationToken};
         foreach (var audioFile in unscannedFiles) {
             _logger.LogDebug("Calculating checksum for {File}", audioFile.PhysicalPath);
             using var tagger = new TagLibTagService(audioFile.PhysicalPath);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AudioBoos.Data.Access;
@@ -16,7 +17,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace AudioBoos.Server.Services.Jobs.Scanners; 
+namespace AudioBoos.Server.Services.Jobs.Scanners;
 
 internal class FastFilesystemLibraryScanner : LibraryScanner {
     public FastFilesystemLibraryScanner(ILogger<FastFilesystemLibraryScanner> logger,
@@ -31,7 +32,7 @@ internal class FastFilesystemLibraryScanner : LibraryScanner {
         albumRepository, messageClient, trackRepository, unitOfWork, lookupService, systemSettings) {
     }
 
-    public override async Task<(int, int, int)> ScanLibrary(CancellationToken cancellationToken) {
+    public override async Task<(int, int, int)> ScanLibrary(bool deepScan, CancellationToken cancellationToken) {
         int artistScans = 0;
         int albumScans = 0;
         int trackScans = 0;
@@ -44,18 +45,22 @@ internal class FastFilesystemLibraryScanner : LibraryScanner {
             Percentage = 0
         }, cancellationToken);
 
-        string scanPath =
-            Path.Combine(_systemSettings.AudioPath);
-        //Path.Combine(_systemSettings.AudioPath, "Tegan & Sara/If it Was You");;
-        var fileList = (await scanPath.GetAllAudioFiles())
-            /*.Where(f => f.Contains("Confess")).ToList()*/
-            ;
+        string scanPath = Path.Combine(_systemSettings.AudioPath/*, "Bauhaus", "1979-1983"*/);
+        var fileList = (await scanPath.GetAllAudioFiles());
+        if (!deepScan) {
+            var scannedList = await _trackRepository.GetAll()
+                .Select(r => r.PhysicalPath)
+                .ToListAsync(cancellationToken);
+            fileList = fileList
+                .Except(scannedList)
+                .ToList();
+        }
 
         int fileCount = fileList.Count;
         int currentFile = 0;
         foreach (var file in fileList) {
             try {
-                _logger.LogDebug("Scanning:  {File}", file);
+                _logger.LogInformation("Scanning:  {File}", file);
                 await _messageClient.Clients.All.SendAsync("QueueJobMessage", new JobMessage() {
                     Message = $"Scanning: {new FileInfo(file).Name}",
                     Percentage = (int)(++currentFile * 100.0 / fileCount)
@@ -145,6 +150,7 @@ internal class FastFilesystemLibraryScanner : LibraryScanner {
 
     private async Task<Artist> _processArtistInfo(string file, string artistName,
         TagLibTagService tagger, CancellationToken cancellationToken) {
+        //TODO: Use LinqExtension.MostCommon to find the most common artist name in the folder
         var artist = await _artistRepository.GetByFile(file, cancellationToken) ??
                      await _artistRepository.GetByName(artistName, cancellationToken) ??
                      await _artistRepository.GetByAlternativeNames(cancellationToken, artistName) ??

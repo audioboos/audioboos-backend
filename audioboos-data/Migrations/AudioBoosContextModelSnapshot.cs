@@ -348,22 +348,22 @@ namespace AudioBoos.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "73b41674-098a-4c46-82c2-169a354f08c6",
-                            ConcurrencyStamp = "86c711e8-ee32-4186-a651-76b5fab2e819",
+                            Id = "4deda126-ddcc-465c-8a07-34a0573ffdff",
+                            ConcurrencyStamp = "bf7e08f9-a913-4251-8245-e977cb460e0e",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "c1c85021-12e1-4583-9d2b-420fdcc29d5e",
-                            ConcurrencyStamp = "9d61f87e-cfd2-4e78-8ad2-c0e69a09b214",
+                            Id = "8527b8ba-9e00-437c-98a4-f2dc4ece392d",
+                            ConcurrencyStamp = "b78de54b-ba55-4dbf-9709-7103da9d96a3",
                             Name = "Editor",
                             NormalizedName = "EDITOR"
                         },
                         new
                         {
-                            Id = "1d6a7752-9d0f-4697-8cea-db102e40783d",
-                            ConcurrencyStamp = "7a73934c-d12c-471d-9e0a-052f5aa0c02c",
+                            Id = "d9dbdcff-2849-42f9-80b0-826241ed21a7",
+                            ConcurrencyStamp = "80893c90-2f6c-4021-ba09-260c66069fae",
                             Name = "Viewer",
                             NormalizedName = "VIEWER"
                         });

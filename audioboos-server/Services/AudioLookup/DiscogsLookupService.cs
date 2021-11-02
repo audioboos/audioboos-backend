@@ -12,7 +12,7 @@ using AudioBoos.Server.Helpers;
 using AudioBoos.Server.Services.Exceptions.AudioLookup;
 using Microsoft.Extensions.Logging;
 
-namespace AudioBoos.Server.Services.AudioLookup; 
+namespace AudioBoos.Server.Services.AudioLookup;
 
 public class DiscogsLookupService : IAudioLookupService {
     private readonly ILogger<DiscogsLookupService> _logger;
@@ -29,8 +29,9 @@ public class DiscogsLookupService : IAudioLookupService {
 
     public string Name => "Discogs";
 
-    public async Task<ArtistInfoLookupDto>
-        LookupArtistInfo(string artistName, CancellationToken cancellationToken = default) {
+
+    private async Task<DiscogsArtistResult> _getDiscogsArtist(string artistName,
+        CancellationToken cancellationToken = default) {
         var request = $"/database/search?q={Uri.EscapeDataString(artistName)}&type=artist";
         try {
             using var client = _httpClientFactory.CreateClient("discogs");
@@ -61,45 +62,60 @@ public class DiscogsLookupService : IAudioLookupService {
                             $"Artist {artistName} not found in discogs\n\tRequest: {client.BaseAddress}/{request}");
                     }
 
-                    //Fix discogs putting (2) or (3) at the end of artist name
-                    var sanitisedName = Regex.Replace(
-                            artist.name,
-                            @"\(\d+\)",
-                            string.Empty)
-                        .Trim()
-                        .ToTitleCase();
-
-                    var parsed = new ArtistInfoLookupDto(
-                        sanitisedName,
-                        artist.profile ?? string.Empty,
-                        string.Empty, //TODO: Find genre info from Discogs
-                        artist
-                            .images?
-                            .FirstOrDefault(r => r.type.Equals("secondary"))?.resource_url ?? string.Empty,
-                        artist
-                            .images?
-                            .FirstOrDefault(r => r.type.Equals("primary"))?.resource_url ??
-                        string.Empty,
-                        artist.id.ToString() ?? string.Empty,
-                        artist
-                            .aliases?.Select(r => r.name)
-                            .ToList() ?? Array.Empty<string>().ToList()
-                    );
-                    return parsed;
+                    return artist;
                 }
             } catch (HttpRequestException e) {
                 _logger.LogError("Error getting info for artist: {ArtistName}\n\t{Error}", artistName, e.Message);
             }
-
-            throw new ArtistNotFoundException(
-                $"Artist {artistName} not found in discogs\n\tRequest: {client.BaseAddress}/{request}");
         } catch (Exception e) {
             _logger.LogError("Unable to create discogs http client {Error}", e.Message);
             throw;
         }
+
+        throw new ArtistNotFoundException(
+            $"Artist {artistName} not found in discogs");
     }
 
-    public async Task<AlbumInfoLookupDTO> LookupAlbumInfo(string artistName, string albumName,
+    public async Task<string> GetArtistImage(string artistName, CancellationToken cancellationToken = default) {
+        var result = await _getDiscogsArtist(artistName, cancellationToken);
+
+        return result.images
+            .Select(i => i.resource_url)
+            .FirstOrDefault();
+    }
+
+    public async Task<ArtistInfoLookupDto>
+        LookupArtistInfo(string artistName, CancellationToken cancellationToken = default) {
+        var artist = await _getDiscogsArtist(artistName, cancellationToken);
+
+        //Fix discogs putting (2) or (3) at the end of artist name
+        var sanitisedName = Regex.Replace(
+                artist.name,
+                @"\(\d+\)",
+                string.Empty)
+            .Trim()
+            .ToTitleCase();
+
+        var parsed = new ArtistInfoLookupDto(
+            sanitisedName,
+            artist.profile ?? string.Empty,
+            string.Empty, //TODO: Find genre info from Discogs
+            artist
+                .images?
+                .FirstOrDefault(r => r.type.Equals("secondary"))?.resource_url ?? string.Empty,
+            artist
+                .images?
+                .FirstOrDefault(r => r.type.Equals("primary"))?.resource_url ??
+            string.Empty,
+            artist.id.ToString() ?? string.Empty,
+            artist
+                .aliases?.Select(r => r.name)
+                .ToList() ?? Array.Empty<string>().ToList()
+        );
+        return parsed;
+    }
+
+    public async Task<AlbumInfoLookupDto> LookupAlbumInfo(string artistName, string albumName, string artistId,
         CancellationToken cancellationToken = default) {
         var request =
             $"/database/search?artist={Uri.EscapeDataString(artistName)}&title={Uri.EscapeDataString(albumName)}&type=album";
@@ -139,13 +155,14 @@ public class DiscogsLookupService : IAudioLookupService {
                         regex,
                         string.Empty,
                         RegexOptions.IgnoreCase).ToTitleCase();
-                    var parsed = new AlbumInfoLookupDTO(
+                    var parsed = new AlbumInfoLookupDto(
                         artistName,
                         sanitisedAlbumName,
                         album.style.Count != 0 ? string.Join("\n", album.style) : string.Empty,
                         $"{album.id}",
                         album.cover_image,
-                        album.cover_image
+                        album.cover_image,
+                        album.id.ToString()
                     );
                     return parsed;
                 } catch (Exception parsedException) {

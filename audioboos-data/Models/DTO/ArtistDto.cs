@@ -4,6 +4,7 @@ namespace AudioBoos.Data.Models.DTO;
 
 public record ArtistDto(
     string Name,
+    string NormalisedName,
     string? Description,
     string? Genre,
     string? SmallImage,

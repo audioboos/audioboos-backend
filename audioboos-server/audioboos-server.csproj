@@ -6,6 +6,7 @@
         <RootNamespace>AudioBoos.Server</RootNamespace>
         <AssemblyName>AudioBoos.Server</AssemblyName>
         <Nullable>disable</Nullable>
+        <EnablePreviewFeatures>True</EnablePreviewFeatures>
     </PropertyGroup>
 
     <ItemGroup>
@@ -58,13 +59,13 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Resources\Fonts" />
+        <Folder Include="Resources\Fonts" />
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="Resources\Fonts\Roboto-Regular.ttf">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
+        <None Update="Resources\Fonts\Roboto-Regular.ttf">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
 </Project>

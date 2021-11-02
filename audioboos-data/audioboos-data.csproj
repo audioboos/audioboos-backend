@@ -6,12 +6,13 @@
         <AssemblyName>AudioBoos.Data</AssemblyName>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <EnablePreviewFeatures>True</EnablePreviewFeatures>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Mapster.Core" Version="1.2.0" />
-      <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.0-rc.2.21480.10" />
-      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.0-rc.2" />
+        <PackageReference Include="Mapster.Core" Version="1.2.0"/>
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.0-rc.2.21480.10"/>
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.0-rc.2"/>
     </ItemGroup>
 
 </Project>

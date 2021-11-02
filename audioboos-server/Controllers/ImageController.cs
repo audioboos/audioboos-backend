@@ -48,6 +48,11 @@ public class ImageController : ControllerBase {
 
     [HttpGet("album/{albumId}")]
     public async Task<IActionResult> GetAlbumImage(string albumId, [FromQuery] string type) {
+        var cacheFile = Path.Combine(_systemSettings.ImagePath, "album", albumId);
+        if (System.IO.File.Exists(cacheFile)) {
+            return GetFileDirect(cacheFile);
+        }
+
         var album = await _albumRepository.GetAll()
             .Where(a => a.Id.Equals(Guid.Parse(albumId)))
             .Include(a => a.Artist)

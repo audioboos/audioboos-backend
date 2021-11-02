@@ -23,8 +23,9 @@ public class UpdateLibraryJob : IAudioBoosJob {
     public async Task Execute(IJobExecutionContext context) {
         var scheduler = await _schedulerFactory.GetScheduler(context.CancellationToken);
 
-        await _scanner.ScanLibrary(context.CancellationToken);
+        await _scanner.ScanLibrary(false, context.CancellationToken);
         await _scanner.UpdateUnscannedArtists(context.CancellationToken);
+        await _scanner.UpdateUnscannedAlbums(context.CancellationToken);
         await _scanner.UpdateChecksums(context.CancellationToken);
         await scheduler.TriggerJob(new JobKey("CacheImages", "DEFAULT"), context.CancellationToken);
 

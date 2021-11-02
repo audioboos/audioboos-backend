@@ -18,7 +18,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace AudioBoos.Server.Services.Jobs.Scanners; 
+namespace AudioBoos.Server.Services.Jobs.Scanners;
 
 internal class FilesystemLibraryScanner : LibraryScanner {
     public FilesystemLibraryScanner(
@@ -35,7 +35,7 @@ internal class FilesystemLibraryScanner : LibraryScanner {
     }
 
 
-    public override async Task<(int, int, int)> ScanLibrary(CancellationToken cancellationToken) {
+    public override async Task<(int, int, int)> ScanLibrary(bool deepScan, CancellationToken cancellationToken) {
         int artistScans = 0;
         int albumScans = 0;
         int trackScans = 0;
@@ -190,14 +190,15 @@ internal class FilesystemLibraryScanner : LibraryScanner {
         }
 
         try {
-            var albumDTO = await _lookupService.LookupAlbumInfo(
+            var albumDto = await _lookupService.LookupAlbumInfo(
                 artist.Name,
                 albumName,
+                album.Id.ToString(),
                 cancellationToken);
-            if (!string.IsNullOrEmpty(albumDTO?.Name)) {
+            if (!string.IsNullOrEmpty(albumDto?.Name)) {
                 try {
-                    album = albumDTO.Adapt<Album>();
-                    if (!albumName.Equals(albumDTO.Name) &&
+                    album = albumDto.Adapt<Album>();
+                    if (!albumName.Equals(albumDto.Name) &&
                         !album.AlternativeNames.Contains(albumName)) {
                         album.AlternativeNames.Add(albumName);
                     }

@@ -17,6 +17,7 @@ public static class MappingStartup {
             .NewConfig()
             .Map(dest => dest.Id, src => src.Id.ToString())
             .Map(dest => dest.Name, src => src.Name)
+            .Map(dest => dest.NormalisedName, src => src.GetNormalisedName())
             .Map(dest => dest.SmallImage,
                 src => $"{config.GetSection("System").GetValue<string>("BaseUrl")}/image/artist/{src.Id}?type=small")
             .Map(dest => dest.LargeImage,
