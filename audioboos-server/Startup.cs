@@ -39,9 +39,11 @@ public class Startup {
         var provider = Configuration.GetValue("Provider", "postgres");
 
         Console.WriteLine("******************************************");
+        Console.WriteLine(
+            $"Env: {System.Environment.GetEnvironmentVariable("ASPNETCORE_ConnectionStrings__PostgresConnection")}");
         Console.WriteLine(Configuration.GetConnectionString("PostgresConnection"));
         Console.WriteLine("******************************************");
-        
+
         services.AddDbContext<AudioBoosContext>(
             options => _ = provider switch {
                 "postgres" => options.UseNpgsql(
