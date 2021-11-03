@@ -3,12 +3,7 @@ name: Build and publish container
 on:
   push:
     branches: [ develop ]
-  workflow_dispatch:
-    inputs:
-      reason:
-        description: 'Why ?'
-        required: false
-        default: ''
+
 
 jobs:
   ghr_push:
