@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace AudioBoos.Data.Store {
-    public class AppUser : IdentityUser {
-    }
+namespace AudioBoos.Data.Store; 
+
+public class AppUser : IdentityUser {
 }

@@ -1,10 +1,11 @@
 ﻿namespace AudioBoos.Data.Models.DTO;
 
-public record AlbumInfoLookupDTO(
+public record AlbumInfoLookupDto(
     string artistName,
     string Name,
     string Description,
-    string SiteId,
+    string Genre,
     string SmallImage,
-    string LargeImage) {
-}
+    string LargeImage,
+    string SiteId
+);

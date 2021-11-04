@@ -7,6 +7,7 @@ using AudioBoos.Data.Models.Settings;
 using AudioBoos.Data.Persistence.Interfaces;
 using AudioBoos.Data.Store;
 using AudioBoos.Server.Services.AudioLookup;
+using AudioBoos.Server.Services.Exceptions.AudioLookup;
 using AudioBoos.Server.Services.Hubs;
 using AudioBoos.Server.Services.Tags;
 using Mapster;
@@ -51,32 +52,77 @@ internal abstract class LibraryScanner : ILibraryScanner {
         _systemSettings = systemSettings.Value;
     }
 
-    public abstract Task<(int, int, int)> ScanLibrary(CancellationToken cancellationToken);
+    public abstract Task<(int, int, int)> ScanLibrary(bool deepScan, CancellationToken cancellationToken);
 
-    public async Task UpdateUnscannedArtists(CancellationToken cancellationToken) {
-        var unscannedArtists = await _artistRepository
-            .GetAll()
-            .Where(a => string.IsNullOrEmpty(a.SmallImage) || string.IsNullOrEmpty(a.LargeImage) ||
-                        string.IsNullOrEmpty(a.Description))
-            .ToListAsync(cancellationToken);
+    public async Task UpdateUnscannedAlbums(CancellationToken cancellationToken) {
+        _logger.LogInformation("Scanning unscanned albums");
+        var unscannedAlbums = _albumRepository
+                .GetAll()
+                .AsNoTracking()
+                .Include(a => a.Artist)
+                .Where(a => a.TaggingStatus != TaggingStatus.ManualUpdate)
+                .ToList()
+                .Where(a => Album.IsIncomplete(a) || a.TaggingStatus.Equals(TaggingStatus.MP3TagsOnly))
+            // .Where(a => a.Artist.Name.Equals("Bauhaus"))
+            ;
 
-        var options = new ParallelOptions {MaxDegreeOfParallelism = 10, CancellationToken = cancellationToken};
-        foreach (var artist in unscannedArtists) {
-            _logger.LogDebug("Looking up info for {Artist}", artist.Name);
-            var albumDTO = await _lookupService.LookupArtistInfo(
-                artist.Name,
-                cancellationToken);
-            if (albumDTO is null) {
-                continue;
+        foreach (var album in unscannedAlbums) {
+            try {
+                _logger.LogInformation("Scanning {Album}", album.Name);
+                var remoteAlbumInfo = await _lookupService.LookupAlbumInfo(
+                    album.Artist.Name,
+                    album.Name,
+                    album.Id.ToString(),
+                    cancellationToken);
+                if (remoteAlbumInfo is null) {
+                    continue;
+                }
+
+                var updated = remoteAlbumInfo.Adapt(album);
+                updated.TaggingStatus = TaggingStatus.RemoteLookup;
+                updated.LastScanDate = DateTime.Now;
+                await _albumRepository.InsertOrUpdate(updated, cancellationToken);
+                await _unitOfWork.Complete();
+            } catch (AlbumNotFoundException e) {
+                _logger.LogError("Unable to find album info for {Artist} - {Album}", album.Artist.Name, album.Name);
             }
-
-            var updated = albumDTO.Adapt(artist);
-            updated.TaggingStatus = TaggingStatus.MP3TagsOnly;
-
-            await _artistRepository.InsertOrUpdate(updated, cancellationToken);
         }
 
-        await _unitOfWork.Complete();
+        _logger.LogInformation("Finished scanning albums");
+    }
+
+    public async Task UpdateUnscannedArtists(CancellationToken cancellationToken) {
+        var unscannedArtists = _artistRepository
+            .GetAll()
+            .AsNoTracking()
+            .Where(a => a.TaggingStatus != TaggingStatus.ManualUpdate) //never auto scan manually updated artists
+            .ToList()
+            .Where(a => Artist.IsIncomplete(a) || a.TaggingStatus.Equals(TaggingStatus.MP3TagsOnly));
+
+        foreach (var artist in unscannedArtists) {
+            _logger.LogDebug("Looking up info for {Artist}", artist.Name);
+            try {
+                var remoteArtistInfo = await _lookupService.LookupArtistInfo(
+                    artist.Name,
+                    cancellationToken);
+                if (remoteArtistInfo is null) {
+                    continue;
+                }
+
+                var updated = remoteArtistInfo.Adapt(artist);
+                updated.TaggingStatus = TaggingStatus.RemoteLookup;
+
+                await _artistRepository.InsertOrUpdate(updated, cancellationToken);
+                await _unitOfWork.Complete();
+            } catch (ArtistNotFoundException) {
+                _logger.LogWarning("Artist {Artist} not found in {Scanner}", artist.Name, _lookupService.Name);
+            } catch (Exception e) {
+                _logger.LogError("Failure finding artist {Artist} in {Scanner}", artist.Name, _lookupService.Name);
+                _logger.LogError("{Error}", e.Message);
+            }
+        }
+
+        _logger.LogInformation("Finished processing artists");
     }
 
     public async Task UpdateChecksums(CancellationToken cancellationToken) {
@@ -85,7 +131,6 @@ internal abstract class LibraryScanner : ILibraryScanner {
             .Where(a => string.IsNullOrEmpty(a.Checksum))
             .ToListAsync(cancellationToken);
 
-        var options = new ParallelOptions {MaxDegreeOfParallelism = 10, CancellationToken = cancellationToken};
         foreach (var audioFile in unscannedFiles) {
             _logger.LogDebug("Calculating checksum for {File}", audioFile.PhysicalPath);
             using var tagger = new TagLibTagService(audioFile.PhysicalPath);

@@ -3,74 +3,74 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using AudioBoos.Server.Services;
 
-namespace AudioBoos.Server.Services.Tags {
-    public class TagLibTagService : MustInitialize<string>, ITagService {
-        private readonly TagLib.File _file;
-        private readonly string _filePath;
+namespace AudioBoos.Server.Services.Tags; 
 
-        public TagLibTagService(string path) : base(path) {
-            _filePath = path;
-            _file = TagLib.File.Create(path);
-        }
+public class TagLibTagService : MustInitialize<string>, ITagService {
+    private readonly TagLib.File _file;
+    private readonly string _filePath;
 
-        public void Dispose() {
-            _file?.Dispose();
-        }
+    public TagLibTagService(string path) : base(path) {
+        _filePath = path;
+        _file = TagLib.File.Create(path);
+    }
 
-        public string GetFilename() {
-            return _file.Name;
-        }
+    public void Dispose() {
+        _file?.Dispose();
+    }
 
-        public string GetArtistName() {
-            return _file.Tag.FirstAlbumArtist ??
-                   _file.Tag.FirstPerformer;
-        }
+    public string GetFilename() {
+        return _file.Name;
+    }
 
-        public string GetArtistDescription() {
-            return _file.Tag.FirstAlbumArtist ??
-                   _file.Tag.FirstPerformer;
-        }
+    public string GetArtistName() {
+        return _file.Tag.FirstAlbumArtist ??
+               _file.Tag.FirstPerformer;
+    }
 
-        public string GetAlbumName() {
-            return _file.Tag.Album;
-        }
+    public string GetArtistDescription() {
+        return _file.Tag.FirstAlbumArtist ??
+               _file.Tag.FirstPerformer;
+    }
 
-        public string GetAlbumCatalogueNumber() {
-            return string.Empty;
-        }
+    public string GetAlbumName() {
+        return _file.Tag.Album;
+    }
 
-        public string GetTrackName() {
-            return _file.Tag.Title;
-        }
+    public string GetAlbumCatalogueNumber() {
+        return string.Empty;
+    }
 
-        public string GetTrackComments() {
-            return _file.Tag.Comment;
-        }
+    public string GetTrackName() {
+        return _file.Tag.Title;
+    }
 
-        public int GetTrackNumber() {
-            return Convert.ToInt32(_file.Tag.Track);
-        }
+    public string GetTrackComments() {
+        return _file.Tag.Comment;
+    }
 
-        public async Task<string> GetChecksum() {
-            using var md5 = MD5.Create();
-            await using var stream = System.IO.File.OpenRead(_filePath);
-            var hash = await md5.ComputeHashAsync(stream);
-            return BitConverter
-                .ToString(hash)
-                .Replace("-", "")
-                .ToLowerInvariant();
-        }
+    public int GetTrackNumber() {
+        return Convert.ToInt32(_file.Tag.Track);
+    }
 
-        public bool SetArtistName(string artist) {
-            throw new NotImplementedException();
-        }
+    public async Task<string> GetChecksum() {
+        using var md5 = MD5.Create();
+        await using var stream = System.IO.File.OpenRead(_filePath);
+        var hash = await md5.ComputeHashAsync(stream);
+        return BitConverter
+            .ToString(hash)
+            .Replace("-", "")
+            .ToLowerInvariant();
+    }
 
-        public bool SetAlbumName(string album) {
-            throw new NotImplementedException();
-        }
+    public bool SetArtistName(string artist) {
+        throw new NotImplementedException();
+    }
 
-        public bool SetTrackTitle(string title) {
-            throw new NotImplementedException();
-        }
+    public bool SetAlbumName(string album) {
+        throw new NotImplementedException();
+    }
+
+    public bool SetTrackTitle(string title) {
+        throw new NotImplementedException();
     }
 }

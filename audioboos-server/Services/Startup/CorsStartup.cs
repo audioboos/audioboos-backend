@@ -2,28 +2,28 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AudioBoos.Server.Services.Startup {
-    public static class CorsStartup {
-        private static readonly string policyName = "AudioBoosCors";
+namespace AudioBoos.Server.Services.Startup; 
 
-        public static IServiceCollection AddAudioBoosCors(this IServiceCollection services, IConfiguration config) {
-            services.AddCors(options => {
-                options.AddPolicy(name: policyName,
-                    builder => {
-                        builder.AllowCredentials();
-                        builder.AllowAnyHeader();
+public static class CorsStartup {
+    private static readonly string policyName = "AudioBoosCors";
 
-                        builder.WithOrigins(
-                            config.GetValue<string>("System:WebClientUrl"));
-                    });
-            });
+    public static IServiceCollection AddAudioBoosCors(this IServiceCollection services, IConfiguration config) {
+        services.AddCors(options => {
+            options.AddPolicy(name: policyName,
+                builder => {
+                    builder.AllowCredentials();
+                    builder.AllowAnyHeader();
 
-            return services;
-        }
+                    builder.WithOrigins(
+                        config.GetValue<string>("System:WebClientUrl"));
+                });
+        });
 
-        public static IApplicationBuilder UseAudioBoosCors(this IApplicationBuilder app) {
-            app.UseCors(policyName);
-            return app;
-        }
+        return services;
+    }
+
+    public static IApplicationBuilder UseAudioBoosCors(this IApplicationBuilder app) {
+        app.UseCors(policyName);
+        return app;
     }
 }
