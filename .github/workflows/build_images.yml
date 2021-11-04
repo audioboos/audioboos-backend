@@ -34,8 +34,8 @@ jobs:
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           # Strip "v" prefix from tag name
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-          # when the branch is master, replace master with latest
-          [ "$VERSION" == "master" ] && VERSION=latest
+          # when the branch is trunk, replace trunk with latest
+          [ "$VERSION" == "trunk" ] && VERSION=latest
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
           # Build and Publish container image
