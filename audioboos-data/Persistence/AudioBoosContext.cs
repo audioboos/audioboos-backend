@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AudioBoos.Data.Persistence; 
 
 public class AudioBoosContext : IdentityDbContext<AppUser> {
+    public DbSet<Setting> Settings { get; set; }
     public DbSet<AudioFile> AudioFiles { get; set; }
     public DbSet<Artist> Artists { get; set; }
     public DbSet<Album> Albums { get; set; }
