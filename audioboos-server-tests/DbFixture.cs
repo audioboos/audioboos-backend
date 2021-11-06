@@ -10,7 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit.Sdk;
 
-namespace AudioBoos.Server.Tests; 
+namespace AudioBoos.Server.Tests;
 
 public class DbFixture {
     private static readonly object _lock = new();

@@ -2,7 +2,7 @@
 
 public class SystemSettings {
     public string WebClientUrl { get; set; }
-    public string Hostname { get; set; }
+    public string DefaultSiteName { get; set; }
     public string ImagePath { get; set; }
     public string AudioPath { get; set; }
     public string ContactEmail { get; set; }

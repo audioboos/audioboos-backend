@@ -15,8 +15,8 @@ public class SettingsProvider {
         this._settings = context.Settings;
     }
 
-    public async Task<string> Get(string key) => await _settings
-        .Where(s => s.key.Equals(key))
-        .Select(r => r.value)
+    public async Task<string?> Get(string key) => await _settings
+        .Where(s => s.Key.Equals(key))
+        .Select(r => r.Value)
         .FirstOrDefaultAsync();
 }

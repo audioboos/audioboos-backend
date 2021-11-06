@@ -8,7 +8,7 @@ using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace AudioBoos.Server.Controllers; 
+namespace AudioBoos.Server.Controllers;
 
 [ApiController]
 [Route("[controller]")]
