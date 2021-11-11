@@ -18,7 +18,7 @@ namespace AudioBoos.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("app")
-                .HasAnnotation("ProductVersion", "6.0.0-rc.2.21480.5")
+                .HasAnnotation("ProductVersion", "6.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -83,7 +83,7 @@ namespace AudioBoos.Data.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_albums_artist_id_name");
 
-                    b.ToTable("albums", (string)null);
+                    b.ToTable("albums", "app");
                 });
 
             modelBuilder.Entity("AudioBoos.Data.Store.AppUser", b =>
@@ -163,7 +163,7 @@ namespace AudioBoos.Data.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
 
-                    b.ToTable("users", (string)null);
+                    b.ToTable("users", "app");
                 });
 
             modelBuilder.Entity("AudioBoos.Data.Store.Artist", b =>
@@ -242,7 +242,7 @@ namespace AudioBoos.Data.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_artists_name");
 
-                    b.ToTable("artists", (string)null);
+                    b.ToTable("artists", "app");
                 });
 
             modelBuilder.Entity("AudioBoos.Data.Store.AudioFile", b =>
@@ -330,7 +330,7 @@ namespace AudioBoos.Data.Migrations
                     b.HasIndex("TrackId")
                         .HasDatabaseName("ix_audio_files_track_id");
 
-                    b.ToTable("audio_files", (string)null);
+                    b.ToTable("audio_files", "app");
                 });
 
             modelBuilder.Entity("AudioBoos.Data.Store.Setting", b =>
@@ -351,7 +351,7 @@ namespace AudioBoos.Data.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_settings_key");
 
-                    b.ToTable("settings", (string)null);
+                    b.ToTable("settings", "app");
                 });
 
             modelBuilder.Entity("AudioBoos.Data.Store.Track", b =>
@@ -422,7 +422,7 @@ namespace AudioBoos.Data.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_tracks_physical_path");
 
-                    b.ToTable("tracks", (string)null);
+                    b.ToTable("tracks", "app");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -458,22 +458,22 @@ namespace AudioBoos.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "a667cd0a-b675-46a4-a003-e7deab7e0a1a",
-                            ConcurrencyStamp = "65e5ac0f-5fec-4568-9550-789e60ea676d",
+                            Id = "5bdc02fb-49ee-4b18-b704-95e814dad1a3",
+                            ConcurrencyStamp = "e03a0f2b-d6d9-4f97-9b2e-6515f8132d86",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "8d9d41ab-e1b9-4a39-8033-1443da3f4609",
-                            ConcurrencyStamp = "398a2dc4-704a-4460-8e9f-a633082ac4ed",
+                            Id = "9d402f75-fa1e-4ed7-b3ba-ad7bbdcfb4bb",
+                            ConcurrencyStamp = "8d573fbd-177a-4a86-a7d5-06e4c26d9e3b",
                             Name = "Editor",
                             NormalizedName = "EDITOR"
                         },
                         new
                         {
-                            Id = "5cf299f1-b384-4c42-b95a-e47e4d791b43",
-                            ConcurrencyStamp = "38cd4065-71a4-476b-b03e-6bc49a0ab491",
+                            Id = "df301601-9b70-4e3b-b1a4-3b36a06ead43",
+                            ConcurrencyStamp = "75ead5da-d156-484d-bbf7-b29f1b05823a",
                             Name = "Viewer",
                             NormalizedName = "VIEWER"
                         });

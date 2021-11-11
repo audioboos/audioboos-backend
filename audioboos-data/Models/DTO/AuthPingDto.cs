@@ -1,4 +1,4 @@
-﻿namespace AudioBoos.Data.Models.DTO; 
+﻿namespace AudioBoos.Data.Models.DTO;
 
 public class AuthPingDto {
     public bool Success { get; set; }

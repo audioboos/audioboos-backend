@@ -21,7 +21,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
 
-namespace AudioBoos.Server.Controllers; 
+namespace AudioBoos.Server.Controllers;
 
 [ApiController]
 [Route("[controller]")]
@@ -85,6 +85,17 @@ public class AuthController : ControllerBase {
             signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
         );
         return token;
+    }
+
+    [Authorize]
+    [HttpGet("profile")]
+    public async Task<ActionResult<ProfileDto>> GetProfile() {
+        var user = await _userManager.GetUserAsync(this.User);
+        if (user is not null) {
+            return Ok(new ProfileDto(user.UserName));
+        }
+
+        return Unauthorized();
     }
 
     [Authorize]

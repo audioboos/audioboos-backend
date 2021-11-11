@@ -325,9 +325,9 @@ namespace AudioBoos.Data.Migrations
                 columns: new[] { "id", "concurrency_stamp", "name", "normalized_name" },
                 values: new object[,]
                 {
-                    { "5cf299f1-b384-4c42-b95a-e47e4d791b43", "38cd4065-71a4-476b-b03e-6bc49a0ab491", "Viewer", "VIEWER" },
-                    { "8d9d41ab-e1b9-4a39-8033-1443da3f4609", "398a2dc4-704a-4460-8e9f-a633082ac4ed", "Editor", "EDITOR" },
-                    { "a667cd0a-b675-46a4-a003-e7deab7e0a1a", "65e5ac0f-5fec-4568-9550-789e60ea676d", "Admin", "ADMIN" }
+                    { "5bdc02fb-49ee-4b18-b704-95e814dad1a3", "e03a0f2b-d6d9-4f97-9b2e-6515f8132d86", "Admin", "ADMIN" },
+                    { "9d402f75-fa1e-4ed7-b3ba-ad7bbdcfb4bb", "8d573fbd-177a-4a86-a7d5-06e4c26d9e3b", "Editor", "EDITOR" },
+                    { "df301601-9b70-4e3b-b1a4-3b36a06ead43", "75ead5da-d156-484d-bbf7-b29f1b05823a", "Viewer", "VIEWER" }
                 });
 
             migrationBuilder.CreateIndex(

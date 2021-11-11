@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using AudioBoos.Data.Models.DTO;
@@ -23,8 +24,13 @@ public class SettingsController : ControllerBase {
     }
 
     [HttpGet]
-    public ActionResult<SettingsDto> Get() {
-        return new SettingsDto(_systemSettings.DefaultSiteName);
+    public async Task<ActionResult<SettingsDto>> Get() {
+        var settings = await _context
+            .Settings
+            .FirstOrDefaultAsync(r => r.Key.ToLower().Equals("sitename"));
+
+        return new SettingsDto(
+            settings is not null ? settings.Value : string.Empty);
     }
 
     [HttpPost]
