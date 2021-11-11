@@ -3,16 +3,12 @@ using System.Collections.Generic;
 using Mapster;
 
 #nullable enable
-namespace AudioBoos.Data.Models.DTO; 
+namespace AudioBoos.Data.Models.DTO;
 
-public record AlbumDto {
-    public AlbumDto(string artistName) {
-        ArtistName = artistName;
-    }
-
+public record AlbumDto(string ArtistName) {
     public string? Id { get; set; }
     public string Name { get; set; }
-    public string ArtistName { get; set; }
+    public string ArtistName { get; set; } = ArtistName;
     public string Description { get; set; }
     public string SmallImage { get; set; }
     public string LargeImage { get; set; }

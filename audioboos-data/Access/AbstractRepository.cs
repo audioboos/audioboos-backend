@@ -7,7 +7,7 @@ using AudioBoos.Data.Persistence;
 using AudioBoos.Data.Store;
 using Microsoft.EntityFrameworkCore;
 
-namespace AudioBoos.Data.Access; 
+namespace AudioBoos.Data.Access;
 
 public abstract class AbstractRepository<TEntity> : IRepository<TEntity> where TEntity : BaseEntity {
     protected readonly AudioBoosContext _context;

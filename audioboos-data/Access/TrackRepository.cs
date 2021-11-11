@@ -4,7 +4,7 @@ using AudioBoos.Data.Persistence;
 using AudioBoos.Data.Store;
 using Microsoft.EntityFrameworkCore;
 
-namespace AudioBoos.Data.Access; 
+namespace AudioBoos.Data.Access;
 
 public class TrackRepository : AbstractRepository<Track> {
     public TrackRepository(AudioBoosContext context) : base(context) { }
@@ -17,13 +17,13 @@ public class TrackRepository : AbstractRepository<Track> {
                 cancellationToken);
     }
 
-    public override async Task<Track>
-        InsertOrUpdate(Track entity, CancellationToken cancellationToken = default) {
+    public override async Task<Track> InsertOrUpdate(Track entity, CancellationToken cancellationToken = default) {
         var existing = await _context
             .Tracks
             .AsNoTracking()
-            .FirstOrDefaultAsync(e => e.PhysicalPath.Equals(entity.PhysicalPath),
-                cancellationToken: cancellationToken);
+            .FirstOrDefaultAsync(
+                e => e.PhysicalPath.Equals(entity.PhysicalPath),
+                cancellationToken);
         if (existing is not null) {
             entity.Id = existing.Id;
         } else {

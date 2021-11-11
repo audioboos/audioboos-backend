@@ -33,12 +33,12 @@ public class MusicBrainzLookupService : IAudioLookupService {
 
 
     private Query _buildQuery() => new Query(
-        _settings.Hostname,
+        _settings.DefaultSiteName,
         Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0",
         _settings.ContactEmail);
 
     private CoverArt _buildCoverArtQuery() => new(
-        _settings.Hostname,
+        _settings.DefaultSiteName,
         Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0",
         _settings.ContactEmail);
 

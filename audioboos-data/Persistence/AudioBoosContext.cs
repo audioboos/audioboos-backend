@@ -8,9 +8,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace AudioBoos.Data.Persistence; 
+namespace AudioBoos.Data.Persistence;
 
 public class AudioBoosContext : IdentityDbContext<AppUser> {
+    public DbSet<Setting> Settings { get; set; }
     public DbSet<AudioFile> AudioFiles { get; set; }
     public DbSet<Artist> Artists { get; set; }
     public DbSet<Album> Albums { get; set; }
@@ -20,7 +21,9 @@ public class AudioBoosContext : IdentityDbContext<AppUser> {
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
-        optionsBuilder.EnableSensitiveDataLogging();
+        optionsBuilder
+            .UseSnakeCaseNamingConvention()
+            .EnableSensitiveDataLogging();
     }
 
     protected override void OnModelCreating(ModelBuilder builder) {
@@ -70,7 +73,7 @@ public class AudioBoosContext : IdentityDbContext<AppUser> {
         }
 
         builder.Entity<AppUser>(userEntity => {
-            userEntity.ToTable("AppUsers");
+            userEntity.ToTable("users");
         });
 
         builder.Entity<Artist>()
