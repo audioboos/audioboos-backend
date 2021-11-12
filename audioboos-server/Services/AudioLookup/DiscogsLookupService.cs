@@ -81,7 +81,7 @@ public class DiscogsLookupService : IAudioLookupService {
 
         return result.images
             .Select(i => i.resource_url)
-            .FirstOrDefault();
+            .FirstOrDefault() ?? string.Empty;
     }
 
     public async Task<ArtistInfoLookupDto>

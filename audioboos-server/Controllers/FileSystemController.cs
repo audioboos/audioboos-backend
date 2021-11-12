@@ -29,12 +29,14 @@ public class FileSystemController : ControllerBase {
 
     [HttpGet("directories")]
     public async Task<List<string>> GetMachineFolders([FromQuery] string path = "/") {
-        var folders = Directory
-            .EnumerateDirectories(path, "*")
-            .Where(f => (new FileInfo(f).Attributes & FileAttributes.Hidden & FileAttributes.System) == 0);
+        return await Task.Run(() => {
+            var folders = Directory
+                .EnumerateDirectories(path, "*")
+                .Where(f => (new FileInfo(f).Attributes & FileAttributes.Hidden & FileAttributes.System) == 0);
 
-        return folders
-            .Except(_exclusions)
-            .Select(r => r).ToList();
+            return folders
+                .Except(_exclusions)
+                .Select(r => r).ToList();
+        });
     }
 }

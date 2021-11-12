@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AudioBoos.Data.Access;
 using AudioBoos.Data.Models.Settings;
+using AudioBoos.Data.Persistence;
 using AudioBoos.Data.Persistence.Interfaces;
 using AudioBoos.Data.Store;
 using AudioBoos.Server.Helpers;
@@ -23,6 +24,7 @@ namespace AudioBoos.Server.Services.Jobs.Scanners;
 internal class FilesystemLibraryScanner : LibraryScanner {
     public FilesystemLibraryScanner(
         ILogger<FilesystemLibraryScanner> logger,
+        AudioBoosContext context,
         IRepository<AudioFile> audioFileRepository,
         IRepository<Artist> artistRepository,
         IRepository<Album> albumRepository,
@@ -30,7 +32,7 @@ internal class FilesystemLibraryScanner : LibraryScanner {
         IRepository<Track> trackRepository,
         IUnitOfWork unitOfWork,
         IAudioLookupService lookupService,
-        IOptions<SystemSettings> systemSettings) : base(logger, audioFileRepository, artistRepository,
+        IOptions<SystemSettings> systemSettings) : base(logger, context, audioFileRepository, artistRepository,
         albumRepository, messageClient, trackRepository, unitOfWork, lookupService, systemSettings) {
     }
 
@@ -43,13 +45,13 @@ internal class FilesystemLibraryScanner : LibraryScanner {
         await __scanLock.WaitAsync(cancellationToken);
         _logger.LogInformation("*** START SCANNING ***");
 
-        await _messageClient.Clients.All.SendAsync("QueueJobMessage", new JobMessage() {
+        await _messageClient.Clients.All.SendAsync("QueueJobMessage", new JobMessage {
             Message = "Starting scan job",
             Percentage = 0
         }, cancellationToken);
 
         string scanPath =
-            Path.Combine(_systemSettings.AudioPath);
+            Path.Combine(await _libraryPath());
         // Path.Combine("/home/fergalm/dev/audioboos/working/testing/problemscans/");
         //Path.Combine(_systemSettings.AudioPath, "Tegan & Sara/If it Was You");;
         var fileList = (await scanPath.GetAllAudioFiles())

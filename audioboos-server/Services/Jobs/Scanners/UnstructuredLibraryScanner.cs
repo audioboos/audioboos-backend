@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using AudioBoos.Data.Access;
 using AudioBoos.Data.Models.Settings;
+using AudioBoos.Data.Persistence;
 using AudioBoos.Data.Persistence.Interfaces;
 using AudioBoos.Data.Store;
 using AudioBoos.Server.Services.AudioLookup;
@@ -18,6 +19,7 @@ namespace AudioBoos.Server.Services.Jobs.Scanners;
 /// </summary>
 internal class UnstructuredLibraryScanner : LibraryScanner {
     public UnstructuredLibraryScanner(ILogger<UnstructuredLibraryScanner> logger,
+        AudioBoosContext context,
         IRepository<AudioFile> audioFileRepository,
         IRepository<Artist> artistRepository,
         IRepository<Album> albumRepository,
@@ -25,7 +27,7 @@ internal class UnstructuredLibraryScanner : LibraryScanner {
         IRepository<Track> trackRepository,
         IUnitOfWork unitOfWork,
         IAudioLookupService lookupService,
-        IOptions<SystemSettings> systemSettings) : base(logger, audioFileRepository, artistRepository,
+        IOptions<SystemSettings> systemSettings) : base(logger, context, audioFileRepository, artistRepository,
         albumRepository, messageClient, trackRepository, unitOfWork, lookupService, systemSettings) {
     }
 

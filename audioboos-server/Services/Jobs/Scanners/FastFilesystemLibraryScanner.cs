@@ -5,10 +5,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using AudioBoos.Data.Access;
 using AudioBoos.Data.Models.Settings;
+using AudioBoos.Data.Persistence;
 using AudioBoos.Data.Persistence.Interfaces;
 using AudioBoos.Data.Store;
 using AudioBoos.Server.Helpers;
 using AudioBoos.Server.Services.AudioLookup;
+using AudioBoos.Server.Services.Exceptions;
 using AudioBoos.Server.Services.Exceptions.AudioLookup;
 using AudioBoos.Server.Services.Hubs;
 using AudioBoos.Server.Services.Tags;
@@ -21,6 +23,7 @@ namespace AudioBoos.Server.Services.Jobs.Scanners;
 
 internal class FastFilesystemLibraryScanner : LibraryScanner {
     public FastFilesystemLibraryScanner(ILogger<FastFilesystemLibraryScanner> logger,
+        AudioBoosContext context,
         IRepository<AudioFile> audioFileRepository,
         IRepository<Artist> artistRepository,
         IRepository<Album> albumRepository,
@@ -28,7 +31,7 @@ internal class FastFilesystemLibraryScanner : LibraryScanner {
         IRepository<Track> trackRepository,
         IUnitOfWork unitOfWork,
         IAudioLookupService lookupService,
-        IOptions<SystemSettings> systemSettings) : base(logger, audioFileRepository, artistRepository,
+        IOptions<SystemSettings> systemSettings) : base(logger, context, audioFileRepository, artistRepository,
         albumRepository, messageClient, trackRepository, unitOfWork, lookupService, systemSettings) {
     }
 
@@ -45,8 +48,13 @@ internal class FastFilesystemLibraryScanner : LibraryScanner {
             Percentage = 0
         }, cancellationToken);
 
-        string scanPath = Path.Combine(_systemSettings.AudioPath/*, "Bauhaus", "1979-1983"*/);
-        var fileList = (await scanPath.GetAllAudioFiles());
+        var libraryPath = await _libraryPath();
+        if (string.IsNullOrEmpty(libraryPath) || !Directory.Exists(libraryPath)) {
+            _logger.LogError("Library path ({LibraryPath}) does not exist", libraryPath);
+            throw new LibraryNotFoundException($"Library path ({libraryPath}) does not exist");
+        }
+
+        var fileList = (await libraryPath.GetAllAudioFiles());
         if (!deepScan) {
             var scannedList = await _trackRepository.GetAll()
                 .Select(r => r.PhysicalPath)

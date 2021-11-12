@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AudioBoos.Data.Access;
 using AudioBoos.Data.Models.Settings;
+using AudioBoos.Data.Persistence;
 using AudioBoos.Data.Persistence.Interfaces;
 using AudioBoos.Data.Store;
 using AudioBoos.Server.Services.AudioLookup;
@@ -20,6 +21,7 @@ namespace AudioBoos.Server.Services.Jobs.Scanners;
 
 internal abstract class LibraryScanner : ILibraryScanner {
     protected readonly ILogger _logger;
+    private readonly AudioBoosContext _context;
     protected readonly IRepository<AudioFile> _audioFileRepository;
     protected readonly IRepository<Artist> _artistRepository;
     protected readonly IRepository<Album> _albumRepository;
@@ -31,7 +33,9 @@ internal abstract class LibraryScanner : ILibraryScanner {
 
     protected readonly SemaphoreSlim __scanLock = new(1, 1);
 
+
     protected LibraryScanner(ILogger<LibraryScanner> logger,
+        AudioBoosContext context,
         IRepository<AudioFile> audioFileRepository,
         IRepository<Artist> artistRepository,
         IRepository<Album> albumRepository,
@@ -42,6 +46,7 @@ internal abstract class LibraryScanner : ILibraryScanner {
         IOptions<SystemSettings> systemSettings
     ) {
         _logger = logger;
+        _context = context;
         _audioFileRepository = audioFileRepository;
         _artistRepository = artistRepository;
         _albumRepository = albumRepository;
@@ -51,6 +56,13 @@ internal abstract class LibraryScanner : ILibraryScanner {
         _lookupService = lookupService;
         _systemSettings = systemSettings.Value;
     }
+
+    protected async Task<string> _libraryPath() => await _context
+        .Settings
+        .Where(r => r.Key.ToLower().Equals("librarypath"))
+        .Select(s => s.Value)
+        .FirstOrDefaultAsync();
+
 
     public abstract Task<(int, int, int)> ScanLibrary(bool deepScan, CancellationToken cancellationToken);
 
@@ -83,7 +95,7 @@ internal abstract class LibraryScanner : ILibraryScanner {
                 updated.LastScanDate = DateTime.Now;
                 await _albumRepository.InsertOrUpdate(updated, cancellationToken);
                 await _unitOfWork.Complete();
-            } catch (AlbumNotFoundException e) {
+            } catch (AlbumNotFoundException) {
                 _logger.LogError("Unable to find album info for {Artist} - {Album}", album.Artist.Name, album.Name);
             }
         }
