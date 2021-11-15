@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Net;
+using System.Net.Http;
 using AudioBoos.Server.Services.AudioLookup;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,6 +12,7 @@ public static class HttpClientsStartup {
 
     public static IServiceCollection AddAudioBoosHttpClients(this IServiceCollection services) {
         // services.AddTransient<IAudioLookupService, TheAudioDBLookupService>();
+        services.AddTransient<CoverArtLookupService>();
         services.AddTransient<IAudioLookupService, MusicBrainzLookupService>();
         services.AddTransient<DiscogsLookupService>();
 
@@ -28,6 +31,17 @@ public static class HttpClientsStartup {
             .ConfigureHttpClient(c => {
                 c.DefaultRequestHeaders.Add("Accept", "application/json");
                 c.DefaultRequestHeaders.Add("User-Agent", USER_AGENT);
+            });
+
+        services.AddHttpClient("coverart", c => {
+                c.BaseAddress = new Uri("https://coverartarchive.org/");
+            })
+            .ConfigureHttpClient(c => {
+                c.DefaultRequestHeaders.Add("Accept", "application/json");
+                c.DefaultRequestHeaders.Add("User-Agent", USER_AGENT);
+            }).ConfigurePrimaryHttpMessageHandler(x => new HttpClientHandler {
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+                ServerCertificateCustomValidationCallback = (_, _, _, _) => true
             });
         return services;
     }

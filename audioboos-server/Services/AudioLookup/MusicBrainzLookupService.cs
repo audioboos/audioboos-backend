@@ -9,7 +9,6 @@ using AudioBoos.Data.Models.Settings;
 using AudioBoos.Server.Helpers;
 using AudioBoos.Server.Services.Exceptions.AudioLookup;
 using MetaBrainz.MusicBrainz;
-using MetaBrainz.MusicBrainz.CoverArt;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -18,29 +17,28 @@ namespace AudioBoos.Server.Services.AudioLookup;
 public class MusicBrainzLookupService : IAudioLookupService {
     private readonly SystemSettings _systemSettings;
     private readonly DiscogsLookupService _discogsLookupService;
+    private readonly CoverArtLookupService _coverArtService;
     private readonly ILogger<MusicBrainzLookupService> _logger;
     private readonly SystemSettings _settings;
     public string Name => "MusicBrainz";
 
     public MusicBrainzLookupService(IOptions<SystemSettings> systemSettings, DiscogsLookupService discogsLookupService,
         IOptions<SystemSettings> settings,
+        CoverArtLookupService coverArtService,
         ILogger<MusicBrainzLookupService> logger) {
         _systemSettings = systemSettings.Value;
-        _discogsLookupService = discogsLookupService;
+        _discogsLookupService = discogsLookupService; // for album art lookup (for now)
+        _coverArtService = coverArtService;
         _logger = logger;
         _settings = settings.Value;
     }
 
 
-    private Query _buildQuery() => new Query(
+    private Query _buildQuery() => new(
         _settings.DefaultSiteName,
         Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0",
         _settings.ContactEmail);
 
-    private CoverArt _buildCoverArtQuery() => new(
-        _settings.DefaultSiteName,
-        Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0",
-        _settings.ContactEmail);
 
     public async Task<ArtistInfoLookupDto>
         LookupArtistInfo(string artistName, CancellationToken cancellationToken = default) {
@@ -75,8 +73,6 @@ public class MusicBrainzLookupService : IAudioLookupService {
     public async Task<AlbumInfoLookupDto> LookupAlbumInfo(string artistName, string albumName, string albumId,
         CancellationToken cancellationToken = default) {
         var albumQuery = _buildQuery();
-        var coverArt = _buildCoverArtQuery();
-
         var remoteInfo =
             await albumQuery.FindReleasesAsync($"title:{albumName} AND artist:{artistName}");
 
@@ -85,21 +81,27 @@ public class MusicBrainzLookupService : IAudioLookupService {
         }
 
         var details = remoteInfo.Results[0];
-        var art = await coverArt.FetchFrontAsync(details.Item.Id);
-        //TODO: probably shouldn't be caching here
-        var cacheFile = Path.Combine(_systemSettings.ImagePath, "album", albumId);
-        var image = await art.Data.SaveToLocalFile(cacheFile, cancellationToken);
+        try {
+            var id = details.Item.Id;
+            var art = await _coverArtService.GetCoverart(id.ToString());
+            //TODO: probably shouldn't be caching here
+            var cacheFile = Path.Combine(_systemSettings.ImagePath, "album", albumId);
+            var file = await HttpHelpers.DownloadFile(art, cacheFile);
 
-        return new AlbumInfoLookupDto(
-            artistName,
-            details.Item.Title,
-            details.Item.Annotation,
-            details.Item.Genres is not null && details.Item.Genres.Count != 0
-                ? string.Join(',', details.Item.Genres?.Select(r => r.Name))
-                : string.Empty,
-            image,
-            image,
-            details.Item.Id.ToString()
-        );
+            return new AlbumInfoLookupDto(
+                artistName,
+                details.Item.Title,
+                details.Item.Annotation,
+                details.Item.Genres is not null && details.Item.Genres.Count != 0
+                    ? string.Join(',', details.Item.Genres?.Select(r => r.Name))
+                    : string.Empty,
+                file,
+                file,
+                details.Item.Id.ToString()
+            );
+        } catch (Exception e) {
+            _logger.LogError("Error looking up album\n\t{Error}", e.Message);
+            throw new AlbumNotFoundException($"Album: {albumName} not found");
+        }
     }
 }

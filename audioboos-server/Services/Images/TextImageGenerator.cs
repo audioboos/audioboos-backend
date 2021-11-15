@@ -6,6 +6,8 @@ using System.IO;
 using System.Threading.Tasks;
 using AudioBoos.Server.Helpers;
 using AudioBoos.Server.Services.Utils;
+using Color = System.Drawing.Color;
+using RectangleF = System.Drawing.RectangleF;
 
 namespace AudioBoos.Server.Services.Images;
 
