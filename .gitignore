@@ -36,6 +36,7 @@ msbuild.wrn
 # Visual Studio 2015
 .vs/
 appsettings.development.json
+appsettings.Development.json
 .idea/
 .vscode/
 
