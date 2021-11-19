@@ -1,105 +1,132 @@
-﻿using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-using System.Drawing.Text;
+﻿using System;
 using System.IO;
 using System.Threading.Tasks;
 using AudioBoos.Server.Helpers;
 using AudioBoos.Server.Services.Utils;
-using Color = System.Drawing.Color;
-using RectangleF = System.Drawing.RectangleF;
+using SixLabors.Fonts;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 namespace AudioBoos.Server.Services.Images;
 
 public static class TextImageGenerator {
     private static async Task<Image> _loadImage(string imageName) {
-        var image = Image.FromStream(await ResourceReader.ReadResourceAsByteArray(imageName));
+        var image = await Image.LoadAsync(await ResourceReader.ReadResourceAsByteArray(imageName));
         return image;
     }
 
     private static Font _loadFont(float fontSize = 36f, string fontName = "Roboto-Regular", string fontType = "ttf",
         FontStyle fontStyle = FontStyle.Regular) {
-        var collection = new PrivateFontCollection();
-        collection.AddFontFile(Path.Combine("./Resources/Fonts/", $"{fontName}.{fontType}"));
-        return new Font(collection.Families[0], fontSize, fontStyle);
+        FontCollection collection = new FontCollection();
+        FontFamily family = collection.Install(Path.Combine("./Resources/Fonts/", $"{fontName}.{fontType}"));
+        Font font = family.CreateFont(fontSize, FontStyle.Italic);
+        return font;
+    }
+
+    private static IImageProcessingContext WriteText(this IImageProcessingContext processingContext,
+        Font font,
+        string text,
+        Color color,
+        float padding) {
+        var (width, height) = processingContext.GetCurrentSize();
+        float targetWidth = width - (padding * 2);
+        float targetHeight = height - (padding * 2);
+
+        float targetMinHeight = height - (padding * 3); // must be with in a margin width of the target height
+
+        // now we are working i 2 dimensions at once and can't just scale because it will cause the text to
+        // reflow we need to just try multiple times
+
+        var scaledFont = font;
+        FontRectangle s = new FontRectangle(0, 0, float.MaxValue, float.MaxValue);
+
+        float scaleFactor = (scaledFont.Size / 2); // every time we change direction we half this size
+        int trapCount = (int)scaledFont.Size * 2;
+        if (trapCount < 10) {
+            trapCount = 10;
+        }
+
+        bool isTooSmall = false;
+
+        while ((s.Height > targetHeight || s.Height < targetMinHeight) && trapCount > 0) {
+            if (s.Height > targetHeight) {
+                if (isTooSmall) {
+                    scaleFactor /= 2;
+                }
+
+                scaledFont = new Font(scaledFont, scaledFont.Size - scaleFactor);
+                isTooSmall = false;
+            }
+
+            if (s.Height < targetMinHeight) {
+                if (!isTooSmall) {
+                    scaleFactor /= 2;
+                }
+
+                scaledFont = new Font(scaledFont, scaledFont.Size + scaleFactor);
+                isTooSmall = true;
+            }
+
+            trapCount--;
+
+            s = TextMeasurer.Measure(text, new RendererOptions(scaledFont) {
+                WrappingWidth = targetWidth
+            });
+        }
+
+        var center = new PointF(padding, height / 2);
+        var textGraphicOptions = new DrawingOptions {
+            TextOptions = {
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Center,
+                WrapTextWidth = targetWidth
+            }
+        };
+        return processingContext.DrawText(textGraphicOptions, text, scaledFont, color, center);
     }
 
     public static async Task<byte[]> CreateArtistAvatarImage(string artistName) {
-        using var bitmap = new Bitmap(50, 50);
-        using Graphics g = Graphics.FromImage(bitmap);
-        g.Clear(Color.Transparent);
-        using (Brush b = new SolidBrush(ColorTranslator.FromHtml("#96BC99"))) {
-            g.FillEllipse(b, 0, 0, 49, 49);
-        }
+        using var image = new Image<Rgba32>(50, 50);
+        var text = artistName.TrimTheFromStart()[..1];
+        var font = _loadFont(32);
 
-        g.DrawString(artistName.TrimTheFromStart()[..1],
-            new Font(FontFamily.GenericSansSerif, 24, FontStyle.Regular),
-            new SolidBrush(ColorTranslator.FromHtml("#EAC94B")), 13, 5);
+        image.Mutate(x => x.Fill(Rgba32.ParseHex("#96BC99")));
+        image.Mutate(x => x.DrawText(
+            text,
+            font,
+            Rgba32.ParseHex("#EAC94B"),
+            new PointF(15, 6)));
 
         await using var ms = new MemoryStream();
-        bitmap.Save(ms, ImageFormat.Png);
-
+        await image.SaveAsPngAsync(ms);
         return ms.ToArray();
     }
 
     public static async Task<byte[]> CreateArtistImage(string artistName) {
-        var artistTextRect = new RectangleF(7, 7, 290, 200);
-
         var image = await _loadImage("default-artist.png");
-        using Graphics g = Graphics.FromImage(image);
-
-        g.SmoothingMode = SmoothingMode.AntiAlias;
-        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-        g.PixelOffsetMode = PixelOffsetMode.HighQuality;
-        StringFormat sf = new StringFormat();
-        sf.Alignment = StringAlignment.Center;
-        sf.LineAlignment = StringAlignment.Center;
-
-        g.DrawString(
-            artistName,
+        image.Mutate(x => x.WriteText(
             _loadFont(32),
-            Brushes.PapayaWhip,
-            artistTextRect, sf
-        );
-
+            artistName,
+            Rgba32.ParseHex("#EAC94B"),
+            5));
 
         await using var ms = new MemoryStream();
-        image.Save(ms, ImageFormat.Png);
+        await image.SaveAsPngAsync(ms);
         return ms.ToArray();
     }
 
     public static async Task<byte[]> CreateAlbumImage(string artistName, string albumName) {
-        var artistTextRect = new RectangleF(12, 7, 260, 200);
-        var albumTextRect = new RectangleF(12, 200, 260, 100);
-
         var image = await _loadImage("default-album.png");
-        using Graphics g = Graphics.FromImage(image);
-
-        g.SmoothingMode = SmoothingMode.AntiAlias;
-        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-        g.PixelOffsetMode = PixelOffsetMode.HighQuality;
-        StringFormat sf = new StringFormat();
-        sf.Alignment = StringAlignment.Near;
-        sf.LineAlignment = StringAlignment.Near;
-
-        g.DrawString(
-            artistName,
+        image.Mutate(x => x.WriteText(
             _loadFont(32),
-            Brushes.PapayaWhip,
-            artistTextRect,
-            sf
-        );
-        sf.LineAlignment = StringAlignment.Center;
-        g.DrawString(
-            albumName,
-            _loadFont(16),
-            new SolidBrush(ColorTranslator.FromHtml("#EB4557")),
-            albumTextRect,
-            sf
-        );
+            $"{artistName} - {albumName}",
+            Rgba32.ParseHex("#EAC94B"),
+            5));
 
         await using var ms = new MemoryStream();
-        image.Save(ms, ImageFormat.Png);
+        await image.SaveAsPngAsync(ms);
         return ms.ToArray();
     }
 }

@@ -27,7 +27,10 @@ public class ImageController : ControllerBase {
     }
 
     [HttpGet("artist/{artistId}")]
-    public async Task<IActionResult> GetArtistImage(string artistId, [FromQuery] string type) {
+    public async Task<IActionResult> GetArtistImage(string artistId, [FromQuery] string type = "small") {
+        var artist = await _artistRepository.GetById(artistId);
+        return File(await TextImageGenerator.CreateArtistImage(artist.Name), "image/png");
+        /*
         var cacheFile = Path.Combine(_systemSettings.ImagePath, "artist", artistId);
         if (System.IO.File.Exists(cacheFile)) {
             return GetFileDirect(cacheFile);
@@ -43,7 +46,7 @@ public class ImageController : ControllerBase {
             ? type.Equals("small") ?
                 File(await TextImageGenerator.CreateArtistAvatarImage(artist.Name), "image/png") :
                 File(await TextImageGenerator.CreateArtistImage(artist.Name), "image/png")
-            : Ok(image);
+            : Ok(image);*/
     }
 
     [HttpGet("album/{albumId}")]
