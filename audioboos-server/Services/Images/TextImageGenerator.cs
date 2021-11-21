@@ -5,9 +5,11 @@ using AudioBoos.Server.Helpers;
 using AudioBoos.Server.Services.Utils;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using Path = System.IO.Path;
 
 namespace AudioBoos.Server.Services.Images;
 
@@ -25,67 +27,31 @@ public static class TextImageGenerator {
         return font;
     }
 
-    private static IImageProcessingContext WriteText(this IImageProcessingContext processingContext,
-        Font font,
+    private static async Task<IImageProcessingContext> WriteTextInBounds(this IImageProcessingContext processingContext,
         string text,
-        Color color,
-        float padding) {
-        var (width, height) = processingContext.GetCurrentSize();
-        float targetWidth = width - (padding * 2);
-        float targetHeight = height - (padding * 2);
+        Size targetSize) {
+        var font = _loadFont(100);
+        RendererOptions
+            style = new RendererOptions(font, 72); // again dpi doesn't overlay matter as this code genreates a vector
 
-        float targetMinHeight = height - (padding * 3); // must be with in a margin width of the target height
+        // this is the important line, where we render the glyphs to a vector instead of directly to the image
+        // this allows further vector manipulation (scaling, translating) etc without the expensive pixel operations.
+        IPathCollection glyphs = TextBuilder.GenerateGlyphs(text, style);
 
-        // now we are working i 2 dimensions at once and can't just scale because it will cause the text to
-        // reflow we need to just try multiple times
+        var widthScale = (targetSize.Width / glyphs.Bounds.Width);
+        var heightScale = (targetSize.Height / glyphs.Bounds.Height);
+        var minScale = Math.Min(widthScale, heightScale);
 
-        var scaledFont = font;
-        FontRectangle s = new FontRectangle(0, 0, float.MaxValue, float.MaxValue);
+        // scale so that it will fit exactly in image shape once rendered
+        glyphs = glyphs.Scale(minScale);
 
-        float scaleFactor = (scaledFont.Size / 2); // every time we change direction we half this size
-        int trapCount = (int)scaledFont.Size * 2;
-        if (trapCount < 10) {
-            trapCount = 10;
-        }
+        // move the vectorised glyph so that it touchs top and left edges 
+        // could be tweeked to center horizontaly & vertically here
+        glyphs = glyphs.Translate(-glyphs.Bounds.Location);
 
-        bool isTooSmall = false;
-
-        while ((s.Height > targetHeight || s.Height < targetMinHeight) && trapCount > 0) {
-            if (s.Height > targetHeight) {
-                if (isTooSmall) {
-                    scaleFactor /= 2;
-                }
-
-                scaledFont = new Font(scaledFont, scaledFont.Size - scaleFactor);
-                isTooSmall = false;
-            }
-
-            if (s.Height < targetMinHeight) {
-                if (!isTooSmall) {
-                    scaleFactor /= 2;
-                }
-
-                scaledFont = new Font(scaledFont, scaledFont.Size + scaleFactor);
-                isTooSmall = true;
-            }
-
-            trapCount--;
-
-            s = TextMeasurer.Measure(text, new RendererOptions(scaledFont) {
-                WrappingWidth = targetWidth
-            });
-        }
-
-        var center = new PointF(padding, height / 2);
-        var textGraphicOptions = new DrawingOptions {
-            TextOptions = {
-                HorizontalAlignment = HorizontalAlignment.Left,
-                VerticalAlignment = VerticalAlignment.Center,
-                WrapTextWidth = targetWidth
-            }
-        };
-        return processingContext.DrawText(textGraphicOptions, text, scaledFont, color, center);
+        return processingContext.Fill(Color.Black, glyphs);
     }
+
 
     public static async Task<byte[]> CreateArtistAvatarImage(string artistName) {
         using var image = new Image<Rgba32>(50, 50);
@@ -106,11 +72,10 @@ public static class TextImageGenerator {
 
     public static async Task<byte[]> CreateArtistImage(string artistName) {
         var image = await _loadImage("default-artist.png");
-        image.Mutate(x => x.WriteText(
-            _loadFont(32),
-            artistName,
-            Rgba32.ParseHex("#EAC94B"),
-            5));
+        image.Mutate(x => 
+            x.WriteTextInBounds(
+                artistName,
+                new Size(300, 200)));
 
         await using var ms = new MemoryStream();
         await image.SaveAsPngAsync(ms);
@@ -118,12 +83,19 @@ public static class TextImageGenerator {
     }
 
     public static async Task<byte[]> CreateAlbumImage(string artistName, string albumName) {
+
         var image = await _loadImage("default-album.png");
-        image.Mutate(x => x.WriteText(
-            _loadFont(32),
-            $"{artistName} - {albumName}",
-            Rgba32.ParseHex("#EAC94B"),
-            5));
+        image.Mutate(x => 
+            x.WriteTextInBounds(
+                artistName,
+                new Size(300, 200)));
+
+        // image.Mutate(x => x.WriteTextInRect(
+        //     _loadFont(16),
+        //     $"{albumName}",
+        //     Rgba32.ParseHex("#EAC94B"),
+        //     new Rectangle(0, 200, 300, 100),
+        //     5));
 
         await using var ms = new MemoryStream();
         await image.SaveAsPngAsync(ms);

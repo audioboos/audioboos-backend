@@ -36,7 +36,9 @@ public class FileSystemController : ControllerBase {
 
             return folders
                 .Except(_exclusions)
-                .Select(r => r).ToList();
+                .Select(r => r)
+                .OrderBy(r => r)
+                .ToList();
         });
     }
 }
