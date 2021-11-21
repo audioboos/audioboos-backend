@@ -12,7 +12,7 @@ public static class TextImageGenerator {
         return image;
     }
 
-    private static async Task _addTextToImage(this MagickImage image, string text, int yOffset, int width, int height,
+    private static void _addTextToImage(this MagickImage image, string text, int yOffset, int width, int height,
         MagickColor color, int padding = 5) {
         var readSettings = new MagickReadSettings {
             Font = "Calibri",
@@ -30,12 +30,17 @@ public static class TextImageGenerator {
 
 
     public static async Task<byte[]> CreateArtistAvatarImage(string artistName) {
-        throw new Exception();
+        using var image = await _loadImage("default-artist-avatar.png");
+        image._addTextToImage(artistName.Substring(0, 1), 0, 64, 64, MagickColors.Azure);
+
+        await using var ms = new MemoryStream();
+        await image.WriteAsync(ms);
+        return ms.ToArray();
     }
 
     public static async Task<byte[]> CreateArtistImage(string artistName) {
         using var image = await _loadImage("default-artist.png");
-        await image._addTextToImage(artistName, 0, 300, 200, MagickColors.Azure);
+        image._addTextToImage(artistName, 0, 300, 200, MagickColors.Azure);
 
         await using var ms = new MemoryStream();
         await image.WriteAsync(ms);
@@ -44,8 +49,8 @@ public static class TextImageGenerator {
 
     public static async Task<byte[]> CreateAlbumImage(string artistName, string albumName) {
         using var image = await _loadImage("default-album.png");
-        await image._addTextToImage(artistName, 0, 300, 200, MagickColors.Azure);
-        await image._addTextToImage(albumName, 200, 300, 100, MagickColors.DarkGray);
+        image._addTextToImage(artistName, 0, 300, 200, MagickColors.Azure);
+        image._addTextToImage(albumName, 200, 300, 100, MagickColors.DarkGray);
 
         await using var ms = new MemoryStream();
         await image.WriteAsync(ms);

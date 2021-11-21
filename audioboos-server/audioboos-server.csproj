@@ -57,6 +57,8 @@
         <EmbeddedResource Include="Resources/default-album.png" />
         <None Remove="Resources\default-artist.png" />
         <EmbeddedResource Include="Resources\default-artist.png" />
+        <None Remove="Resources\default-artist-avatar.png" />
+        <EmbeddedResource Include="Resources\default-artist-avatar.png" />
     </ItemGroup>
 
     <ItemGroup>
