@@ -21,7 +21,7 @@ public class DbFixture : Fixture {
         _serviceCollection
             .AddDbContext<AudioBoosContext>(
                 options => options.UseNpgsql(
-                    Config.GetConnectionString("PostgresConnection")
+                    Config.GetConnectionString("PostgresTestsConnection")
                 ));
 
         _serviceCollection.AddLogging();

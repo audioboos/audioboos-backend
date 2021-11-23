@@ -7,7 +7,7 @@ using AudioBoos.Data.Store;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace AudioBoos.Data.Access; 
+namespace AudioBoos.Data.Access;
 
 public class AlbumRepository : AbstractRepository<Album> {
     private readonly ILogger<AlbumRepository> _logger;
@@ -31,7 +31,7 @@ public class AlbumRepository : AbstractRepository<Album> {
                 .AsNoTracking()
                 .FirstOrDefaultAsync(
                     a => a.Name.Equals(entity.Name) && a.Artist.Id.Equals(entity.ArtistId),
-                    cancellationToken: cancellationToken);
+                    cancellationToken);
 
         if (existing is not null) {
             entity.Id = existing.Id;

@@ -54,6 +54,7 @@ public class DataTests : IClassFixture<DbFixture> {
         audioFile.Checksum = "Post Save Test Checksum";
 
         await audioFileRepository.InsertOrUpdate(audioFile);
+        await audioFileRepository.Context.SaveChangesAsync();
 
         var test = await audioFileRepository.GetByFile("/tmp/Test_Insert_AudioFile_Repository_audio.mp3");
         Assert.Equal("Post Save Test Checksum", test?.Checksum);

@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AudioBoos.Data.Migrations
 {
     [DbContext(typeof(AudioBoosContext))]
-    [Migration("20211122000502_Initial")]
+    [Migration("20211123174528_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -460,22 +460,22 @@ namespace AudioBoos.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "bac0a72b-c29a-4462-a204-f62556dd4d08",
-                            ConcurrencyStamp = "6dd582cd-6de5-4d70-9588-3e1e02cb649f",
+                            Id = "f35ccd66-e000-443a-95d1-7ec10415e49f",
+                            ConcurrencyStamp = "3a34eb28-03fa-49d9-93d6-529f3287ccf4",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "ce8b6911-9510-48ba-bb25-713c7d6668c3",
-                            ConcurrencyStamp = "7c1994ab-316e-4966-9f94-472efb6bcb38",
+                            Id = "24331498-2c52-4a7e-a65a-f9a40c0e7092",
+                            ConcurrencyStamp = "bb463f16-9a7a-4894-975c-9d71231fedfc",
                             Name = "Editor",
                             NormalizedName = "EDITOR"
                         },
                         new
                         {
-                            Id = "c9aaf53b-d748-4a59-bd05-9497219e0c5d",
-                            ConcurrencyStamp = "ee451bdc-1f90-4b42-a998-bb6851709a24",
+                            Id = "bb6472fb-fc27-4680-ad9f-509b215b1673",
+                            ConcurrencyStamp = "f9bdf59c-511e-4bc2-987a-de81578877ad",
                             Name = "Viewer",
                             NormalizedName = "VIEWER"
                         });
