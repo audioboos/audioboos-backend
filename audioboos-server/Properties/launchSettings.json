@@ -9,6 +9,9 @@
     },
     "profiles": {
         "dotnet": {
+            "environmentVariables": {
+                "ASPNETCORE_Environment": "Development"
+            },
             "commandName": "Project",
             "hotReloadProfile": "aspnetcore"
         }

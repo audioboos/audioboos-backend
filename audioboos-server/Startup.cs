@@ -15,8 +15,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using SixLabors.ImageSharp.Web.Caching;
-using SixLabors.ImageSharp.Web.DependencyInjection;
 
 namespace AudioBoos.Server;
 

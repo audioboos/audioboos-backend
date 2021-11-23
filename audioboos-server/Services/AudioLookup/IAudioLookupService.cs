@@ -6,7 +6,7 @@ namespace AudioBoos.Server.Services.AudioLookup;
 
 public interface IAudioLookupService {
     string Name { get; }
-    Task<ArtistInfoLookupDto> LookupArtistInfo(string artistName, CancellationToken cancellationToken);
+    Task<ArtistInfoLookupDto> LookupArtistInfo(string artistName, CancellationToken cancellationToken = default);
 
     Task<AlbumInfoLookupDto> LookupAlbumInfo(string artistName, string albumName, string albumId,
         CancellationToken cancellationToken);

@@ -4,14 +4,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using AudioBoos.Data.Access;
 using AudioBoos.Data.Persistence;
-using AudioBoos.Data.Persistence.Interfaces;
 using AudioBoos.Data.Store;
+using AudioBoos.Server.Tests.Fixtures;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Moq;
 using Xunit;
 
-namespace AudioBoos.Server.Tests; 
+namespace AudioBoos.Server.Tests;
 
 public class DataTests : IClassFixture<DbFixture> {
     private readonly ServiceProvider _serviceProvider;
