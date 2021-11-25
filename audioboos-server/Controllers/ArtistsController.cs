@@ -15,9 +15,9 @@ namespace AudioBoos.Server.Controllers;
 // [Authorize]
 [Route("[controller]")]
 public class ArtistsController : ControllerBase {
-    private readonly IRepository<Artist> _artistRepository;
+    private readonly IAudioRepository<Artist> _artistRepository;
 
-    public ArtistsController(IRepository<Artist> artistRepository) {
+    public ArtistsController(IAudioRepository<Artist> artistRepository) {
         _artistRepository = artistRepository;
     }
 

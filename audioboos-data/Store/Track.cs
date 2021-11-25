@@ -23,5 +23,4 @@ public record Track : BaseAudioEntity {
     [Required] public Guid AlbumId { get; set; }
     [Required] public Album Album { get; set; }
 
-    [Required] public DateTime ScanDate { get; set; }
 }

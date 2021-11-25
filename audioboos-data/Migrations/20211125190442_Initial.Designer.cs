@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AudioBoos.Data.Migrations
 {
     [DbContext(typeof(AudioBoosContext))]
-    [Migration("20211123191257_Initial")]
+    [Migration("20211125190442_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -272,7 +272,7 @@ namespace AudioBoos.Data.Migrations
                     b.ToTable("artists", "app");
                 });
 
-            modelBuilder.Entity("AudioBoos.Data.Store.AudioAudioFile", b =>
+            modelBuilder.Entity("AudioBoos.Data.Store.AudioFile", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -372,50 +372,6 @@ namespace AudioBoos.Data.Migrations
                     b.ToTable("audio_files", "app");
                 });
 
-            modelBuilder.Entity("AudioBoos.Data.Store.AudioPlay", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<DateTime>("CreateDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("create_date")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<Guid>("FileId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("file_id");
-
-                    b.Property<IPAddress>("IPAddress")
-                        .IsRequired()
-                        .HasColumnType("inet")
-                        .HasColumnName("ip_address");
-
-                    b.Property<DateTime>("UpdateDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("update_date")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("text")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_audio_plays");
-
-                    b.HasIndex("FileId")
-                        .HasDatabaseName("ix_audio_plays_file_id");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_audio_plays_user_id");
-
-                    b.ToTable("audio_plays", "app");
-                });
-
             modelBuilder.Entity("AudioBoos.Data.Store.Setting", b =>
                 {
                     b.Property<string>("Key")
@@ -489,10 +445,6 @@ namespace AudioBoos.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("physical_path");
 
-                    b.Property<DateTime>("ScanDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("scan_date");
-
                     b.Property<int>("TaggingStatus")
                         .HasColumnType("integer")
                         .HasColumnName("tagging_status");
@@ -518,6 +470,50 @@ namespace AudioBoos.Data.Migrations
                         .HasDatabaseName("ix_tracks_physical_path");
 
                     b.ToTable("tracks", "app");
+                });
+
+            modelBuilder.Entity("AudioBoos.Data.Store.TrackPlayLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreateDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("create_date")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<IPAddress>("IPAddress")
+                        .IsRequired()
+                        .HasColumnType("inet")
+                        .HasColumnName("ip_address");
+
+                    b.Property<Guid>("TrackId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("track_id");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("update_date")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("text")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_track_play_logs");
+
+                    b.HasIndex("TrackId")
+                        .HasDatabaseName("ix_track_play_logs_track_id");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_track_play_logs_user_id");
+
+                    b.ToTable("track_play_logs", "app");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -553,22 +549,22 @@ namespace AudioBoos.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "3302d7c6-fa84-4eac-ad07-309b04b3b400",
-                            ConcurrencyStamp = "10a4893b-a05f-4927-8ca4-905e60b7a101",
+                            Id = "e95da7bc-d2ca-4db7-b580-ed9865b6dd31",
+                            ConcurrencyStamp = "1782c7c5-b858-4bf6-926b-cae1b3513f46",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "6c7d691d-7423-49a9-a053-cc4a2d5023bd",
-                            ConcurrencyStamp = "507bdc6e-3b87-41fc-b67e-2ab010f21ea8",
+                            Id = "589e5a2e-48f5-4505-97a2-da82b314f8a5",
+                            ConcurrencyStamp = "51bbd98c-405e-471e-b3d3-74fe27dec816",
                             Name = "Editor",
                             NormalizedName = "EDITOR"
                         },
                         new
                         {
-                            Id = "c7207d51-e542-4106-8462-b1ee5362dec4",
-                            ConcurrencyStamp = "3680b7b5-d0cb-4aa9-a629-d0e80b25b481",
+                            Id = "096f2021-e414-4c07-8833-a547be5085f8",
+                            ConcurrencyStamp = "7dd0b289-94e4-4a27-804a-93e35187643f",
                             Name = "Viewer",
                             NormalizedName = "VIEWER"
                         });
@@ -723,7 +719,7 @@ namespace AudioBoos.Data.Migrations
                     b.Navigation("Artist");
                 });
 
-            modelBuilder.Entity("AudioBoos.Data.Store.AudioAudioFile", b =>
+            modelBuilder.Entity("AudioBoos.Data.Store.AudioFile", b =>
                 {
                     b.HasOne("AudioBoos.Data.Store.Album", "Album")
                         .WithMany()
@@ -747,25 +743,6 @@ namespace AudioBoos.Data.Migrations
                     b.Navigation("Track");
                 });
 
-            modelBuilder.Entity("AudioBoos.Data.Store.AudioPlay", b =>
-                {
-                    b.HasOne("AudioBoos.Data.Store.AudioAudioFile", "File")
-                        .WithMany()
-                        .HasForeignKey("FileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_audio_plays_audio_files_file_id");
-
-                    b.HasOne("AudioBoos.Data.Store.AppUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .HasConstraintName("fk_audio_plays_users_user_id");
-
-                    b.Navigation("File");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("AudioBoos.Data.Store.Track", b =>
                 {
                     b.HasOne("AudioBoos.Data.Store.Album", "Album")
@@ -776,6 +753,25 @@ namespace AudioBoos.Data.Migrations
                         .HasConstraintName("fk_tracks_albums_album_id");
 
                     b.Navigation("Album");
+                });
+
+            modelBuilder.Entity("AudioBoos.Data.Store.TrackPlayLog", b =>
+                {
+                    b.HasOne("AudioBoos.Data.Store.Track", "Track")
+                        .WithMany()
+                        .HasForeignKey("TrackId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_track_play_logs_tracks_track_id");
+
+                    b.HasOne("AudioBoos.Data.Store.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .HasConstraintName("fk_track_play_logs_users_user_id");
+
+                    b.Navigation("Track");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

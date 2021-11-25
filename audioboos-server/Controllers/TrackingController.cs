@@ -11,31 +11,31 @@ namespace AudioBoos.Server.Controllers;
 [Route("[controller]")]
 public class TrackingController : ControllerBase {
     private readonly AudioBoosContext _context;
-    private readonly IRepository<AudioFile> _audioFileRepository;
+    private readonly IAudioRepository<Track> _trackRepository;
     private readonly UserManager<AppUser> _userManager;
 
-    public TrackingController(AudioBoosContext context, IRepository<AudioFile> audioFileRepository,
+    public TrackingController(AudioBoosContext context, IAudioRepository<Track> trackRepository,
         UserManager<AppUser> userManager) {
         _context = context;
-        _audioFileRepository = audioFileRepository;
+        _trackRepository = trackRepository;
         _userManager = userManager;
     }
 
     [HttpPost]
     public async Task<IActionResult> TrackPlay(string trackId) {
-        var audioFile = await _audioFileRepository.GetById(trackId);
+        var audioFile = await _trackRepository.GetById(trackId);
         if (audioFile is null) {
             return NotFound();
         }
 
         var remoteIp = Request.HttpContext.Connection.RemoteIpAddress;
         var user = await _userManager.GetUserAsync(HttpContext.User);
-        var play = new AudioPlay {
+        var play = new TrackPlayLog {
             User = user,
-            File = audioFile,
+            Track = audioFile,
             IPAddress = remoteIp
         };
-        _context.AudioPlays.Add(play);
+        _context.TrackPlayLogs.Add(play);
         await _context.SaveChangesAsync();
 
         return Ok();

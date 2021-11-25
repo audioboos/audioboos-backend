@@ -2,13 +2,13 @@
 
 namespace AudioBoos.Data.Access;
 
-public class AudioPlayAudioRepository : AbstractRepository<AudioPlay> {
+public class AudioPlayAudioRepository : AbstractRepository<TrackPlayLog> {
     public AudioPlayAudioRepository(AudioBoosContext context) : base(context) {
     }
 
-    public override async Task<AudioPlay> InsertOrUpdate(AudioPlay entity,
+    public override async Task<TrackPlayLog> InsertOrUpdate(TrackPlayLog entity,
         CancellationToken cancellationToken = default) {
-        this._context.AudioPlays.Add(entity);
+        this._context.TrackPlayLogs.Add(entity);
         return await Task.FromResult(entity);
     }
 }

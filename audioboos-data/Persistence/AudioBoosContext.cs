@@ -16,7 +16,7 @@ public class AudioBoosContext : IdentityDbContext<AppUser> {
     public DbSet<Artist> Artists { get; set; }
     public DbSet<Album> Albums { get; set; }
     public DbSet<Track> Tracks { get; set; }
-    public DbSet<AudioPlay> AudioPlays { get; set; }
+    public DbSet<TrackPlayLog> TrackPlayLogs { get; set; }
 
 
     public AudioBoosContext(DbContextOptions options) : base(options) {

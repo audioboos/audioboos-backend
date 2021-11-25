@@ -26,10 +26,10 @@ public class DbFixture : Fixture {
 
         _serviceCollection.AddLogging();
 
-        _serviceCollection.AddScoped<IRepository<AudioFile>, AudioFileAudioRepository>();
-        _serviceCollection.AddScoped<IRepository<Artist>, ArtistAudioRepository>();
-        _serviceCollection.AddScoped<IRepository<Album>, AlbumAudioRepository>();
-        _serviceCollection.AddScoped<IRepository<Track>, TrackAudioRepository>();
+        _serviceCollection.AddScoped<IAudioRepository<AudioFile>, AudioFileAudioRepository>();
+        _serviceCollection.AddScoped<IAudioRepository<Artist>, ArtistAudioRepository>();
+        _serviceCollection.AddScoped<IAudioRepository<Album>, AlbumAudioRepository>();
+        _serviceCollection.AddScoped<IAudioRepository<Track>, TrackRepository>();
         _serviceCollection.AddScoped<IUnitOfWork, UnitOfWork>();
         _serviceCollection.AddScoped<IEmailSender, EmailSender>();
 

@@ -15,12 +15,12 @@ namespace AudioBoos.Server.Controllers;
 [ApiController]
 [Route("[controller]")]
 public class ImageController : ControllerBase {
-    private readonly IRepository<Artist> _artistRepository;
-    private readonly IRepository<Album> _albumRepository;
+    private readonly IAudioRepository<Artist> _artistRepository;
+    private readonly IAudioRepository<Album> _albumRepository;
     private readonly SystemSettings _systemSettings;
 
-    public ImageController(IOptions<SystemSettings> systemSettings, IRepository<Artist> artistRepository,
-        IRepository<Album> albumRepository) {
+    public ImageController(IOptions<SystemSettings> systemSettings, IAudioRepository<Artist> artistRepository,
+        IAudioRepository<Album> albumRepository) {
         _artistRepository = artistRepository;
         _albumRepository = albumRepository;
         _systemSettings = systemSettings.Value;

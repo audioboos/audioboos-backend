@@ -2,9 +2,9 @@
 
 namespace AudioBoos.Data.Store;
 
-public record AudioPlay : BaseEntity {
+public record TrackPlayLog : BaseEntity {
     public virtual AppUser? User { get; set; }
-    public virtual AudioFile File { get; set; }
+    public virtual Track Track { get; set; }
 
     public IPAddress IPAddress { get; set; }
 }

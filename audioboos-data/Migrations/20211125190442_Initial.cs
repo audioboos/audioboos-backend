@@ -260,7 +260,6 @@ namespace AudioBoos.Data.Migrations
                     audio_url = table.Column<string>(type: "text", nullable: true),
                     physical_path = table.Column<string>(type: "text", nullable: false),
                     album_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    scan_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     create_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     update_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     name = table.Column<string>(type: "text", nullable: false),
@@ -329,29 +328,29 @@ namespace AudioBoos.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "audio_plays",
+                name: "track_play_logs",
                 schema: "app",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     user_id = table.Column<string>(type: "text", nullable: true),
-                    file_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    track_id = table.Column<Guid>(type: "uuid", nullable: false),
                     ip_address = table.Column<IPAddress>(type: "inet", nullable: false),
                     create_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     update_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_audio_plays", x => x.id);
+                    table.PrimaryKey("pk_track_play_logs", x => x.id);
                     table.ForeignKey(
-                        name: "fk_audio_plays_audio_files_file_id",
-                        column: x => x.file_id,
+                        name: "fk_track_play_logs_tracks_track_id",
+                        column: x => x.track_id,
                         principalSchema: "app",
-                        principalTable: "audio_files",
+                        principalTable: "tracks",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_audio_plays_users_user_id",
+                        name: "fk_track_play_logs_users_user_id",
                         column: x => x.user_id,
                         principalSchema: "app",
                         principalTable: "users",
@@ -364,9 +363,9 @@ namespace AudioBoos.Data.Migrations
                 columns: new[] { "id", "concurrency_stamp", "name", "normalized_name" },
                 values: new object[,]
                 {
-                    { "3302d7c6-fa84-4eac-ad07-309b04b3b400", "10a4893b-a05f-4927-8ca4-905e60b7a101", "Admin", "ADMIN" },
-                    { "6c7d691d-7423-49a9-a053-cc4a2d5023bd", "507bdc6e-3b87-41fc-b67e-2ab010f21ea8", "Editor", "EDITOR" },
-                    { "c7207d51-e542-4106-8462-b1ee5362dec4", "3680b7b5-d0cb-4aa9-a629-d0e80b25b481", "Viewer", "VIEWER" }
+                    { "096f2021-e414-4c07-8833-a547be5085f8", "7dd0b289-94e4-4a27-804a-93e35187643f", "Viewer", "VIEWER" },
+                    { "589e5a2e-48f5-4505-97a2-da82b314f8a5", "51bbd98c-405e-471e-b3d3-74fe27dec816", "Editor", "EDITOR" },
+                    { "e95da7bc-d2ca-4db7-b580-ed9865b6dd31", "1782c7c5-b858-4bf6-926b-cae1b3513f46", "Admin", "ADMIN" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -409,18 +408,6 @@ namespace AudioBoos.Data.Migrations
                 column: "track_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_audio_plays_file_id",
-                schema: "app",
-                table: "audio_plays",
-                column: "file_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_audio_plays_user_id",
-                schema: "app",
-                table: "audio_plays",
-                column: "user_id");
-
-            migrationBuilder.CreateIndex(
                 name: "RoleNameIndex",
                 schema: "auth",
                 table: "IdentityRole",
@@ -459,6 +446,18 @@ namespace AudioBoos.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "ix_track_play_logs_track_id",
+                schema: "app",
+                table: "track_play_logs",
+                column: "track_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_track_play_logs_user_id",
+                schema: "app",
+                table: "track_play_logs",
+                column: "user_id");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_tracks_album_id",
                 schema: "app",
                 table: "tracks",
@@ -488,7 +487,7 @@ namespace AudioBoos.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "audio_plays",
+                name: "audio_files",
                 schema: "app");
 
             migrationBuilder.DropTable(
@@ -516,7 +515,7 @@ namespace AudioBoos.Data.Migrations
                 schema: "app");
 
             migrationBuilder.DropTable(
-                name: "audio_files",
+                name: "track_play_logs",
                 schema: "app");
 
             migrationBuilder.DropTable(
@@ -524,11 +523,11 @@ namespace AudioBoos.Data.Migrations
                 schema: "auth");
 
             migrationBuilder.DropTable(
-                name: "users",
+                name: "tracks",
                 schema: "app");
 
             migrationBuilder.DropTable(
-                name: "tracks",
+                name: "users",
                 schema: "app");
 
             migrationBuilder.DropTable(

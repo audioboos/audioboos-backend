@@ -59,10 +59,11 @@ public class Startup {
             .AddAudioBoosIdentity(Configuration);
 
         services.AddTransient<IUnitOfWork, UnitOfWork>();
+        services.AddTransient<IRepository<TrackPlayLog>, AudioPlayAudioRepository>();
         services.AddTransient<IAudioRepository<AudioFile>, AudioFileAudioRepository>();
         services.AddTransient<IAudioRepository<Artist>, ArtistAudioRepository>();
         services.AddTransient<IAudioRepository<Album>, AlbumAudioRepository>();
-        services.AddTransient<IAudioRepository<Track>, TrackAudioRepository>();
+        services.AddTransient<IAudioRepository<Track>, TrackRepository>();
 
         services.AddTransient<IEmailSender, EmailSender>();
 
