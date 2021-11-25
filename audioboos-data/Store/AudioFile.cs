@@ -10,7 +10,7 @@ public record AudioFile(
     string ID3ArtistName,
     string ID3AlbumName,
     string ID3TrackName
-) : BaseEntity(ID3AlbumName) {
+) : BaseAudioEntity(ID3AlbumName) {
     public Artist? Artist { get; set; }
     public Album? Album { get; set; }
     public Track? Track { get; set; }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AudioBoos.Data.Access;
-using AudioBoos.Data.Persistence;
+using AudioBoos.Data;
 using AudioBoos.Data.Store;
 using AudioBoos.Server.Tests.Fixtures;
 using Microsoft.EntityFrameworkCore;
@@ -39,7 +39,7 @@ public class DataTests : IClassFixture<DbFixture> {
     [Fact]
     public async Task Test_Insert_AudioFile_Repository() {
         using var scope = _serviceProvider.CreateScope();
-        var audioFileRepository = scope.ServiceProvider.GetRequiredService<IRepository<AudioFile>>();
+        var audioFileRepository = scope.ServiceProvider.GetRequiredService<IAudioRepository<AudioFile>>();
 
         var audioFile = await audioFileRepository.InsertOrUpdate(
             new AudioFile(
@@ -63,7 +63,7 @@ public class DataTests : IClassFixture<DbFixture> {
     [Fact]
     public async Task Test_Insert_Artist() {
         using var scope = _serviceProvider.CreateScope();
-        var artistRepository = scope.ServiceProvider.GetRequiredService<IRepository<Artist>>();
+        var artistRepository = scope.ServiceProvider.GetRequiredService<IAudioRepository<Artist>>();
 
         var artist = await artistRepository.InsertOrUpdate(
             new Artist("Test_Insert_Artist_Artist"));

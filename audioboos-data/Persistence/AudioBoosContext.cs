@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AudioBoos.Data.Persistence.Extensions;
+using AudioBoos.Data.Extensions;
 using AudioBoos.Data.Store;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace AudioBoos.Data.Persistence;
+namespace AudioBoos.Data;
 
 public class AudioBoosContext : IdentityDbContext<AppUser> {
     public DbSet<Setting> Settings { get; set; }
@@ -16,6 +16,8 @@ public class AudioBoosContext : IdentityDbContext<AppUser> {
     public DbSet<Artist> Artists { get; set; }
     public DbSet<Album> Albums { get; set; }
     public DbSet<Track> Tracks { get; set; }
+    public DbSet<AudioPlay> AudioPlays { get; set; }
+
 
     public AudioBoosContext(DbContextOptions options) : base(options) {
     }
@@ -37,16 +39,18 @@ public class AudioBoosContext : IdentityDbContext<AppUser> {
         foreach (var entityType in builder.Model.GetEntityTypes()) {
             if (typeof(BaseEntity).IsAssignableFrom(entityType.ClrType)) {
                 builder.Entity(entityType.ClrType)
-                    .Property<List<string>>(nameof(BaseEntity.AlternativeNames))
-                    .HasConversion(stringArrayValueConverter);
+                    .Property<DateTime>(nameof(BaseEntity.CreateDate))
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-                // modelBuilder.Entity(entityType.ClrType)
-                //     .Property<DateTime>(nameof(BaseEntity.FirstScanDate))
-                //     .HasDefaultValueSql("CURRENT_TIMESTAMP");
-                //
-                // modelBuilder.Entity(entityType.ClrType)
-                //     .Property<DateTime>(nameof(BaseEntity.LastScanDate))
-                //     .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                builder.Entity(entityType.ClrType)
+                    .Property<DateTime>(nameof(BaseEntity.UpdateDate))
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            }
+
+            if (typeof(BaseAudioEntity).IsAssignableFrom(entityType.ClrType)) {
+                builder.Entity(entityType.ClrType)
+                    .Property<List<string>>(nameof(BaseAudioEntity.AlternativeNames))
+                    .HasConversion(stringArrayValueConverter);
             }
         }
 

@@ -1,18 +1,17 @@
 ﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using AudioBoos.Data.Extensions;
-using AudioBoos.Data.Persistence;
+using AudioBoos.Data;
 using AudioBoos.Data.Store;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace AudioBoos.Data.Access;
 
-public class AlbumRepository : AbstractRepository<Album> {
-    private readonly ILogger<AlbumRepository> _logger;
+public class AlbumAudioRepository : AbstractAudioRepository<Album> {
+    private readonly ILogger<AlbumAudioRepository> _logger;
 
-    public AlbumRepository(AudioBoosContext context, ILogger<AlbumRepository> logger) : base(context) {
+    public AlbumAudioRepository(AudioBoosContext context, ILogger<AlbumAudioRepository> logger) : base(context) {
         _logger = logger;
     }
 

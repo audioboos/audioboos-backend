@@ -5,7 +5,7 @@ using AudioBoos.Data.Store;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace AudioBoos.Data.Extensions; 
+namespace AudioBoos.Data; 
 
 public static class DbSetExtensions {
     // public static async Task<TEntity> AddOrUpdate<TEntity>(this DbSet<TEntity> dbSet, DbContext context,

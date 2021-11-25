@@ -4,11 +4,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using AudioBoos.Data.Models.DTO;
 using AudioBoos.Data.Models.Settings;
-using AudioBoos.Data.Persistence;
+using AudioBoos.Data;
 using AudioBoos.Data.Store;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Quartz;
 
 namespace AudioBoos.Server.Controllers;
 
@@ -16,10 +17,13 @@ namespace AudioBoos.Server.Controllers;
 [Route("[controller]")]
 public class SettingsController : ControllerBase {
     private readonly AudioBoosContext _context;
+    private readonly ISchedulerFactory _schedulerFactory;
     private readonly SystemSettings _systemSettings;
 
-    public SettingsController(IOptions<SystemSettings> systemSettings, AudioBoosContext context) {
+    public SettingsController(IOptions<SystemSettings> systemSettings, AudioBoosContext context,
+        ISchedulerFactory schedulerFactory) {
         _context = context;
+        _schedulerFactory = schedulerFactory;
         _systemSettings = systemSettings.Value;
     }
 
@@ -55,6 +59,10 @@ public class SettingsController : ControllerBase {
         }
 
         await _context.SaveChangesAsync(cancellationToken);
+
+        var scheduler = await _schedulerFactory.GetScheduler(cancellationToken);
+        await scheduler.TriggerJob(new JobKey("UpdateLibrary", "DEFAULT"), cancellationToken);
+
         return new SettingsDto(
             (await _context
                 .Settings

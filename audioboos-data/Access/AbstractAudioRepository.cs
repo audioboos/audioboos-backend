@@ -3,7 +3,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using AudioBoos.Data.Persistence;
+using AudioBoos.Data;
 using AudioBoos.Data.Store;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,6 +31,23 @@ public abstract class AbstractRepository<TEntity> : IRepository<TEntity> where T
     public async Task<TEntity?> GetById(Guid id, CancellationToken cancellationToken = default) {
         return await _entities
             .SingleOrDefaultAsync(s => s.Id == id, cancellationToken);
+    }
+
+    public abstract Task<TEntity> InsertOrUpdate(TEntity entity,
+        CancellationToken cancellationToken = default);
+
+    public async Task Delete(Guid id, CancellationToken cancellationToken = default) {
+        if (id.Equals(Guid.Empty)) throw new ArgumentNullException(nameof(id));
+        var entity = await _entities.SingleOrDefaultAsync(s => s.Id == id, cancellationToken);
+        if (entity != null) {
+            _entities.Remove(entity);
+        }
+    }
+}
+
+public abstract class AbstractAudioRepository<TEntity> : AbstractRepository<TEntity>, IAudioRepository<TEntity>
+    where TEntity : BaseAudioEntity {
+    public AbstractAudioRepository(AudioBoosContext context) : base(context) {
     }
 
     public async Task<TEntity?> GetByName(string name, CancellationToken cancellationToken = default) {
@@ -62,17 +79,5 @@ public abstract class AbstractRepository<TEntity> : IRepository<TEntity> where T
                 .Intersect(names).Any());
 
         return results;
-    }
-
-
-    public abstract Task<TEntity> InsertOrUpdate(TEntity entity,
-        CancellationToken cancellationToken = default);
-
-    public async Task Delete(Guid id, CancellationToken cancellationToken = default) {
-        if (id.Equals(Guid.Empty)) throw new ArgumentNullException(nameof(id));
-        var entity = await _entities.SingleOrDefaultAsync(s => s.Id == id, cancellationToken);
-        if (entity != null) {
-            _entities.Remove(entity);
-        }
     }
 }

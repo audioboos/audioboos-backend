@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AudioBoos.Data.Store;
 
 [Index(nameof(Name), IsUnique = true)]
-public record Artist(string Name) : BaseEntity(Name) {
+public record Artist(string Name) : BaseAudioEntity(Name) {
     public string? Style { get; set; }
     public string? Genre { get; set; }
     public string? SmallImage { get; set; }
@@ -19,10 +19,10 @@ public record Artist(string Name) : BaseEntity(Name) {
 
     public ICollection<Album>? Albums { get; set; }
 
-    public static bool IsIncomplete(BaseEntity entity) =>
-        !BaseEntity.IsIncomplete(entity) ||
-        !string.IsNullOrEmpty((entity as Artist)?.SmallImage) ||
-        !string.IsNullOrEmpty((entity as Artist)?.LargeImage);
+    public static bool IsIncomplete(BaseAudioEntity audioEntity) =>
+        !BaseAudioEntity.IsIncomplete(audioEntity) ||
+        !string.IsNullOrEmpty((audioEntity as Artist)?.SmallImage) ||
+        !string.IsNullOrEmpty((audioEntity as Artist)?.LargeImage);
 
     public string GetNormalisedName() => (Name.ToLower().StartsWith("the") ? Name.Remove(0, 3) : Name).Trim();
 }

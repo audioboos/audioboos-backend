@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using AudioBoos.Data.Access;
-using AudioBoos.Data.Persistence;
-using AudioBoos.Data.Persistence.Interfaces;
+using AudioBoos.Data;
+using AudioBoos.Data.Interfaces;
 using AudioBoos.Data.Store;
 using AudioBoos.Server.Services.Email;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -26,10 +26,10 @@ public class DbFixture : Fixture {
 
         _serviceCollection.AddLogging();
 
-        _serviceCollection.AddScoped<IRepository<AudioFile>, AudioFileRepository>();
-        _serviceCollection.AddScoped<IRepository<Artist>, ArtistRepository>();
-        _serviceCollection.AddScoped<IRepository<Album>, AlbumRepository>();
-        _serviceCollection.AddScoped<IRepository<Track>, TrackRepository>();
+        _serviceCollection.AddScoped<IRepository<AudioFile>, AudioFileAudioRepository>();
+        _serviceCollection.AddScoped<IRepository<Artist>, ArtistAudioRepository>();
+        _serviceCollection.AddScoped<IRepository<Album>, AlbumAudioRepository>();
+        _serviceCollection.AddScoped<IRepository<Track>, TrackAudioRepository>();
         _serviceCollection.AddScoped<IUnitOfWork, UnitOfWork>();
         _serviceCollection.AddScoped<IEmailSender, EmailSender>();
 

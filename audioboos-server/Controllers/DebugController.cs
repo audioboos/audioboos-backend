@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using AudioBoos.Data.Access;
-using AudioBoos.Data.Persistence.Interfaces;
+using AudioBoos.Data.Interfaces;
 using AudioBoos.Data.Store;
 using Microsoft.AspNetCore.Mvc;
 

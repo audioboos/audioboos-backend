@@ -1,10 +1,10 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using AudioBoos.Data.Persistence.Annotations;
+using AudioBoos.Data.Annotations;
 
 namespace AudioBoos.Data.Store; 
 
-public record Track : BaseEntity {
+public record Track : BaseAudioEntity {
     public Track(string name) : base(name) {
     }
 

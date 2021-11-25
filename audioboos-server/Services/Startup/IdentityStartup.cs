@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using AudioBoos.Data.Persistence;
+using AudioBoos.Data;
 using AudioBoos.Data.Store;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;

@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using AudioBoos.Data.Persistence.Annotations;
+using AudioBoos.Data.Annotations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace AudioBoos.Data.Persistence.Extensions; 
+namespace AudioBoos.Data.Extensions; 
 
 public static class ModelBuilderExtensions {
     private static IEnumerable<UniqueKeyAttribute> _getUniqueKeyAttributes(this IMutableEntityType entityType,
