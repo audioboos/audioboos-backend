@@ -1,12 +1,9 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using AudioBoos.Data.Persistence;
-using AudioBoos.Data.Store;
+﻿using AudioBoos.Data.Store;
 using Microsoft.EntityFrameworkCore;
 
 namespace AudioBoos.Data.Access;
 
-public class TrackRepository : AbstractRepository<Track> {
+public class TrackRepository : AbstractAudioRepository<Track> {
     public TrackRepository(AudioBoosContext context) : base(context) { }
 
     public override async Task<Track?> GetByFile(string fileName, CancellationToken cancellationToken = default) {

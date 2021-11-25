@@ -14,13 +14,13 @@ namespace AudioBoos.Server.Services.Jobs;
 
 [DisallowConcurrentExecution]
 public class CacheImagesJob : IAudioBoosJob {
-    private readonly IRepository<Artist> _artistRepository;
-    private readonly IRepository<Album> _albumRepository;
+    private readonly IAudioRepository<Artist> _artistRepository;
+    private readonly IAudioRepository<Album> _albumRepository;
     private readonly SystemSettings _systemSettings;
     private readonly ILogger<CacheImagesJob> _logger;
     public string JobName => "CacheImages";
 
-    public CacheImagesJob(IRepository<Artist> artistRepository, IRepository<Album> albumRepository,
+    public CacheImagesJob(IAudioRepository<Artist> artistRepository, IAudioRepository<Album> albumRepository,
         IOptions<SystemSettings> systemSettings,
         ILogger<CacheImagesJob> logger) {
         _artistRepository = artistRepository;

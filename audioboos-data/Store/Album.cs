@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AudioBoos.Data.Store;
 
 [Index(nameof(ArtistId), nameof(Name), IsUnique = true)]
-public record Album : BaseEntity {
+public record Album : BaseAudioEntity {
     public Album(string name) : base(name) {
     }
 
@@ -24,8 +24,8 @@ public record Album : BaseEntity {
     [Required] public Guid ArtistId { get; set; }
     [Required] public Artist Artist { get; set; }
 
-    public static bool IsIncomplete(BaseEntity entity) =>
-        !BaseEntity.IsIncomplete(entity) ||
-        !string.IsNullOrEmpty((entity as Album)?.SmallImage) ||
-        !string.IsNullOrEmpty((entity as Album)?.LargeImage);
+    public static bool IsIncomplete(BaseAudioEntity audioEntity) =>
+        !BaseAudioEntity.IsIncomplete(audioEntity) ||
+        !string.IsNullOrEmpty((audioEntity as Album)?.SmallImage) ||
+        !string.IsNullOrEmpty((audioEntity as Album)?.LargeImage);
 }

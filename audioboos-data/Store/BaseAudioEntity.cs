@@ -1,19 +1,22 @@
 ﻿#nullable enable
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using AudioBoos.Data.Persistence.Interfaces;
+using AudioBoos.Data.Interfaces;
 using Mapster;
 
 namespace AudioBoos.Data.Store;
 
-public abstract record BaseEntity(
-    [Required] string Name) : IBaseEntity {
+public abstract record BaseEntity {
     [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     [AdaptIgnore]
     public Guid Id { get; set; }
 
+    public DateTime CreateDate { get; set; }
+    public DateTime UpdateDate { get; set; }
+}
+
+public abstract record BaseAudioEntity(
+    [Required] string Name) : BaseEntity, IBaseAudioEntity {
     public string? Description { get; set; }
 
     [Required] public TaggingStatus TaggingStatus { get; set; } = TaggingStatus.None;
@@ -26,8 +29,8 @@ public abstract record BaseEntity(
     // Rider thinks this can be protected as only the derived classes access it
     // Once Rider understands static abstract interface methods we can remove this
     // ReSharper disable once MemberCanBeProtected.Global 
-    public static bool IsIncomplete(IBaseEntity entity) =>
-        entity is not null &&
-        !string.IsNullOrEmpty((entity as BaseEntity)?.Name) &&
-        !string.IsNullOrEmpty((entity as BaseEntity)?.Description);
+    public static bool IsIncomplete(IBaseAudioEntity audioEntity) =>
+        audioEntity is not null &&
+        !string.IsNullOrEmpty((audioEntity as BaseAudioEntity)?.Name) &&
+        !string.IsNullOrEmpty((audioEntity as BaseAudioEntity)?.Description);
 }

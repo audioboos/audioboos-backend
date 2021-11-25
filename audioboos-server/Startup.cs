@@ -1,7 +1,7 @@
 ﻿using System;
 using AudioBoos.Data.Access;
-using AudioBoos.Data.Persistence;
-using AudioBoos.Data.Persistence.Interfaces;
+using AudioBoos.Data;
+using AudioBoos.Data.Interfaces;
 using AudioBoos.Data.Store;
 using AudioBoos.Server.Services.Startup;
 using AudioBoos.Server.Services.Email;
@@ -59,10 +59,11 @@ public class Startup {
             .AddAudioBoosIdentity(Configuration);
 
         services.AddTransient<IUnitOfWork, UnitOfWork>();
-        services.AddTransient<IRepository<AudioFile>, AudioFileRepository>();
-        services.AddTransient<IRepository<Artist>, ArtistRepository>();
-        services.AddTransient<IRepository<Album>, AlbumRepository>();
-        services.AddTransient<IRepository<Track>, TrackRepository>();
+        services.AddTransient<IRepository<TrackPlayLog>, AudioPlayAudioRepository>();
+        services.AddTransient<IAudioRepository<AudioFile>, AudioFileAudioRepository>();
+        services.AddTransient<IAudioRepository<Artist>, ArtistAudioRepository>();
+        services.AddTransient<IAudioRepository<Album>, AlbumAudioRepository>();
+        services.AddTransient<IAudioRepository<Track>, TrackRepository>();
 
         services.AddTransient<IEmailSender, EmailSender>();
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -31,6 +32,8 @@ namespace AudioBoos.Data.Migrations
                     music_brainz_id = table.Column<string>(type: "text", nullable: true),
                     discogs_id = table.Column<string>(type: "text", nullable: true),
                     aliases = table.Column<string>(type: "text", nullable: true),
+                    create_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    update_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     name = table.Column<string>(type: "text", nullable: false),
                     description = table.Column<string>(type: "text", nullable: true),
                     tagging_status = table.Column<int>(type: "integer", nullable: false),
@@ -108,6 +111,8 @@ namespace AudioBoos.Data.Migrations
                     small_image = table.Column<string>(type: "text", nullable: true),
                     large_image = table.Column<string>(type: "text", nullable: true),
                     artist_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    create_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    update_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     name = table.Column<string>(type: "text", nullable: false),
                     description = table.Column<string>(type: "text", nullable: true),
                     tagging_status = table.Column<int>(type: "integer", nullable: false),
@@ -255,7 +260,8 @@ namespace AudioBoos.Data.Migrations
                     audio_url = table.Column<string>(type: "text", nullable: true),
                     physical_path = table.Column<string>(type: "text", nullable: false),
                     album_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    scan_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    create_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    update_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     name = table.Column<string>(type: "text", nullable: false),
                     description = table.Column<string>(type: "text", nullable: true),
                     tagging_status = table.Column<int>(type: "integer", nullable: false),
@@ -289,6 +295,8 @@ namespace AudioBoos.Data.Migrations
                     album_id = table.Column<Guid>(type: "uuid", nullable: true),
                     track_id = table.Column<Guid>(type: "uuid", nullable: true),
                     checksum = table.Column<string>(type: "text", nullable: true),
+                    create_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    update_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     name = table.Column<string>(type: "text", nullable: false),
                     description = table.Column<string>(type: "text", nullable: true),
                     tagging_status = table.Column<int>(type: "integer", nullable: false),
@@ -319,15 +327,45 @@ namespace AudioBoos.Data.Migrations
                         principalColumn: "id");
                 });
 
+            migrationBuilder.CreateTable(
+                name: "track_play_logs",
+                schema: "app",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    user_id = table.Column<string>(type: "text", nullable: true),
+                    track_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ip_address = table.Column<IPAddress>(type: "inet", nullable: false),
+                    create_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    update_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_track_play_logs", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_track_play_logs_tracks_track_id",
+                        column: x => x.track_id,
+                        principalSchema: "app",
+                        principalTable: "tracks",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_track_play_logs_users_user_id",
+                        column: x => x.user_id,
+                        principalSchema: "app",
+                        principalTable: "users",
+                        principalColumn: "id");
+                });
+
             migrationBuilder.InsertData(
                 schema: "auth",
                 table: "IdentityRole",
                 columns: new[] { "id", "concurrency_stamp", "name", "normalized_name" },
                 values: new object[,]
                 {
-                    { "24331498-2c52-4a7e-a65a-f9a40c0e7092", "bb463f16-9a7a-4894-975c-9d71231fedfc", "Editor", "EDITOR" },
-                    { "bb6472fb-fc27-4680-ad9f-509b215b1673", "f9bdf59c-511e-4bc2-987a-de81578877ad", "Viewer", "VIEWER" },
-                    { "f35ccd66-e000-443a-95d1-7ec10415e49f", "3a34eb28-03fa-49d9-93d6-529f3287ccf4", "Admin", "ADMIN" }
+                    { "096f2021-e414-4c07-8833-a547be5085f8", "7dd0b289-94e4-4a27-804a-93e35187643f", "Viewer", "VIEWER" },
+                    { "589e5a2e-48f5-4505-97a2-da82b314f8a5", "51bbd98c-405e-471e-b3d3-74fe27dec816", "Editor", "EDITOR" },
+                    { "e95da7bc-d2ca-4db7-b580-ed9865b6dd31", "1782c7c5-b858-4bf6-926b-cae1b3513f46", "Admin", "ADMIN" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -408,6 +446,18 @@ namespace AudioBoos.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "ix_track_play_logs_track_id",
+                schema: "app",
+                table: "track_play_logs",
+                column: "track_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_track_play_logs_user_id",
+                schema: "app",
+                table: "track_play_logs",
+                column: "user_id");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_tracks_album_id",
                 schema: "app",
                 table: "tracks",
@@ -465,12 +515,16 @@ namespace AudioBoos.Data.Migrations
                 schema: "app");
 
             migrationBuilder.DropTable(
-                name: "tracks",
+                name: "track_play_logs",
                 schema: "app");
 
             migrationBuilder.DropTable(
                 name: "IdentityRole",
                 schema: "auth");
+
+            migrationBuilder.DropTable(
+                name: "tracks",
+                schema: "app");
 
             migrationBuilder.DropTable(
                 name: "users",

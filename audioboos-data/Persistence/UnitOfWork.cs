@@ -1,9 +1,9 @@
 using System.Threading.Tasks;
-using AudioBoos.Data.Persistence.Interfaces;
+using AudioBoos.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace AudioBoos.Data.Persistence; 
+namespace AudioBoos.Data; 
 
 public class UnitOfWork : IUnitOfWork {
     private readonly AudioBoosContext _context;

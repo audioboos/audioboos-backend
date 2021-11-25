@@ -2,8 +2,8 @@
 using System.Threading.Tasks;
 using AudioBoos.Data.Access;
 using AudioBoos.Data.Models.Settings;
-using AudioBoos.Data.Persistence;
-using AudioBoos.Data.Persistence.Interfaces;
+using AudioBoos.Data;
+using AudioBoos.Data.Interfaces;
 using AudioBoos.Data.Store;
 using AudioBoos.Server.Services.AudioLookup;
 using AudioBoos.Server.Services.Hubs;
@@ -20,15 +20,15 @@ namespace AudioBoos.Server.Services.Jobs.Scanners;
 internal class UnstructuredLibraryScanner : LibraryScanner {
     public UnstructuredLibraryScanner(ILogger<UnstructuredLibraryScanner> logger,
         AudioBoosContext context,
-        IRepository<AudioFile> audioFileRepository,
-        IRepository<Artist> artistRepository,
-        IRepository<Album> albumRepository,
+        IAudioRepository<AudioFile> audioFileRepository,
+        IAudioRepository<Artist> artistRepository,
+        IAudioRepository<Album> albumRepository,
+        IAudioRepository<Track> trackRepository,
         IHubContext<JobHub> messageClient,
-        IRepository<Track> trackRepository,
         IUnitOfWork unitOfWork,
         IAudioLookupService lookupService,
         IOptions<SystemSettings> systemSettings) : base(logger, context, audioFileRepository, artistRepository,
-        albumRepository, messageClient, trackRepository, unitOfWork, lookupService, systemSettings) {
+        albumRepository, trackRepository, messageClient, unitOfWork, lookupService, systemSettings) {
     }
 
     public override async Task<(int, int, int)> ScanLibrary(bool deepScan, CancellationToken cancellationToken) {

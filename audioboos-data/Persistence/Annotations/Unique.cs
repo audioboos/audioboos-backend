@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace AudioBoos.Data.Persistence.Annotations; 
+namespace AudioBoos.Data.Annotations; 
 
 /// <summary>
 /// Used on an EntityFramework Entity class to mark a property to be used as a Unique Key

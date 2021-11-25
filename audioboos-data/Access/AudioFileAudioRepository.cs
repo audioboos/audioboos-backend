@@ -1,14 +1,14 @@
-﻿using AudioBoos.Data.Persistence;
+﻿using AudioBoos.Data;
 using AudioBoos.Data.Store;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace AudioBoos.Data.Access;
 
-public class AudioFileRepository : AbstractRepository<AudioFile> {
-    private readonly ILogger<AudioFileRepository> _logger;
+public class AudioFileAudioRepository : AbstractAudioRepository<AudioFile> {
+    private readonly ILogger<AudioFileAudioRepository> _logger;
 
-    public AudioFileRepository(AudioBoosContext context, ILogger<AudioFileRepository> logger) : base(context) {
+    public AudioFileAudioRepository(AudioBoosContext context, ILogger<AudioFileAudioRepository> logger) : base(context) {
         _logger = logger;
     }
 

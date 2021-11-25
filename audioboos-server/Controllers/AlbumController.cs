@@ -13,9 +13,9 @@ namespace AudioBoos.Server.Controllers;
 [ApiController]
 [Route("[controller]")]
 public class AlbumController : ControllerBase {
-    private readonly IRepository<Album> _albumsRepository;
+    private readonly IAudioRepository<Album> _albumsRepository;
 
-    public AlbumController(IRepository<Album> albumsRepository) {
+    public AlbumController(IAudioRepository<Album> albumsRepository) {
         _albumsRepository = albumsRepository;
     }
 

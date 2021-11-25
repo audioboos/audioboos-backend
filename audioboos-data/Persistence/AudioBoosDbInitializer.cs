@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace AudioBoos.Data.Persistence; 
+namespace AudioBoos.Data; 
 
 public static class AudioBoosDbInitializer {
     public static void SeedUsers<TUser>(UserManager<TUser> userManager) where TUser : IdentityUser, new() {

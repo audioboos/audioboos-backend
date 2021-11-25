@@ -4,8 +4,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using AudioBoos.Data.Access;
 using AudioBoos.Data.Models.Settings;
-using AudioBoos.Data.Persistence;
-using AudioBoos.Data.Persistence.Interfaces;
+using AudioBoos.Data;
+using AudioBoos.Data.Interfaces;
 using AudioBoos.Data.Store;
 using AudioBoos.Server.Services.AudioLookup;
 using AudioBoos.Server.Services.Exceptions.AudioLookup;
@@ -22,25 +22,25 @@ namespace AudioBoos.Server.Services.Jobs.Scanners;
 internal abstract class LibraryScanner : ILibraryScanner {
     protected readonly ILogger _logger;
     private readonly AudioBoosContext _context;
-    protected readonly IRepository<AudioFile> _audioFileRepository;
-    protected readonly IRepository<Artist> _artistRepository;
-    protected readonly IRepository<Album> _albumRepository;
-    protected readonly IHubContext<JobHub> _messageClient;
-    protected readonly IRepository<Track> _trackRepository;
+    protected readonly IAudioRepository<AudioFile> _audioFileRepository;
+    protected readonly IAudioRepository<Artist> _artistRepository;
+    protected readonly IAudioRepository<Album> _albumRepository;
+    protected readonly IAudioRepository<Track> _trackRepository;
+   protected readonly IHubContext<JobHub> _messageClient;
     protected readonly IUnitOfWork _unitOfWork;
     protected readonly IAudioLookupService _lookupService;
-    protected readonly SystemSettings _systemSettings;
+    private readonly IOptions<SystemSettings> _systemSettings;
 
     protected readonly SemaphoreSlim __scanLock = new(1, 1);
 
 
     protected LibraryScanner(ILogger<LibraryScanner> logger,
         AudioBoosContext context,
-        IRepository<AudioFile> audioFileRepository,
-        IRepository<Artist> artistRepository,
-        IRepository<Album> albumRepository,
+        IAudioRepository<AudioFile> audioFileRepository,
+        IAudioRepository<Artist> artistRepository,
+        IAudioRepository<Album> albumRepository,
+        IAudioRepository<Track> trackRepository,
         IHubContext<JobHub> messageClient,
-        IRepository<Track> trackRepository,
         IUnitOfWork unitOfWork,
         IAudioLookupService lookupService,
         IOptions<SystemSettings> systemSettings
@@ -50,11 +50,11 @@ internal abstract class LibraryScanner : ILibraryScanner {
         _audioFileRepository = audioFileRepository;
         _artistRepository = artistRepository;
         _albumRepository = albumRepository;
-        _messageClient = messageClient;
         _trackRepository = trackRepository;
+        _messageClient = messageClient;
         _unitOfWork = unitOfWork;
         _lookupService = lookupService;
-        _systemSettings = systemSettings.Value;
+        _systemSettings = systemSettings;
     }
 
     protected async Task<string> _libraryPath() => await _context
