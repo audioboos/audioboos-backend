@@ -36,7 +36,7 @@ public class Startup {
         //TODO: refactor this into separate shared project
         var provider = Configuration.GetValue("Provider", "postgres");
 
-        if (Environment.IsDevelopment()) {
+        if (Environment.IsDevelopment() || true) {
             Console.WriteLine("******************************************");
             Console.WriteLine(
                 $"Env: {System.Environment.GetEnvironmentVariable("ASPNETCORE_ConnectionStrings__PostgresConnection")}");
