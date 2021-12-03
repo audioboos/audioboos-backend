@@ -4,8 +4,8 @@ FROM mcr.microsoft.com/dotnet/sdk:6.0-bullseye-slim-amd64 AS build-env
 WORKDIR /app
 
 # Copy csproj and restore as distinct layers
-COPY ../audioboos-data/. ./audioboos-data/
-COPY ../audioboos-server/. ./audioboos-server/
+COPY ./audioboos-data/. ./audioboos-data/
+COPY ./audioboos-server/. ./audioboos-server/
 
 WORKDIR /app/audioboos-server
 RUN dotnet restore
