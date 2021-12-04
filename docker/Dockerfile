@@ -21,7 +21,6 @@ WORKDIR /app
 COPY --from=build-env /app/audioboos-server/out .
 EXPOSE 80
 
-RUN apt update 
-RUN apt install imagemagick
+RUN apt-get update && apt-get -y install imagemagick
 
 ENTRYPOINT ["dotnet", "AudioBoos.Server.dll"]
