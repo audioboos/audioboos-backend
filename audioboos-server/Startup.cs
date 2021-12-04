@@ -110,11 +110,15 @@ public class Startup {
             endpoints.MapHub<JobHub>("/hubs/job");
         });
 
-        using var scope =
-            app.ApplicationServices.CreateScope();
+
+        using var scope = app.ApplicationServices.CreateScope();
         using var context = scope.ServiceProvider.GetService<AudioBoosContext>();
+        Console.WriteLine("Creating database");
+        context?.Database.EnsureCreated();
+        Console.WriteLine("Migrating database");
         context?.Database.Migrate();
 
+        Console.WriteLine("Seeding database");
         AudioBoosDbInitializer.SeedUsers(userManager);
     }
 }
