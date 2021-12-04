@@ -115,7 +115,6 @@ public class Startup {
         using var context = scope.ServiceProvider.GetService<AudioBoosContext>();
 
         Console.WriteLine("Migrating database");
-        context?.Database.EnsureDeleted();
         context?.Database.Migrate();
 
         Console.WriteLine("Seeding database");
