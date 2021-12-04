@@ -6,7 +6,7 @@ on:
 
 
 jobs:
-  ghr_push:
+  build_and_push:
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
 
