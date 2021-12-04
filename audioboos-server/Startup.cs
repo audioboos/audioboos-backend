@@ -113,8 +113,7 @@ public class Startup {
 
         using var scope = app.ApplicationServices.CreateScope();
         using var context = scope.ServiceProvider.GetService<AudioBoosContext>();
-        Console.WriteLine("Creating database");
-        context?.Database.EnsureCreated();
+
         Console.WriteLine("Migrating database");
         context?.Database.Migrate();
 
