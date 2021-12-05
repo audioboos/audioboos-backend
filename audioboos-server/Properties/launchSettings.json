@@ -8,9 +8,16 @@
         }
     },
     "profiles": {
-        "dotnet": {
+        "dev": {
             "environmentVariables": {
                 "ASPNETCORE_Environment": "Development"
+            },
+            "commandName": "Project",
+            "hotReloadProfile": "aspnetcore"
+        },
+        "prod": {
+            "environmentVariables": {
+                "ASPNETCORE_Environment": "Production"
             },
             "commandName": "Project",
             "hotReloadProfile": "aspnetcore"

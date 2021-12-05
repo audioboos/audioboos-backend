@@ -37,6 +37,8 @@ msbuild.wrn
 .vs/
 appsettings.development.json
 appsettings.Development.json
+appsettings.production.json
+appsettings.Production.json
 .idea/
 .vscode/
 

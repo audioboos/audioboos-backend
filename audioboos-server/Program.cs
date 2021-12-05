@@ -1,8 +1,9 @@
 using AudioBoos.Server.Services.Startup.SSL;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
-namespace AudioBoos.Server; 
+namespace AudioBoos.Server;
 
 public class Program {
     public static void Main(string[] args) {
@@ -15,5 +16,9 @@ public class Program {
                 webBuilder
                     .UseStartup<Startup>()
                     .UseKestrel(options => options.ConfigureEndpoints());
+            })
+            .ConfigureLogging(builder => {
+                builder.ClearProviders();
+                builder.AddConsole();
             });
 }
