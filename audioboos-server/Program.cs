@@ -10,7 +10,7 @@ namespace AudioBoos.Server;
 public class Program {
     public static void Main(string[] args) {
         Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
             .Enrich.FromLogContext()
             .WriteTo.Console()
             .CreateLogger();
