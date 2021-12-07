@@ -43,3 +43,4 @@ appsettings.Production.json
 .vscode/
 
 prod.env
+scripts/reset_db.sh

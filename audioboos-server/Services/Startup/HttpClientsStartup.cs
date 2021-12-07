@@ -13,7 +13,7 @@ public static class HttpClientsStartup {
     public static IServiceCollection AddAudioBoosHttpClients(this IServiceCollection services) {
         // services.AddTransient<IAudioLookupService, TheAudioDBLookupService>();
         services.AddTransient<CoverArtLookupService>();
-        services.AddTransient<IAudioLookupService, MusicBrainzLookupService>();
+        services.AddTransient<IAudioLookupService, DiscogsLookupService>();
         services.AddTransient<DiscogsLookupService>();
 
         services.AddHttpClient("discogs", c => {
