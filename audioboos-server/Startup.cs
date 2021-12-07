@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 
 namespace AudioBoos.Server;
@@ -35,14 +36,6 @@ public class Startup {
 
         //TODO: refactor this into separate shared project
         var provider = Configuration.GetValue("Provider", "postgres");
-
-        if (Environment.IsDevelopment() || true) {
-            Console.WriteLine("******************************************");
-            Console.WriteLine(
-                $"Env: {System.Environment.GetEnvironmentVariable("ASPNETCORE_ConnectionStrings__PostgresConnection")}");
-            Console.WriteLine(Configuration.GetConnectionString("PostgresConnection"));
-            Console.WriteLine("******************************************");
-        }
 
         services.AddDbContext<AudioBoosContext>(
             options => _ = provider switch {
@@ -85,7 +78,8 @@ public class Startup {
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, UserManager<AppUser> userManager) {
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, UserManager<AppUser> userManager,
+        ILogger<Startup> logger) {
         if (env.IsDevelopment()) {
             app.UseDeveloperExceptionPage();
             app.UseMigrationsEndPoint();
@@ -114,10 +108,11 @@ public class Startup {
         using var scope = app.ApplicationServices.CreateScope();
         using var context = scope.ServiceProvider.GetService<AudioBoosContext>();
 
-        Console.WriteLine("Migrating database");
+        logger.LogInformation("Migrating database");
         context?.Database.Migrate();
 
-        Console.WriteLine("Seeding database");
+        logger.LogInformation("Seeding database");
         AudioBoosDbInitializer.SeedUsers(userManager);
+        logger.LogInformation("Database seeded");
     }
 }

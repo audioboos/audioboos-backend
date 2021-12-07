@@ -6,6 +6,7 @@ using AudioBoos.Data.Access;
 using AudioBoos.Data.Models.Settings;
 using AudioBoos.Data.Store;
 using AudioBoos.Server.Helpers;
+using AudioBoos.Server.Services.Images;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Quartz;
@@ -48,7 +49,7 @@ public class CacheImagesJob : IAudioBoosJob {
             var cacheFile = Path.Combine(cachePath, album.Id.ToString());
             var imageFile = album.LargeImage;
             try {
-                var result = await _cacheImage(cacheFile, imageFile);
+                var result = await ImageCacher.CacheImage(cacheFile, imageFile);
                 if (result) {
                     _logger.LogInformation("Successfully cached artist image for {Album}", album.Name);
                 }
@@ -73,7 +74,7 @@ public class CacheImagesJob : IAudioBoosJob {
             var cacheFile = Path.Combine(cachePath, artist.Id.ToString());
             var imageFile = artist.LargeImage;
             try {
-                var result = await _cacheImage(cacheFile, imageFile);
+                var result = await ImageCacher.CacheImage(cacheFile, imageFile);
                 if (result) {
                     _logger.LogInformation("Successfully cached artist image for {Artist}", artist.Name);
                 }
@@ -86,14 +87,5 @@ public class CacheImagesJob : IAudioBoosJob {
         }
 
         _logger.LogInformation("**Finished caching artist images**");
-    }
-
-    private async Task<bool> _cacheImage(string cacheFile, string imageFile) {
-        if (File.Exists(cacheFile)) {
-            return true;
-        }
-
-        var file = await HttpHelpers.DownloadFile(imageFile, cacheFile);
-        return !string.IsNullOrEmpty(file) && File.Exists(file);
     }
 }

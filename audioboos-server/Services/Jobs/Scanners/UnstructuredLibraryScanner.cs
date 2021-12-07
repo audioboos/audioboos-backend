@@ -31,7 +31,7 @@ internal class UnstructuredLibraryScanner : LibraryScanner {
         albumRepository, trackRepository, messageClient, unitOfWork, lookupService, systemSettings) {
     }
 
-    public override async Task<(int, int, int)> ScanLibrary(bool deepScan, CancellationToken cancellationToken) {
+    public override async Task<(int, int, int)> ScanLibrary(bool deepScan, string childFolder, CancellationToken cancellationToken) {
         _logger.LogInformation("Starting unstructured library scan");
         return await Task.FromResult((0, 0, 0));
     }

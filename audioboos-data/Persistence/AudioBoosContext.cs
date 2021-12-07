@@ -5,6 +5,7 @@ using AudioBoos.Data.Extensions;
 using AudioBoos.Data.Store;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
@@ -32,10 +33,6 @@ public class AudioBoosContext : IdentityDbContext<AppUser> {
         builder.HasDefaultSchema("app");
         base.OnModelCreating(builder);
 
-        var stringArrayValueConverter = new ValueConverter<List<string>, string>(
-            v => string.Join("|", v),
-            v => v.Split(new[] {'|'}).ToList()
-        );
         foreach (var entityType in builder.Model.GetEntityTypes()) {
             if (typeof(BaseEntity).IsAssignableFrom(entityType.ClrType)) {
                 builder.Entity(entityType.ClrType)
@@ -50,7 +47,13 @@ public class AudioBoosContext : IdentityDbContext<AppUser> {
             if (typeof(BaseAudioEntity).IsAssignableFrom(entityType.ClrType)) {
                 builder.Entity(entityType.ClrType)
                     .Property<List<string>>(nameof(BaseAudioEntity.AlternativeNames))
-                    .HasConversion(stringArrayValueConverter);
+                    .HasConversion(v => string.Join("|", v),
+                        v => v.Split(new[] {'|'}).ToList(),
+                        new ValueComparer<List<string>>(
+                            (c1, c2) => c1.SequenceEqual(c2),
+                            c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                            c => c.ToList()
+                        ));
             }
         }
 
@@ -82,14 +85,23 @@ public class AudioBoosContext : IdentityDbContext<AppUser> {
 
         builder.Entity<Artist>()
             .Property(a => a.AlternativeNames)
-            .HasConversion(stringArrayValueConverter);
+            .HasConversion(v => string.Join("|", v),
+                v => v.Split(new[] {'|'}).ToList(),
+                new ValueComparer<List<string>>(
+                    (c1, c2) => c1.SequenceEqual(c2),
+                    c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                    c => c.ToList()
+                ));
 
         builder.Entity<Artist>()
             .Property(e => e.Aliases)
-            .HasConversion(
-                v => string.Join(',', v),
-                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                    .ToList());
+            .HasConversion(v => string.Join("|", v),
+                v => v.Split(new[] {'|'}).ToList(),
+                new ValueComparer<List<string>>(
+                    (c1, c2) => c1.SequenceEqual(c2),
+                    c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                    c => c.ToList()
+                ));
 
         foreach (var entity in builder.Model.GetEntityTypes()
                      .Where(p => p.Name.StartsWith("Microsoft.AspNetCore.Identity") ||

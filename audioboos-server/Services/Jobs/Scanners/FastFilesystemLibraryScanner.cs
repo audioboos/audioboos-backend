@@ -35,7 +35,8 @@ internal class FastFilesystemLibraryScanner : LibraryScanner {
         albumRepository, trackRepository, messageClient, unitOfWork, lookupService, systemSettings) {
     }
 
-    public override async Task<(int, int, int)> ScanLibrary(bool deepScan, CancellationToken cancellationToken) {
+    public override async Task<(int, int, int)> ScanLibrary(bool deepScan, string childFolder,
+        CancellationToken cancellationToken) {
         int artistScans = 0;
         int albumScans = 0;
         int trackScans = 0;
@@ -48,7 +49,7 @@ internal class FastFilesystemLibraryScanner : LibraryScanner {
             Percentage = 0
         }, cancellationToken);
 
-        var libraryPath = await _libraryPath();
+        var libraryPath = Path.Combine(await _libraryPath(), childFolder);
         if (string.IsNullOrEmpty(libraryPath) || !Directory.Exists(libraryPath)) {
             _logger.LogError("Library path ({LibraryPath}) does not exist", libraryPath);
             throw new LibraryNotFoundException($"Library path ({libraryPath}) does not exist");

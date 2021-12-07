@@ -26,7 +26,7 @@ internal abstract class LibraryScanner : ILibraryScanner {
     protected readonly IAudioRepository<Artist> _artistRepository;
     protected readonly IAudioRepository<Album> _albumRepository;
     protected readonly IAudioRepository<Track> _trackRepository;
-   protected readonly IHubContext<JobHub> _messageClient;
+    protected readonly IHubContext<JobHub> _messageClient;
     protected readonly IUnitOfWork _unitOfWork;
     protected readonly IAudioLookupService _lookupService;
     private readonly IOptions<SystemSettings> _systemSettings;
@@ -64,7 +64,8 @@ internal abstract class LibraryScanner : ILibraryScanner {
         .FirstOrDefaultAsync();
 
 
-    public abstract Task<(int, int, int)> ScanLibrary(bool deepScan, CancellationToken cancellationToken);
+    public abstract Task<(int, int, int)> ScanLibrary(bool deepScan, string childFolder,
+        CancellationToken cancellationToken);
 
     public async Task UpdateUnscannedAlbums(CancellationToken cancellationToken) {
         _logger.LogInformation("Scanning unscanned albums");
@@ -112,26 +113,31 @@ internal abstract class LibraryScanner : ILibraryScanner {
             .Where(a => Artist.IsIncomplete(a) || a.TaggingStatus.Equals(TaggingStatus.MP3TagsOnly));
 
         foreach (var artist in unscannedArtists) {
-            _logger.LogDebug("Looking up info for {Artist}", artist.Name);
-            try {
-                var remoteArtistInfo = await _lookupService.LookupArtistInfo(
-                    artist.Name,
-                    cancellationToken);
-                if (remoteArtistInfo is null) {
-                    continue;
-                }
+            await UpdateArtist(artist.Name, cancellationToken);
+        }
+    }
 
-                var updated = remoteArtistInfo.Adapt(artist);
-                updated.TaggingStatus = TaggingStatus.RemoteLookup;
-
-                await _artistRepository.InsertOrUpdate(updated, cancellationToken);
-                await _unitOfWork.Complete();
-            } catch (ArtistNotFoundException) {
-                _logger.LogWarning("Artist {Artist} not found in {Scanner}", artist.Name, _lookupService.Name);
-            } catch (Exception e) {
-                _logger.LogError("Failure finding artist {Artist} in {Scanner}", artist.Name, _lookupService.Name);
-                _logger.LogError("{Error}", e.Message);
+    public async Task UpdateArtist(string artistName, CancellationToken cancellationToken) {
+        _logger.LogDebug("Looking up info for {Artist}", artistName);
+        var artist = await _artistRepository.GetByName(artistName, cancellationToken);
+        try {
+            var remoteArtistInfo = await _lookupService.LookupArtistInfo(
+                artist.Name,
+                cancellationToken);
+            if (remoteArtistInfo is null) {
+                return;
             }
+
+            var updated = remoteArtistInfo.Adapt(artist);
+            updated.TaggingStatus = TaggingStatus.RemoteLookup;
+
+            await _artistRepository.InsertOrUpdate(updated, cancellationToken);
+            await _unitOfWork.Complete();
+        } catch (ArtistNotFoundException) {
+            _logger.LogWarning("Artist {Artist} not found in {Scanner}", artist.Name, _lookupService.Name);
+        } catch (Exception e) {
+            _logger.LogError("Failure finding artist {Artist} in {Scanner}", artist.Name, _lookupService.Name);
+            _logger.LogError("{Error}", e.Message);
         }
 
         _logger.LogInformation("Finished processing artists");

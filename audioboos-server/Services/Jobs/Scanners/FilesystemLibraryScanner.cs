@@ -33,11 +33,12 @@ internal class FilesystemLibraryScanner : LibraryScanner {
         IUnitOfWork unitOfWork,
         IAudioLookupService lookupService,
         IOptions<SystemSettings> systemSettings) : base(logger, context, audioFileRepository, artistRepository,
-        albumRepository,  trackRepository, messageClient,unitOfWork, lookupService, systemSettings) {
+        albumRepository, trackRepository, messageClient, unitOfWork, lookupService, systemSettings) {
     }
 
 
-    public override async Task<(int, int, int)> ScanLibrary(bool deepScan, CancellationToken cancellationToken) {
+    public override async Task<(int, int, int)> ScanLibrary(bool deepScan, string childFolder,
+        CancellationToken cancellationToken) {
         int artistScans = 0;
         int albumScans = 0;
         int trackScans = 0;
@@ -51,9 +52,7 @@ internal class FilesystemLibraryScanner : LibraryScanner {
         }, cancellationToken);
 
         string scanPath =
-            Path.Combine(await _libraryPath());
-        // Path.Combine("/home/fergalm/dev/audioboos/working/testing/problemscans/");
-        //Path.Combine(_systemSettings.AudioPath, "Tegan & Sara/If it Was You");;
+            Path.Combine(await _libraryPath(), childFolder);
         var fileList = (await scanPath.GetAllAudioFiles())
             /*.Where(f => f.Contains("Confess")).ToList()*/
             ;

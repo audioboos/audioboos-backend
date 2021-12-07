@@ -38,6 +38,13 @@ public class ImageController : ControllerBase {
 
         var image = type.Equals("small") ? artist.SmallImage : artist.LargeImage;
 
+        if (!string.IsNullOrEmpty(image) && image.StartsWith("http")) {
+            await ImageCacher.CacheImage(cacheFile, image);
+            if (System.IO.File.Exists(cacheFile)) {
+                return GetFileDirect(cacheFile);
+            }
+        }
+
         //TODO: switch??
         return string.IsNullOrEmpty(image)
             ? type.Equals("small") ?
