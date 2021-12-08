@@ -10,6 +10,10 @@ public static class ImageCacher {
             return true;
         }
 
+        if (!Directory.Exists(Path.GetDirectoryName(cacheFile))) {
+            Directory.CreateDirectory(Path.GetDirectoryName(cacheFile));
+        }
+
         var file = await HttpHelpers.DownloadFile(imageFile, cacheFile);
         return !string.IsNullOrEmpty(file) && File.Exists(file);
     }
