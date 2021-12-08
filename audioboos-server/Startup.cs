@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Threading.Tasks;
 using AudioBoos.Data.Access;
 using AudioBoos.Data;
 using AudioBoos.Data.Interfaces;
@@ -15,7 +17,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IO;
 using Microsoft.OpenApi.Models;
+using SixLabors.ImageSharp.Web.Caching;
+using SixLabors.ImageSharp.Web.Commands;
+using SixLabors.ImageSharp.Web.DependencyInjection;
+using SixLabors.ImageSharp.Web.Processors;
 
 namespace AudioBoos.Server;
 
@@ -65,11 +72,18 @@ public class Startup {
 
         services.AddSignalR();
 
-        // services
-        //     .AddImageSharp()
-        //     .Configure<PhysicalFileSystemCacheOptions>(options => {
-        //         options.CacheFolder = "different-cache";
-        //     });
+        services.AddImageSharp(
+                options => {
+                    options.MemoryStreamManager = new RecyclableMemoryStreamManager();
+                    options.BrowserMaxAge = TimeSpan.FromDays(7);
+                    options.CacheMaxAge = TimeSpan.FromDays(365);
+                    options.CachedNameLength = 8;
+                }).SetRequestParser<QueryCollectionRequestParser>()
+            .Configure<PhysicalFileSystemCacheOptions>(options => {
+                options.CacheFolder = Path.Combine(Configuration.GetSection("System").GetValue<string>("CachePath"),
+                    ".img-cache");
+            }).AddProcessor<ResizeWebProcessor>();
+
 
         services.AddControllers();
         services.AddSwaggerGen(c => {
@@ -92,6 +106,8 @@ public class Startup {
             app.UseHsts();
         }
 
+        app.UseImageSharp();
+        app.UseStaticFiles();
 
         app.UseHttpsRedirection();
         app.UseRouting();

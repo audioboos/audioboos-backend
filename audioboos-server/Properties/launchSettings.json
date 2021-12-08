@@ -10,14 +10,14 @@
     "profiles": {
         "dev": {
             "environmentVariables": {
-                "ASPNETCORE_Environment": "Development"
+                "ASPNETCORE_ENVIRONMENT": "Development"
             },
             "commandName": "Project",
             "hotReloadProfile": "aspnetcore"
         },
         "prod": {
             "environmentVariables": {
-                "ASPNETCORE_Environment": "Production"
+                "ASPNETCORE_ENVIRONMENT": "Production"
             },
             "commandName": "Project",
             "hotReloadProfile": "aspnetcore"

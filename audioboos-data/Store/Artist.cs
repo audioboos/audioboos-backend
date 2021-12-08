@@ -25,4 +25,6 @@ public record Artist(string Name) : BaseAudioEntity(Name) {
         !string.IsNullOrEmpty((audioEntity as Artist)?.LargeImage);
 
     public string GetNormalisedName() => (Name.ToLower().StartsWith("the") ? Name.Remove(0, 3) : Name).Trim();
+
+    public string GetImageFile() => $"{Id}.jpg";
 }

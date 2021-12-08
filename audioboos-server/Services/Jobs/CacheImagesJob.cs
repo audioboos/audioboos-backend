@@ -71,12 +71,19 @@ public class CacheImagesJob : IAudioBoosJob {
         }
 
         foreach (var artist in _artistRepository.GetAll()) {
-            var cacheFile = Path.Combine(cachePath, artist.Id.ToString());
+            var cacheFile = Path.Combine(cachePath, artist.GetImageFile());
             var imageFile = artist.LargeImage;
+            if (File.Exists(cacheFile)) continue;
             try {
-                var result = await ImageCacher.CacheImage(cacheFile, imageFile);
-                if (result) {
-                    _logger.LogInformation("Successfully cached artist image for {Artist}", artist.Name);
+                if (string.IsNullOrEmpty(imageFile)) {
+                    _logger.LogInformation("Creating placeholder image for {Artist}", artist.Name);
+                    var placeholder = await TextImageGenerator.CreateArtistAvatarImage(artist.Name);
+                    await File.WriteAllBytesAsync(cacheFile, placeholder);
+                } else {
+                    var result = await ImageCacher.CacheImage(cacheFile, imageFile);
+                    if (result) {
+                        _logger.LogInformation("Successfully cached artist image for {Artist}", artist.Name);
+                    }
                 }
             } catch (Exception e) {
                 _logger.LogError("Error caching image for {Artist} - {Image} - {Exception}",

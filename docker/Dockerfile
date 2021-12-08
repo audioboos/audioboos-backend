@@ -17,7 +17,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:6.0
 WORKDIR /app
 COPY --from=build-env /app/audioboos-server/out .
 EXPOSE 80
-
+ENV ASPNETCORE_ENVIRONMENT=Production
 RUN apt-get update && apt-get -y install imagemagick
 #RUN apk --update add imagemagick
 ENTRYPOINT ["dotnet", "AudioBoos.Server.dll"]

@@ -19,10 +19,12 @@ public static class MappingStartup {
             .Map(dest => dest.Name, src => src.Name)
             .Map(dest => dest.NormalisedName, src => src.GetNormalisedName())
             .Map(dest => dest.SmallImage,
-                src => $"{config.GetSection("System").GetValue<string>("BaseUrl")}/image/artist/{src.Id}?type=small")
+                src =>
+                    $"{config.GetSection("System").GetValue<string>("BaseUrl")}/image/artist/{src.Id}.jpg?width=32&height=32")
             .Map(dest => dest.LargeImage,
                 src =>
-                    $"{config.GetSection("System").GetValue<string>("BaseUrl")}/image/artist/{src.Id}?type=large");
+                    $"{config.GetSection("System").GetValue<string>("BaseUrl")}/images/artist/{src.Id}.jpg?width=320&height=220");
+
 
         TypeAdapterConfig<AlbumDto, Album>
             .NewConfig()
@@ -33,9 +35,11 @@ public static class MappingStartup {
             .ConstructUsing(src => new AlbumDto(src.Artist.Name))
             .Map(dest => dest.Id, src => src.Id.ToString())
             .Map(dest => dest.SmallImage,
-                src => $"{config.GetSection("System").GetValue<string>("BaseUrl")}/image/album/{src.Id}?type=small")
+                src =>
+                    $"{config.GetSection("System").GetValue<string>("BaseUrl")}/images/album/{src.Id}.jpg?width=32&height=32")
             .Map(dest => dest.LargeImage,
-                src => $"{config.GetSection("System").GetValue<string>("BaseUrl")}/image/album/{src.Id}?type=large");
+                src =>
+                    $"{config.GetSection("System").GetValue<string>("BaseUrl")}/images/album/{src.Id}.jpg?width=320&height=220");
 
         TypeAdapterConfig<TrackDto, Track>
             .NewConfig()
