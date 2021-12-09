@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Http;
 using AudioBoos.Server.Services.AudioLookup;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AudioBoos.Server.Services.Startup;
@@ -10,10 +11,19 @@ public static class HttpClientsStartup {
     // private const string USER_AGENT = "AudioBoos-API/0.1 +https://audioboos.com";
     private const string USER_AGENT = "AudioBoos-API/0.1";
 
-    public static IServiceCollection AddAudioBoosHttpClients(this IServiceCollection services) {
+    public static IServiceCollection AddAudioBoosHttpClients(this IServiceCollection services, IConfiguration config) {
         // services.AddTransient<IAudioLookupService, TheAudioDBLookupService>();
         services.AddTransient<CoverArtLookupService>();
-        services.AddTransient<IAudioLookupService, DiscogsLookupService>();
+
+        switch (config?.GetSection("System").GetValue<string>("AudioLookupService")) {
+            case "discogs":
+                services.AddTransient<IAudioLookupService, DiscogsLookupService>();
+                break;
+            default:
+                services.AddTransient<IAudioLookupService, MusicBrainzLookupService>();
+                break;
+        }
+
         services.AddTransient<DiscogsLookupService>();
 
         services.AddHttpClient("discogs", c => {

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Threading.Tasks;
 using AudioBoos.Data.Access;
 using AudioBoos.Data;
 using AudioBoos.Data.Interfaces;
@@ -67,7 +66,9 @@ public class Startup {
 
         services.AddTransient<IEmailSender, EmailSender>();
 
-        services.AddAudioBoosHttpClients();
+        Console.WriteLine(
+            $"Using {Configuration.GetSection("System").GetValue<string>("AudioLookupService")} for lookups");
+        services.AddAudioBoosHttpClients(Configuration);
         services.AddMapping(Configuration);
 
         services.AddSignalR();

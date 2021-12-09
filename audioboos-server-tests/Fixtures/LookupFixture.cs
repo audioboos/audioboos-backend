@@ -6,7 +6,7 @@ namespace AudioBoos.Server.Tests.Fixtures;
 
 public class LookupFixture : Fixture {
     public LookupFixture() {
-        _serviceCollection.AddAudioBoosHttpClients();
+        _serviceCollection.AddAudioBoosHttpClients(null);
         _serviceCollection.AddScoped<IAudioLookupService, MusicBrainzLookupService>();
 
         ServiceProvider = _serviceCollection.BuildServiceProvider();
