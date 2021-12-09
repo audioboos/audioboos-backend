@@ -20,7 +20,7 @@ public static class MappingStartup {
             .Map(dest => dest.NormalisedName, src => src.GetNormalisedName())
             .Map(dest => dest.SmallImage,
                 src =>
-                    $"{config.GetSection("System").GetValue<string>("BaseUrl")}/image/artist/{src.Id}.jpg?width=32&height=32")
+                    $"{config.GetSection("System").GetValue<string>("BaseUrl")}/images/artist/{src.Id}.jpg?width=32&height=32")
             .Map(dest => dest.LargeImage,
                 src =>
                     $"{config.GetSection("System").GetValue<string>("BaseUrl")}/images/artist/{src.Id}.jpg?width=320&height=220");
