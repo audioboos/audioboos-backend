@@ -30,7 +30,7 @@ public class ImageController : ControllerBase {
     public async Task<IActionResult> GetArtistImage(string artistId, [FromQuery] string type = "small") {
         var cacheFile = Path.Combine(_systemSettings.ImagePath, "artist", artistId);
         if (System.IO.File.Exists(cacheFile)) {
-            return GetFileDirect(cacheFile);
+            return _getFileDirect(cacheFile);
         }
 
         var artist = await _artistRepository.GetById(artistId);
@@ -41,7 +41,7 @@ public class ImageController : ControllerBase {
         if (!string.IsNullOrEmpty(image) && image.StartsWith("http")) {
             await ImageCacher.CacheImage(cacheFile, image);
             if (System.IO.File.Exists(cacheFile)) {
-                return GetFileDirect(cacheFile);
+                return _getFileDirect(cacheFile);
             }
         }
 
@@ -57,7 +57,7 @@ public class ImageController : ControllerBase {
     public async Task<IActionResult> GetAlbumImage(string albumId, [FromQuery] string type) {
         var cacheFile = Path.Combine(_systemSettings.ImagePath, "album", albumId);
         if (System.IO.File.Exists(cacheFile)) {
-            return GetFileDirect(cacheFile);
+            return _getFileDirect(cacheFile);
         }
 
         var album = await _albumRepository.GetAll()
@@ -70,15 +70,10 @@ public class ImageController : ControllerBase {
 
         return string.IsNullOrEmpty(image)
             ? File(await TextImageGenerator.CreateAlbumImage(album.Artist.Name, album.Name), "image/png")
-            : GetFileDirect(image);
+            : _getFileDirect(image);
     }
 
-    public async Task<IActionResult> GeneratePlaceholderImage(string artistName, string albumName) {
-        var image = await TextImageGenerator.CreateAlbumImage(artistName, albumName);
-        return File(image, "image/png");
-    }
-
-    public IActionResult GetFileDirect(string path) {
+    private IActionResult _getFileDirect(string path) {
         if (!System.IO.File.Exists(path)) {
             return NotFound();
         }

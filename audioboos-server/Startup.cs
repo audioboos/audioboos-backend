@@ -54,7 +54,7 @@ public class Startup {
 
         services.AddAudioBoosOptions(Configuration)
             .AddAudioBoosJobs(Configuration)
-            .AddAudioBoosCors(Configuration)
+            .AddAudioBoosCors(Configuration, Environment.IsDevelopment())
             .AddAudioBoosIdentity(Configuration);
 
         services.AddTransient<IUnitOfWork, UnitOfWork>();
@@ -66,9 +66,8 @@ public class Startup {
 
         services.AddTransient<IEmailSender, EmailSender>();
 
-        Console.WriteLine(
-            $"Using {Configuration.GetSection("System").GetValue<string>("AudioLookupService")} for lookups");
         services.AddAudioBoosHttpClients(Configuration);
+
         services.AddMapping(Configuration);
 
         services.AddSignalR();
@@ -88,7 +87,7 @@ public class Startup {
 
         services.AddControllers();
         services.AddSwaggerGen(c => {
-            c.SwaggerDoc("v1", new OpenApiInfo {Title = "arse", Version = "v1"});
+            c.SwaggerDoc("v1", new OpenApiInfo {Title = "AudioBoos API v1.0", Version = "v1"});
         });
     }
 
@@ -100,7 +99,7 @@ public class Startup {
             app.UseMigrationsEndPoint();
 
             app.UseSwagger();
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "AudioBoos Server v1"));
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "AudioBoos API v1"));
         } else {
             app.UseExceptionHandler("/Error");
             // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.

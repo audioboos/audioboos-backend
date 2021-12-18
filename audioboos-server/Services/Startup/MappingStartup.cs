@@ -9,6 +9,11 @@ namespace AudioBoos.Server.Services.Startup;
 
 public static class MappingStartup {
     public static IServiceCollection AddMapping(this IServiceCollection services, IConfiguration config) {
+        var smallWidth = config["ImageOptions:SmallImageWidth"];
+        var smallHeight = config["ImageOptions:SmallImageHeight"];
+        var largeWidth = config["ImageOptions:LargeImageWidth"];
+        var largeHeight = config["ImageOptions:LargeImageHeight"];
+
         TypeAdapterConfig<ArtistDto, Artist>
             .NewConfig()
             .ConstructUsing(src => new Artist(src.Name));
@@ -20,10 +25,10 @@ public static class MappingStartup {
             .Map(dest => dest.NormalisedName, src => src.GetNormalisedName())
             .Map(dest => dest.SmallImage,
                 src =>
-                    $"{config.GetSection("System").GetValue<string>("BaseUrl")}/images/artist/{src.Id}.jpg?width=32&height=32")
+                    $"{config.GetSection("System").GetValue<string>("BaseUrl")}/images/artist/{src.Id}.jpg?width={smallWidth}&height={smallHeight}")
             .Map(dest => dest.LargeImage,
                 src =>
-                    $"{config.GetSection("System").GetValue<string>("BaseUrl")}/images/artist/{src.Id}.jpg?width=320&height=220");
+                    $"{config.GetSection("System").GetValue<string>("BaseUrl")}/images/artist/{src.Id}.jpg?width={largeWidth}&height={largeHeight}");
 
 
         TypeAdapterConfig<AlbumDto, Album>
@@ -36,10 +41,10 @@ public static class MappingStartup {
             .Map(dest => dest.Id, src => src.Id.ToString())
             .Map(dest => dest.SmallImage,
                 src =>
-                    $"{config.GetSection("System").GetValue<string>("BaseUrl")}/images/album/{src.Id}.jpg?width=32&height=32")
+                    $"{config.GetSection("System").GetValue<string>("BaseUrl")}/images/album/{src.Id}.jpg?width={smallWidth}&height={smallHeight}")
             .Map(dest => dest.LargeImage,
                 src =>
-                    $"{config.GetSection("System").GetValue<string>("BaseUrl")}/images/album/{src.Id}.jpg?width=320&height=220");
+                    $"{config.GetSection("System").GetValue<string>("BaseUrl")}/images/album/{src.Id}.jpg?width={largeWidth}&height={largeHeight}");
 
         TypeAdapterConfig<TrackDto, Track>
             .NewConfig()
