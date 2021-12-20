@@ -11,7 +11,7 @@ public static class OptionsBinder {
         services.Configure<SystemSettings>(config.GetSection("System"));
         services.Configure<EmailOptions>(config.GetSection("EmailOptions"));
         services.Configure<JobOptions>(config.GetSection("JobOptions"));
-        services.Configure<JWT>(config.GetSection("JWT"));
+        services.Configure<JWTOptions>(config.GetSection("JWTOptions"));
 
         return services;
     }

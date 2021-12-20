@@ -55,7 +55,7 @@ public class Startup {
         services.AddAudioBoosOptions(Configuration)
             .AddAudioBoosJobs(Configuration)
             .AddAudioBoosCors(Configuration, Environment.IsDevelopment())
-            .AddAudioBoosIdentity(Configuration);
+            .AddAudioBoosIdentity(Configuration, Environment.IsDevelopment());
 
         services.AddTransient<IUnitOfWork, UnitOfWork>();
         services.AddTransient<IRepository<TrackPlayLog>, AudioPlayAudioRepository>();

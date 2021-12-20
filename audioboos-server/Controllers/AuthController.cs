@@ -9,9 +9,13 @@ using System.Threading.Tasks;
 using AudioBoos.Data.Models.DTO;
 using AudioBoos.Data.Models.Settings;
 using AudioBoos.Data.Store;
+using AudioBoos.Server.Helpers;
 using AudioBoos.Server.Services.Email;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -28,63 +32,41 @@ namespace AudioBoos.Server.Controllers;
 public class AuthController : ControllerBase {
     private readonly SignInManager<AppUser> _signInManager;
     private readonly ILogger<AuthController> _logger;
-    private readonly JWT _jwt;
+    private readonly JWTOptions _jwtOptions;
     private readonly UserManager<AppUser> _userManager;
     private readonly IEmailSender _emailSender;
+    private readonly TokenValidationParameters _tokenValidationParameters;
 
     public AuthController(
         SignInManager<AppUser> signInManager,
         ILogger<AuthController> logger,
-        IOptions<JWT> jwtOptions,
+        IOptions<JWTOptions> jwtOptions,
         UserManager<AppUser> userManager,
-        IEmailSender emailSender) {
+        IEmailSender emailSender,
+        TokenValidationParameters tokenValidationParameters) {
         _signInManager = signInManager;
         _logger = logger;
-        _jwt = jwtOptions.Value;
+        _jwtOptions = jwtOptions.Value;
         _userManager = userManager;
         _emailSender = emailSender;
+        _tokenValidationParameters = tokenValidationParameters;
     }
 
-    private async Task _sendRegisterEmail(AppUser user) {
-        // if email required
-        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-        var callbackUrl = Url.Page(
-            "/Account/ConfirmEmail",
-            pageHandler: null,
-            values: new {area = "Identity", userId = user.Id, code, returnUrl = "TODO:"},
-            protocol: Request.Scheme);
-
-        if (_userManager.Options.SignIn.RequireConfirmedAccount) {
-            await _emailSender.SendEmailAsync(
-                user.Email,
-                "Confirm your email",
-                $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+    [HttpPost("login")]
+    public async Task<IActionResult> OnLoginAsync([FromBody] LoginDto request) {
+        var user = await _userManager.FindByEmailAsync(request.Email);
+        if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password)) {
+            return Unauthorized();
         }
-    }
 
-    private async Task<JwtSecurityToken> _getUserToken(AppUser user) {
-        var userRoles = await _userManager.GetRolesAsync(user);
+        await _signInManager.SignInAsync(user, false);
+        var token = await AuthHelpers.GetUserToken(user, _jwtOptions);
+        var tokenText = new JwtSecurityTokenHandler().WriteToken(token);
+        var refreshToken = AuthHelpers.GetRefreshToken(HttpContext.Connection.RemoteIpAddress.ToString());
 
-        var authClaims = new List<Claim> {
-            new Claim(ClaimTypes.Name, user.UserName),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        };
+        AuthHelpers.SetCookies(Response, tokenText, user.UserName, refreshToken.Token);
 
-        authClaims.AddRange(userRoles.Select(userRole =>
-            new Claim(ClaimTypes.Role, userRole))
-        );
-
-        var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Secret));
-
-        var token = new JwtSecurityToken(
-            issuer: _jwt.ValidIssuer,
-            audience: _jwt.ValidAudience,
-            expires: DateTime.Now.AddHours(3),
-            claims: authClaims,
-            signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
-        );
-        return token;
+        return Ok();
     }
 
     [Authorize]
@@ -117,11 +99,8 @@ public class AuthController : ControllerBase {
         var result = await _userManager.CreateAsync(user, request.Password);
         if (result.Succeeded) {
             _logger.LogInformation("User created a new account with password");
-
-            //TODO: _sendRegisterEmail();
-
-            await _signInManager.SignInAsync(user, isPersistent: false);
-            var token = await _getUserToken(user);
+            await _signInManager.SignInAsync(user, false);
+            var token = await AuthHelpers.GetUserToken(user, _jwtOptions);
             return Ok(new {
                 token = new JwtSecurityTokenHandler().WriteToken(token),
                 expiration = token.ValidTo
@@ -133,21 +112,6 @@ public class AuthController : ControllerBase {
         }
 
         return StatusCode(500);
-    }
-
-    [HttpPost("login")]
-    public async Task<IActionResult> OnLoginAsync([FromBody] LoginDto request) {
-        var user = await _userManager.FindByEmailAsync(request.Email);
-        if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password)) {
-            return Unauthorized();
-        }
-
-        await _signInManager.SignInAsync(user, isPersistent: false);
-        var token = await _getUserToken(user);
-        return Ok(new {
-            token = new JwtSecurityTokenHandler().WriteToken(token),
-            expiration = token.ValidTo
-        });
     }
 
     [Authorize]
