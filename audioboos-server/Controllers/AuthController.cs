@@ -117,15 +117,8 @@ public class AuthController : ControllerBase {
     [Authorize]
     [HttpPost("logout")]
     public async Task<IActionResult> OnLogoutAsync() {
-        if (HttpContext.Request.Cookies.Count > 0) {
-            var siteCookies = HttpContext.Request.Cookies.Where(c => c.Key.Equals("AudioBoos.Auth"));
-            foreach (var cookie in siteCookies) {
-                Response.Cookies.Delete(cookie.Key);
-            }
-        }
-
         await HttpContext.SignOutAsync();
-        HttpContext.Session.Clear();
+        AuthHelpers.RemoveCookies(HttpContext.Response);
         return Ok();
     }
 }

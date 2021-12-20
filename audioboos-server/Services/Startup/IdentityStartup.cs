@@ -3,6 +3,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AudioBoos.Data;
 using AudioBoos.Data.Store;
+using AudioBoos.Server.Helpers;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace AudioBoos.Server.Services.Startup;
@@ -20,7 +22,12 @@ public static class IdentityStartup {
         var tokenValidationParameters = new TokenValidationParameters {
             ValidIssuer = config["JWTOptions:Issuer"],
             ValidAudience = config["JWTOptions:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWTOptions:Secret"]))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWTOptions:Secret"])),
+            ValidateIssuerSigningKey = true,
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
         };
         services.AddSingleton(tokenValidationParameters);
 
@@ -34,6 +41,9 @@ public static class IdentityStartup {
                 })
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<AudioBoosContext>();
+        services.ConfigureApplicationCookie(options => {
+            options.Cookie.Name = Constants.SessionCookie;
+        });
 
         services.AddAuthentication(options => {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -44,7 +54,7 @@ public static class IdentityStartup {
                 options.TokenValidationParameters = tokenValidationParameters;
                 options.Events = new JwtBearerEvents {
                     OnMessageReceived = context => {
-                        context.Token = context.Request.Cookies["X-Access-Token"];
+                        context.Token = context.Request.Cookies[Constants.AccessTokenCookie];
                         return Task.CompletedTask;
                     }
                 };

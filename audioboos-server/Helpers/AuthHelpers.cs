@@ -62,11 +62,26 @@ public static class AuthHelpers {
     }
 
     public static void SetCookies(HttpResponse response, string token, string userName, string refreshToken) {
-        response.Cookies.Append("X-Access-Token", token,
+        response.Cookies.Append(Constants.AccessTokenCookie, token,
             new CookieOptions {HttpOnly = true, SameSite = SameSiteMode.Strict});
-        response.Cookies.Append("X-Username", userName,
+        response.Cookies.Append(Constants.UsernameCookie, userName,
             new CookieOptions {HttpOnly = true, SameSite = SameSiteMode.Strict});
-        response.Cookies.Append("X-Refresh-Token", refreshToken,
+        response.Cookies.Append(Constants.RefreshTokenCookie, refreshToken,
             new CookieOptions {HttpOnly = true, SameSite = SameSiteMode.Strict});
+    }
+
+    public static void RemoveCookies(HttpResponse response) {
+        response.Cookies.Append(Constants.SessionCookie, string.Empty,
+            new CookieOptions
+                {HttpOnly = true, SameSite = SameSiteMode.Strict, Expires = DateTime.UtcNow.AddSeconds(5)});
+        response.Cookies.Append(Constants.AccessTokenCookie, string.Empty,
+            new CookieOptions
+                {HttpOnly = true, SameSite = SameSiteMode.Strict, Expires = DateTime.UtcNow.AddSeconds(5)});
+        response.Cookies.Append(Constants.UsernameCookie, string.Empty,
+            new CookieOptions
+                {HttpOnly = true, SameSite = SameSiteMode.Strict, Expires = DateTime.UtcNow.AddSeconds(5)});
+        response.Cookies.Append(Constants.RefreshTokenCookie, string.Empty,
+            new CookieOptions
+                {HttpOnly = true, SameSite = SameSiteMode.Strict, Expires = DateTime.UtcNow.AddSeconds(5)});
     }
 }
