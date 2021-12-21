@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AudioBoos.Data;
 
 public class AudioBoosContext : IdentityDbContext<AppUser> {
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<Setting> Settings { get; set; }
     public DbSet<AudioFile> AudioFiles { get; set; }
     public DbSet<Artist> Artists { get; set; }

@@ -1,20 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using AudioBoos.Data.Annotations;
 using Microsoft.EntityFrameworkCore;
 
 namespace AudioBoos.Data.Store;
 
-[Owned]
-public class RefreshToken {
-    [Key] [JsonIgnore] public int Id { get; set; }
+public record RefreshToken : BaseEntity {
+    [UniqueKey] public string Token { get; set; }
+    [UniqueKey] public string JwtToken { get; set; }
+    public bool Revoked { get; set; } = false;
 
-    public string Token { get; set; }
-    public DateTime Expires { get; set; }
-    public bool IsExpired => DateTime.UtcNow >= Expires;
-    public DateTime Created { get; set; }
-    public string CreatedByIp { get; set; }
-    public DateTime? Revoked { get; set; }
-    public string RevokedByIp { get; set; }
-    public string ReplacedByToken { get; set; }
-    public bool IsActive => Revoked == null && !IsExpired;
+    public AppUser User { get; set; }
 }

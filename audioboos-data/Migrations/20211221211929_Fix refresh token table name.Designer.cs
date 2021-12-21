@@ -4,6 +4,7 @@ using System.Net;
 using AudioBoos.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AudioBoos.Data.Migrations
 {
     [DbContext(typeof(AudioBoosContext))]
-    partial class AudioBoosContextModelSnapshot : ModelSnapshot
+    [Migration("20211221211929_Fix refresh token table name")]
+    partial class Fixrefreshtokentablename
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -383,14 +385,35 @@ namespace AudioBoos.Data.Migrations
                         .HasColumnName("create_date")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-                    b.Property<string>("JwtToken")
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created");
+
+                    b.Property<string>("CreatedByIp")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("jwt_token");
+                        .HasColumnName("created_by_ip");
 
-                    b.Property<bool>("Revoked")
-                        .HasColumnType("boolean")
+                    b.Property<DateTime>("Expires")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires");
+
+                    b.Property<string>("Jwt")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("jwt");
+
+                    b.Property<string>("ReplacedByToken")
+                        .HasColumnType("text")
+                        .HasColumnName("replaced_by_token");
+
+                    b.Property<DateTime?>("Revoked")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("revoked");
+
+                    b.Property<string>("RevokedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("revoked_by_ip");
 
                     b.Property<string>("Token")
                         .IsRequired()
@@ -410,13 +433,9 @@ namespace AudioBoos.Data.Migrations
                     b.HasKey("Id")
                         .HasName("pk_refresh_tokens");
 
-                    b.HasIndex("JwtToken")
+                    b.HasIndex("Jwt")
                         .IsUnique()
-                        .HasDatabaseName("ix_refresh_tokens_jwt_token");
-
-                    b.HasIndex("Token")
-                        .IsUnique()
-                        .HasDatabaseName("ix_refresh_tokens_token");
+                        .HasDatabaseName("ix_refresh_tokens_jwt");
 
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_refresh_tokens_user_id");
@@ -601,22 +620,22 @@ namespace AudioBoos.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "1cfe32e1-b231-4187-97f9-042022c725d6",
-                            ConcurrencyStamp = "4f990493-4483-4c0e-9b2a-0548b0f0ea8a",
+                            Id = "6eb20ce0-3d04-4c91-bd81-16cf59bcb573",
+                            ConcurrencyStamp = "aa1ff998-4b62-46fc-9636-651b729ceae7",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "33a7e0d3-7bf7-4546-8eb8-b248750cb0d1",
-                            ConcurrencyStamp = "0984fcda-7be4-483e-8683-6948244865bd",
+                            Id = "ef88f817-12a1-4c56-9836-9e995eb1d9e6",
+                            ConcurrencyStamp = "4db76b72-0c3b-4696-9be8-00406b101e97",
                             Name = "Editor",
                             NormalizedName = "EDITOR"
                         },
                         new
                         {
-                            Id = "318483de-112c-4c80-83c7-95de5feec03a",
-                            ConcurrencyStamp = "b7b56f4e-f786-43ba-91fb-9cebf693b281",
+                            Id = "8f211548-7410-4c96-b1e1-0dd1013b120e",
+                            ConcurrencyStamp = "86acffac-2522-4c5f-b816-690bb53cfc83",
                             Name = "Viewer",
                             NormalizedName = "VIEWER"
                         });

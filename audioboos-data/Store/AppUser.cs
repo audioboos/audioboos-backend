@@ -4,5 +4,5 @@ using Microsoft.AspNetCore.Identity;
 namespace AudioBoos.Data.Store;
 
 public class AppUser : IdentityUser {
-    [JsonIgnore] public List<RefreshToken> RefreshTokens { get; set; }
+    [JsonIgnore] public List<RefreshToken> RefreshTokens { get; set; } = new();
 }

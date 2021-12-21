@@ -12,25 +12,13 @@ using Microsoft.IdentityModel.Tokens;
 namespace AudioBoos.Server.Helpers;
 
 public static class AuthHelpers {
-    public static RefreshToken GetRefreshToken(string ipAddress) {
-        using var rngCryptoServiceProvider = new RNGCryptoServiceProvider();
-        var randomBytes = new byte[64];
-        rngCryptoServiceProvider.GetBytes(randomBytes);
-        return new RefreshToken {
-            Token = Convert.ToBase64String(randomBytes),
-            Expires = DateTime.UtcNow.AddDays(7),
-            Created = DateTime.UtcNow,
-            CreatedByIp = ipAddress
-        };
-    }
-
-    private static ClaimsPrincipal GetPrincipalFromToken(string token,
+    public static ClaimsPrincipal GetPrincipalFromToken(string token,
         TokenValidationParameters tokenValidationParameters) {
         var tokenHandler = new JwtSecurityTokenHandler();
         try {
             var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var validatedToken);
             return !_jwtHasValidSecurityAlgorithm(validatedToken) ? null : principal;
-        } catch (Exception) {
+        } catch (Exception e) {
             return null;
         }
     }
@@ -54,14 +42,32 @@ public static class AuthHelpers {
         var token = new JwtSecurityToken(
             jwtOptions.Issuer,
             jwtOptions.Audience,
-            expires: DateTime.UtcNow.Add(jwtOptions.Lifetime),
+            expires: DateTime.UtcNow.Add(jwtOptions.TokenLifetime),
             claims: authClaims,
             signingCredentials: credentials
         );
         return token;
     }
 
-    public static void SetCookies(HttpResponse response, string token, string userName, string refreshToken) {
+    public static async Task<JwtSecurityToken> GetRefreshToken(AppUser user, JWTOptions jwtOptions) {
+        var authClaims = new[] {
+            new Claim(ClaimTypes.NameIdentifier, user.Id)
+        };
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Secret));
+        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityToken(
+            jwtOptions.Issuer,
+            jwtOptions.Audience,
+            expires: DateTime.UtcNow.Add(jwtOptions.RefreshTokenLifetime),
+            claims: authClaims,
+            signingCredentials: credentials
+        );
+        return token;
+    }
+
+    public static void SetCookies(HttpResponse response, string userName, string token, string refreshToken) {
         response.Cookies.Append(Constants.AccessTokenCookie, token,
             new CookieOptions {HttpOnly = true, SameSite = SameSiteMode.Strict});
         response.Cookies.Append(Constants.UsernameCookie, userName,

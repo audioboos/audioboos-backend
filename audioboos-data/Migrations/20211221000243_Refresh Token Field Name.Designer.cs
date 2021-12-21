@@ -4,6 +4,7 @@ using System.Net;
 using AudioBoos.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AudioBoos.Data.Migrations
 {
     [DbContext(typeof(AudioBoosContext))]
-    partial class AudioBoosContextModelSnapshot : ModelSnapshot
+    [Migration("20211221000243_Refresh Token Field Name")]
+    partial class RefreshTokenFieldName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -370,60 +372,6 @@ namespace AudioBoos.Data.Migrations
                     b.ToTable("audio_files", "app");
                 });
 
-            modelBuilder.Entity("AudioBoos.Data.Store.RefreshToken", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<DateTime>("CreateDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("create_date")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<string>("JwtToken")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("jwt_token");
-
-                    b.Property<bool>("Revoked")
-                        .HasColumnType("boolean")
-                        .HasColumnName("revoked");
-
-                    b.Property<string>("Token")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("token");
-
-                    b.Property<DateTime>("UpdateDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("update_date")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("text")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_refresh_tokens");
-
-                    b.HasIndex("JwtToken")
-                        .IsUnique()
-                        .HasDatabaseName("ix_refresh_tokens_jwt_token");
-
-                    b.HasIndex("Token")
-                        .IsUnique()
-                        .HasDatabaseName("ix_refresh_tokens_token");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_refresh_tokens_user_id");
-
-                    b.ToTable("refresh_tokens", "app");
-                });
-
             modelBuilder.Entity("AudioBoos.Data.Store.Setting", b =>
                 {
                     b.Property<string>("Key")
@@ -601,22 +549,22 @@ namespace AudioBoos.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "1cfe32e1-b231-4187-97f9-042022c725d6",
-                            ConcurrencyStamp = "4f990493-4483-4c0e-9b2a-0548b0f0ea8a",
+                            Id = "9068ccec-bd02-4bde-97f8-5203a85eb94f",
+                            ConcurrencyStamp = "49cf9756-a2bf-4c37-85c0-3802c467ea4d",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "33a7e0d3-7bf7-4546-8eb8-b248750cb0d1",
-                            ConcurrencyStamp = "0984fcda-7be4-483e-8683-6948244865bd",
+                            Id = "0ff1859e-b6b5-4058-9791-2415b7e0279d",
+                            ConcurrencyStamp = "6a2238bd-db07-4cbe-aafa-1466e1038e5c",
                             Name = "Editor",
                             NormalizedName = "EDITOR"
                         },
                         new
                         {
-                            Id = "318483de-112c-4c80-83c7-95de5feec03a",
-                            ConcurrencyStamp = "b7b56f4e-f786-43ba-91fb-9cebf693b281",
+                            Id = "9e77b18a-cffd-4170-8350-aa15c23054a4",
+                            ConcurrencyStamp = "3e8be8a9-b8c3-46da-bfe0-0c747f0ecc62",
                             Name = "Viewer",
                             NormalizedName = "VIEWER"
                         });
@@ -771,6 +719,75 @@ namespace AudioBoos.Data.Migrations
                     b.Navigation("Artist");
                 });
 
+            modelBuilder.Entity("AudioBoos.Data.Store.AppUser", b =>
+                {
+                    b.OwnsMany("AudioBoos.Data.Store.RefreshToken", "RefreshTokens", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("integer")
+                                .HasColumnName("id");
+
+                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("Id"));
+
+                            b1.Property<string>("AppUserId")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("app_user_id");
+
+                            b1.Property<DateTime>("Created")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("created");
+
+                            b1.Property<string>("CreatedByIp")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("created_by_ip");
+
+                            b1.Property<DateTime>("Expires")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("expires");
+
+                            b1.Property<string>("Jwt")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("jwt");
+
+                            b1.Property<string>("ReplacedByToken")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("replaced_by_token");
+
+                            b1.Property<DateTime?>("Revoked")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("revoked");
+
+                            b1.Property<string>("RevokedByIp")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("revoked_by_ip");
+
+                            b1.Property<string>("Token")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("token");
+
+                            b1.HasKey("Id")
+                                .HasName("pk_refresh_token");
+
+                            b1.HasIndex("AppUserId")
+                                .HasDatabaseName("ix_refresh_token_app_user_id");
+
+                            b1.ToTable("RefreshToken", "app");
+
+                            b1.WithOwner()
+                                .HasForeignKey("AppUserId")
+                                .HasConstraintName("fk_refresh_token_users_app_user_id");
+                        });
+
+                    b.Navigation("RefreshTokens");
+                });
+
             modelBuilder.Entity("AudioBoos.Data.Store.AudioFile", b =>
                 {
                     b.HasOne("AudioBoos.Data.Store.Album", "Album")
@@ -793,16 +810,6 @@ namespace AudioBoos.Data.Migrations
                     b.Navigation("Artist");
 
                     b.Navigation("Track");
-                });
-
-            modelBuilder.Entity("AudioBoos.Data.Store.RefreshToken", b =>
-                {
-                    b.HasOne("AudioBoos.Data.Store.AppUser", "User")
-                        .WithMany("RefreshTokens")
-                        .HasForeignKey("UserId")
-                        .HasConstraintName("fk_refresh_tokens_users_user_id");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("AudioBoos.Data.Store.Track", b =>
@@ -896,11 +903,6 @@ namespace AudioBoos.Data.Migrations
             modelBuilder.Entity("AudioBoos.Data.Store.Album", b =>
                 {
                     b.Navigation("Tracks");
-                });
-
-            modelBuilder.Entity("AudioBoos.Data.Store.AppUser", b =>
-                {
-                    b.Navigation("RefreshTokens");
                 });
 
             modelBuilder.Entity("AudioBoos.Data.Store.Artist", b =>

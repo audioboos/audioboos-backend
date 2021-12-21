@@ -4,6 +4,7 @@ using System.Net;
 using AudioBoos.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AudioBoos.Data.Migrations
 {
     [DbContext(typeof(AudioBoosContext))]
-    partial class AudioBoosContextModelSnapshot : ModelSnapshot
+    [Migration("20211221215634_Add revoked to refresh token")]
+    partial class Addrevokedtorefreshtoken
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -377,6 +379,10 @@ namespace AudioBoos.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<string>("AppUserId")
+                        .HasColumnType("text")
+                        .HasColumnName("app_user_id");
+
                     b.Property<DateTime>("CreateDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -403,12 +409,11 @@ namespace AudioBoos.Data.Migrations
                         .HasColumnName("update_date")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("text")
-                        .HasColumnName("user_id");
-
                     b.HasKey("Id")
                         .HasName("pk_refresh_tokens");
+
+                    b.HasIndex("AppUserId")
+                        .HasDatabaseName("ix_refresh_tokens_app_user_id");
 
                     b.HasIndex("JwtToken")
                         .IsUnique()
@@ -417,9 +422,6 @@ namespace AudioBoos.Data.Migrations
                     b.HasIndex("Token")
                         .IsUnique()
                         .HasDatabaseName("ix_refresh_tokens_token");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_refresh_tokens_user_id");
 
                     b.ToTable("refresh_tokens", "app");
                 });
@@ -601,22 +603,22 @@ namespace AudioBoos.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "1cfe32e1-b231-4187-97f9-042022c725d6",
-                            ConcurrencyStamp = "4f990493-4483-4c0e-9b2a-0548b0f0ea8a",
+                            Id = "3ee7626c-aa24-4430-8bba-2f8586546bce",
+                            ConcurrencyStamp = "6b25c394-53f1-44ea-93c9-2759d4984120",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "33a7e0d3-7bf7-4546-8eb8-b248750cb0d1",
-                            ConcurrencyStamp = "0984fcda-7be4-483e-8683-6948244865bd",
+                            Id = "18c88687-4782-47cc-82cc-b20f591217bc",
+                            ConcurrencyStamp = "8e24102c-b9f9-4621-9273-67ac04634c7f",
                             Name = "Editor",
                             NormalizedName = "EDITOR"
                         },
                         new
                         {
-                            Id = "318483de-112c-4c80-83c7-95de5feec03a",
-                            ConcurrencyStamp = "b7b56f4e-f786-43ba-91fb-9cebf693b281",
+                            Id = "538b0c6c-9a4b-44a8-ab4a-b31903b7e4a4",
+                            ConcurrencyStamp = "bd3e4409-0f5e-4d83-8565-b6eb55d529c4",
                             Name = "Viewer",
                             NormalizedName = "VIEWER"
                         });
@@ -797,12 +799,10 @@ namespace AudioBoos.Data.Migrations
 
             modelBuilder.Entity("AudioBoos.Data.Store.RefreshToken", b =>
                 {
-                    b.HasOne("AudioBoos.Data.Store.AppUser", "User")
+                    b.HasOne("AudioBoos.Data.Store.AppUser", null)
                         .WithMany("RefreshTokens")
-                        .HasForeignKey("UserId")
-                        .HasConstraintName("fk_refresh_tokens_users_user_id");
-
-                    b.Navigation("User");
+                        .HasForeignKey("AppUserId")
+                        .HasConstraintName("fk_refresh_tokens_users_app_user_id");
                 });
 
             modelBuilder.Entity("AudioBoos.Data.Store.Track", b =>

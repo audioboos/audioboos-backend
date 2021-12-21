@@ -6,6 +6,8 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using AudioBoos.Data;
+using AudioBoos.Data.Access;
 using AudioBoos.Data.Models.DTO;
 using AudioBoos.Data.Models.Settings;
 using AudioBoos.Data.Store;
@@ -35,6 +37,7 @@ public class AuthController : ControllerBase {
     private readonly JWTOptions _jwtOptions;
     private readonly UserManager<AppUser> _userManager;
     private readonly IEmailSender _emailSender;
+    private readonly AudioBoosContext _context;
     private readonly TokenValidationParameters _tokenValidationParameters;
 
     public AuthController(
@@ -43,28 +46,79 @@ public class AuthController : ControllerBase {
         IOptions<JWTOptions> jwtOptions,
         UserManager<AppUser> userManager,
         IEmailSender emailSender,
+        AudioBoosContext context,
         TokenValidationParameters tokenValidationParameters) {
         _signInManager = signInManager;
         _logger = logger;
         _jwtOptions = jwtOptions.Value;
         _userManager = userManager;
         _emailSender = emailSender;
+        _context = context;
         _tokenValidationParameters = tokenValidationParameters;
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> OnLoginAsync([FromBody] LoginDto request) {
+    public async Task<IActionResult> OnLogin([FromBody] LoginDto request) {
         var user = await _userManager.FindByEmailAsync(request.Email);
         if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password)) {
             return Unauthorized();
         }
 
         await _signInManager.SignInAsync(user, false);
-        var token = await AuthHelpers.GetUserToken(user, _jwtOptions);
-        var tokenText = new JwtSecurityTokenHandler().WriteToken(token);
-        var refreshToken = AuthHelpers.GetRefreshToken(HttpContext.Connection.RemoteIpAddress.ToString());
+        var token = new JwtSecurityTokenHandler().WriteToken(await AuthHelpers.GetUserToken(user, _jwtOptions));
+        var refreshToken =
+            new JwtSecurityTokenHandler().WriteToken(await AuthHelpers.GetRefreshToken(user, _jwtOptions));
 
-        AuthHelpers.SetCookies(Response, tokenText, user.UserName, refreshToken.Token);
+        AuthHelpers.SetCookies(Response, user.UserName, token, refreshToken);
+        user.RefreshTokens.Add(new RefreshToken {
+            Token = refreshToken,
+            JwtToken = token
+        });
+        await _context.SaveChangesAsync();
+
+        return Ok();
+    }
+
+    [Authorize]
+    [HttpPost("logout")]
+    public async Task<IActionResult> OnLogout() {
+        await HttpContext.SignOutAsync();
+        AuthHelpers.RemoveCookies(HttpContext.Response);
+        return Ok();
+    }
+
+    [HttpPost("refresh")]
+    public async Task<IActionResult> OnRefreshTokenAsync() {
+        var refreshToken = Request.Cookies[Constants.RefreshTokenCookie];
+
+        var validatedToken = AuthHelpers.GetPrincipalFromToken(refreshToken, _tokenValidationParameters);
+        if (validatedToken == null) {
+            return Unauthorized();
+        }
+
+        var userId = validatedToken.Claims.Single(r => r.Type == ClaimTypes.NameIdentifier).Value;
+        var user = await _userManager.FindByIdAsync(userId);
+        var storedRefreshToken = _context.RefreshTokens
+            .SingleOrDefault(t => t.Token.Equals(refreshToken) && !t.Revoked && t.User.Id == userId);
+        if (storedRefreshToken is null) {
+            return Unauthorized();
+        }
+
+        //get the new token
+        var newToken = new JwtSecurityTokenHandler()
+            .WriteToken(await AuthHelpers.GetUserToken(user, _jwtOptions));
+        var newRefreshToken = new JwtSecurityTokenHandler()
+            .WriteToken(await AuthHelpers.GetRefreshToken(user, _jwtOptions));
+
+        AuthHelpers.SetCookies(Response, user.UserName, newToken, newRefreshToken);
+
+        user.RefreshTokens.Add(new RefreshToken {
+            Token = newRefreshToken,
+            JwtToken = newToken
+        });
+        storedRefreshToken.Revoked = true;
+        _context.Update(storedRefreshToken);
+        await _context.SaveChangesAsync();
 
         return Ok();
     }
@@ -82,7 +136,7 @@ public class AuthController : ControllerBase {
 
     [Authorize]
     [HttpGet("p")]
-    public async Task<ActionResult<AuthPingDto>> OnPingAsync() {
+    public async Task<ActionResult<AuthPingDto>> OnPing() {
         return await Task.FromResult(Ok(new AuthPingDto {
             Success = true,
             Message = "pong"
@@ -90,7 +144,7 @@ public class AuthController : ControllerBase {
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> OnRegisterAsync([FromBody] RegisterDto request) {
+    public async Task<IActionResult> OnRegister([FromBody] RegisterDto request) {
         if (!ModelState.IsValid) {
             return StatusCode(500);
         }
@@ -112,13 +166,5 @@ public class AuthController : ControllerBase {
         }
 
         return StatusCode(500);
-    }
-
-    [Authorize]
-    [HttpPost("logout")]
-    public async Task<IActionResult> OnLogoutAsync() {
-        await HttpContext.SignOutAsync();
-        AuthHelpers.RemoveCookies(HttpContext.Response);
-        return Ok();
     }
 }
