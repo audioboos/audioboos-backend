@@ -15,7 +15,8 @@ public static class CorsStartup {
                     builder.AllowCredentials();
                     builder.AllowAnyHeader();
                     builder.WithOrigins(
-                        config.GetValue<string>("System:WebClientUrl"));
+                        config.GetValue<string>("System:WebClientUrl"),
+                        "http://localhost:19006");
                 });
         });
 

@@ -35,6 +35,7 @@ public class Program {
             .ConfigureWebHostDefaults(webBuilder => {
                 webBuilder
                     .UseWebRoot(config.GetSection("System").GetValue<string>("CachePath"))
+                    .UseUrls("http://10.1.1.1:5000")
                     .UseStartup<Startup>()
                     .UseKestrel(options => options.ConfigureEndpoints());
             })

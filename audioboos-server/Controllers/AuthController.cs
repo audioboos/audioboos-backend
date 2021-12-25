@@ -58,7 +58,7 @@ public class AuthController : ControllerBase {
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> OnLogin([FromBody] LoginDto request) {
+    public async Task<ActionResult<AuthResultDto>> OnLogin([FromBody] LoginDto request) {
         var user = await _userManager.FindByEmailAsync(request.Email);
         if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password)) {
             return Unauthorized();
@@ -76,7 +76,7 @@ public class AuthController : ControllerBase {
         });
         await _context.SaveChangesAsync();
 
-        return Ok();
+        return Ok(new AuthResultDto(token, refreshToken));
     }
 
     [Authorize]
@@ -88,7 +88,7 @@ public class AuthController : ControllerBase {
     }
 
     [HttpGet("refresh")]
-    public async Task<IActionResult> OnRefreshTokenAsync() {
+    public async Task<ActionResult<AuthResultDto>> OnRefreshTokenAsync() {
         var refreshToken = Request.Cookies[Constants.RefreshTokenCookie];
 
         var validatedToken = AuthHelpers.GetPrincipalFromToken(refreshToken, _tokenValidationParameters);
@@ -120,7 +120,7 @@ public class AuthController : ControllerBase {
         _context.Update(storedRefreshToken);
         await _context.SaveChangesAsync();
 
-        return Ok();
+        return Ok(new AuthResultDto(newToken, newRefreshToken));
     }
 
     [Authorize]

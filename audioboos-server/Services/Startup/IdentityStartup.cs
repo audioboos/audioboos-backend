@@ -54,7 +54,10 @@ public static class IdentityStartup {
                 options.TokenValidationParameters = tokenValidationParameters;
                 options.Events = new JwtBearerEvents {
                     OnMessageReceived = context => {
-                        context.Token = context.Request.Cookies[Constants.AccessTokenCookie];
+                        if (!string.IsNullOrEmpty(context.Request.Cookies[Constants.AccessTokenCookie])) {
+                            context.Token = context.Request.Cookies[Constants.AccessTokenCookie];
+                        }
+
                         return Task.CompletedTask;
                     }
                 };

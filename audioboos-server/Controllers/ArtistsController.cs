@@ -9,7 +9,7 @@ using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
-namespace AudioBoos.Server.Controllers; 
+namespace AudioBoos.Server.Controllers;
 
 [ApiController]
 // [Authorize]
@@ -22,6 +22,7 @@ public class ArtistsController : ControllerBase {
     }
 
     [HttpGet]
+    [Authorize]
     public async Task<ActionResult<List<ArtistDto>>> Get() {
         var artists = await _artistRepository
             .GetAll()

@@ -11,7 +11,8 @@
         "dev": {
             "environmentVariables": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
-                "ASPNETCORE_System__AudioLookupService": "musicbrainz"
+                "ASPNETCORE_System__AudioLookupService": "musicbrainz",
+                "ASPNETCORE_URLS": "http://10.1.1.1:5000"
             },
             "commandName": "Project",
             "hotReloadProfile": "aspnetcore"
