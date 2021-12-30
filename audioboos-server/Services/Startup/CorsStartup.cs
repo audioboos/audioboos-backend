@@ -16,7 +16,9 @@ public static class CorsStartup {
                     builder.AllowAnyHeader();
                     builder.WithOrigins(
                         config.GetValue<string>("System:WebClientUrl"),
-                        "http://localhost:19006");
+                        "http://localhost:19006",
+                        "http://localhost:19006",
+                        "https://audioboos.fergl.ie");
                 });
         });
 
