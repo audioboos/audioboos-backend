@@ -26,6 +26,7 @@ public class ArtistsController : ControllerBase {
     public async Task<ActionResult<List<ArtistDto>>> Get() {
         var artists = await _artistRepository
             .GetAll()
+            .Include(a => a.Albums)
             .OrderBy(r => r.Name)
             .ToListAsync();
         var results = artists.Adapt<List<ArtistDto>>();

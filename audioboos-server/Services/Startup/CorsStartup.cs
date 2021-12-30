@@ -18,7 +18,8 @@ public static class CorsStartup {
                         config.GetValue<string>("System:WebClientUrl"),
                         "http://localhost:19006",
                         "http://localhost:19006",
-                        "https://audioboos.fergl.ie");
+                        "http://localhost:19006",
+                        "https://audioboos.info");
                 });
         });
 

@@ -109,7 +109,7 @@ public class Startup {
         app.UseImageSharp();
         app.UseStaticFiles();
 
-        app.UseHttpsRedirection();
+        // app.UseHttpsRedirection();
         app.UseRouting();
 
         app.UseAudioBoosCors()
