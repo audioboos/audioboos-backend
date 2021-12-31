@@ -19,7 +19,7 @@ public record Album : BaseAudioEntity {
     public string? SmallImage { get; set; }
     public string? LargeImage { get; set; }
 
-    public ICollection<Track> Tracks { get; set; }
+    public List<Track> Tracks { get; set; }
 
     [Required] public Guid ArtistId { get; set; }
     [Required] public Artist Artist { get; set; }

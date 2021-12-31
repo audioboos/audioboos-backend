@@ -28,7 +28,7 @@ public class StreamController : ControllerBase {
             return NotFound();
         }
 
-        var res = File(System.IO.File.OpenRead(track.PhysicalPath), "audio/wav");
+        var res = File(System.IO.File.OpenRead(track.PhysicalPath), "audio/mpeg");
         res.EnableRangeProcessing = true;
 
         await _trackPlay(track);

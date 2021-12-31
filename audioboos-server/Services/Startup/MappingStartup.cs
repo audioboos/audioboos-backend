@@ -1,9 +1,12 @@
-﻿using AudioBoos.Data.Models.DTO;
+﻿using System;
+using AudioBoos.Data.Models.DTO;
 using AudioBoos.Data.Store;
 using Flurl;
 using Mapster;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualBasic;
+using SixLabors.ImageSharp.ColorSpaces.Companding;
 
 namespace AudioBoos.Server.Services.Startup;
 
@@ -44,7 +47,9 @@ public static class MappingStartup {
                     $"{config.GetSection("System").GetValue<string>("BaseUrl")}/images/album/{src.Id}.jpg?width={smallWidth}&height={smallHeight}")
             .Map(dest => dest.LargeImage,
                 src =>
-                    $"{config.GetSection("System").GetValue<string>("BaseUrl")}/images/album/{src.Id}.jpg?width={largeWidth}&height={largeHeight}");
+                    $"{config.GetSection("System").GetValue<string>("BaseUrl")}/images/album/{src.Id}.jpg?width={largeWidth}&height={largeHeight}")
+            .Map(dest => dest.ReleaseDate,
+                src => src.ReleaseDate ?? src.UpdateDate);
 
         TypeAdapterConfig<TrackDto, Track>
             .NewConfig()
