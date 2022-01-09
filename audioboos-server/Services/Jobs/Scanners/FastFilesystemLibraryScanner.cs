@@ -80,7 +80,7 @@ internal class FastFilesystemLibraryScanner : LibraryScanner {
                 var albumName = tagger.GetAlbumName();
                 var trackName = tagger.GetTrackName();
                 var trackNumber = tagger.GetTrackNumber();
-                var catalogueId = tagger.GetAlbumCatalogueNumber();
+                var duration = tagger.GetDuration();
 
                 if (string.IsNullOrEmpty(artistName) || string.IsNullOrEmpty(albumName) ||
                     string.IsNullOrEmpty(trackName)) {
@@ -120,11 +120,11 @@ internal class FastFilesystemLibraryScanner : LibraryScanner {
                 await _unitOfWork.Complete();
 
                 var track = await _processTrackInfo(file, album, trackName, trackNumber, cancellationToken);
+                track.Duration = duration;
                 await _trackRepository.InsertOrUpdate(
                     track,
                     cancellationToken);
                 fileModel.Track = track;
-                await _unitOfWork.Complete();
 
                 await _unitOfWork.Complete();
 

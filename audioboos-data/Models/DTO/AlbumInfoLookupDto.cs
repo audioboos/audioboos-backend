@@ -4,7 +4,7 @@ public record AlbumInfoLookupDto(
     string artistName,
     string Name,
     string Description,
-    string Genre,
+    List<string>? Genres,
     string SmallImage,
     string LargeImage,
     string SiteId

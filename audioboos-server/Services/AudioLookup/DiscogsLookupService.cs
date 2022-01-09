@@ -159,7 +159,7 @@ public class DiscogsLookupService : IAudioLookupService {
                         artistName,
                         sanitisedAlbumName,
                         album.style.Count != 0 ? string.Join("\n", album.style) : string.Empty,
-                        $"{album.id}",
+                        album.genre,
                         album.cover_image,
                         album.cover_image,
                         album.id.ToString()

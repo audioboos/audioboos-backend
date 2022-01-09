@@ -92,9 +92,9 @@ public class MusicBrainzLookupService : IAudioLookupService {
                 artistName,
                 details.Item.Title,
                 details.Item.Annotation,
-                details.Item.Genres is not null && details.Item.Genres.Count != 0
-                    ? string.Join(',', details.Item.Genres?.Select(r => r.Name))
-                    : string.Empty,
+                details.Item.Genres
+                    .Where(r => !string.IsNullOrEmpty(r.Name))
+                    .Select(r => r.Name).ToList(),
                 file,
                 file,
                 details.Item.Id.ToString()

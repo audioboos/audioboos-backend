@@ -12,22 +12,38 @@ namespace AudioBoos.Server.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class AlbumController : ControllerBase {
+public class AlbumsController : ControllerBase {
     private readonly IAudioRepository<Album> _albumsRepository;
 
-    public AlbumController(IAudioRepository<Album> albumsRepository) {
+    public AlbumsController(IAudioRepository<Album> albumsRepository) {
         _albumsRepository = albumsRepository;
     }
 
     //TODO: API methods are a bit unclear here
     //TODO: endpoint is /album{***} but most methods return plural 
     [HttpGet("{artistName}")]
-    public async Task<ActionResult<List<AlbumDto>>> Get(string artistName) {
+    public async Task<ActionResult<List<AlbumDto>>> GetForArtist(string artistName) {
         var albums = await _albumsRepository
             .GetAll()
             .Include(a => a.Artist)
             .Include(a => a.Tracks)
             .Where(a => a.Artist.Name.Equals(artistName))
+            .ToListAsync();
+
+        //TODO: This should be ordered by album release date
+        var response = albums
+            .OrderBy(a => a.Name)
+            .Adapt<List<AlbumDto>>();
+
+        return response;
+    }
+
+    [HttpGet("")]
+    public async Task<ActionResult<List<AlbumDto>>> GetAss() {
+        var albums = await _albumsRepository
+            .GetAll()
+            .Include(a => a.Artist)
+            .Include(a => a.Tracks)
             .ToListAsync();
 
         //TODO: This should be ordered by album release date
@@ -55,4 +71,5 @@ public class AlbumController : ControllerBase {
 
         return Ok(album.Adapt<AlbumDto>());
     }
+
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text.Json.Serialization;
 using AudioBoos.Data.Access;
 using AudioBoos.Data;
 using AudioBoos.Data.Interfaces;
@@ -85,7 +86,12 @@ public class Startup {
             }).AddProcessor<ResizeWebProcessor>();
 
 
-        services.AddControllers();
+        services
+            .AddControllers()
+            .AddJsonOptions(options => {
+                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+            });
+        ;
         services.AddSwaggerGen(c => {
             c.SwaggerDoc("v1", new OpenApiInfo {Title = "AudioBoos API v1.0", Version = "v1"});
         });

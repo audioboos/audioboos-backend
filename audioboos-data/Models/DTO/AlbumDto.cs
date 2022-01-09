@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AudioBoos.Data.Store;
 using Mapster;
 
 #nullable enable
@@ -16,6 +17,7 @@ public record AlbumDto(string ArtistName) {
     public DateTime ReleaseDate { get; set; }
 
     public List<TrackDto>? Tracks { get; set; }
+    public List<String>? Genres { get; set; }
     public string? SiteId { get; set; }
 
     public static bool IsNullOrIncomplete(AlbumDto? albumDto) {

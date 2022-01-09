@@ -14,6 +14,7 @@ public record Track : BaseAudioEntity {
         this.PhysicalPath = path;
     }
 
+    public int Duration { get; set; }
     [Required] public int TrackNumber { get; set; }
     public string? Comments { get; set; }
     public string? AudioUrl { get; set; }

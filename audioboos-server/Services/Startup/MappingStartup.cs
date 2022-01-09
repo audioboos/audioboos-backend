@@ -1,12 +1,9 @@
-﻿using System;
-using AudioBoos.Data.Models.DTO;
+﻿using AudioBoos.Data.Models.DTO;
 using AudioBoos.Data.Store;
 using Flurl;
 using Mapster;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualBasic;
-using SixLabors.ImageSharp.ColorSpaces.Companding;
 
 namespace AudioBoos.Server.Services.Startup;
 
@@ -23,9 +20,11 @@ public static class MappingStartup {
 
         TypeAdapterConfig<Artist, ArtistDto>
             .NewConfig()
+            .MapToConstructor(false)
             .Map(dest => dest.Id, src => src.Id.ToString())
             .Map(dest => dest.Name, src => src.Name)
             .Map(dest => dest.NormalisedName, src => src.GetNormalisedName())
+            .Map(dest => dest.FirstSeen, src => src.CreateDate)
             .Map(dest => dest.SmallImage,
                 src =>
                     $"{config.GetSection("System").GetValue<string>("BaseUrl")}/images/artist/{src.Id}.jpg?width={smallWidth}&height={smallHeight}")
@@ -40,8 +39,10 @@ public static class MappingStartup {
 
         TypeAdapterConfig<Album, AlbumDto>
             .NewConfig()
+            .MapToConstructor(false)
             .ConstructUsing(src => new AlbumDto(src.Artist.Name))
             .Map(dest => dest.Id, src => src.Id.ToString())
+            .Map(dest => dest.ArtistName, src => src.Artist.Name)
             .Map(dest => dest.SmallImage,
                 src =>
                     $"{config.GetSection("System").GetValue<string>("BaseUrl")}/images/album/{src.Id}.jpg?width={smallWidth}&height={smallHeight}")
@@ -49,7 +50,9 @@ public static class MappingStartup {
                 src =>
                     $"{config.GetSection("System").GetValue<string>("BaseUrl")}/images/album/{src.Id}.jpg?width={largeWidth}&height={largeHeight}")
             .Map(dest => dest.ReleaseDate,
-                src => src.ReleaseDate ?? src.UpdateDate);
+                src => src.ReleaseDate ?? src.UpdateDate)
+            .PreserveReference(true);
+        ;
 
         TypeAdapterConfig<TrackDto, Track>
             .NewConfig()
@@ -66,6 +69,12 @@ public static class MappingStartup {
                         },
                         NullValueHandling.Remove));
 
+        TypeAdapterConfig<TrackPlayLog, TrackPlayDto>
+            .NewConfig()
+            .Map(dest => dest.DatePlayed, src => src.UpdateDate)
+            .Map(dest => dest.PlayedByIp, src => src.IPAddress.ToString())
+            .Map(dest => dest.PlayedByUser, src => src.User.UserName);
+        
         return services;
     }
 }

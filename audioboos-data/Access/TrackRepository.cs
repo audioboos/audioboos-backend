@@ -23,10 +23,9 @@ public class TrackRepository : AbstractAudioRepository<Track> {
                 cancellationToken);
         if (existing is not null) {
             entity.Id = existing.Id;
-        } else {
-            await _context.Tracks.AddAsync(entity, cancellationToken);
         }
 
+        this._context.Update(entity);
         return entity;
     }
 }

@@ -79,7 +79,7 @@ public class AuthController : ControllerBase {
         return Ok(new AuthResultDto(token, refreshToken));
     }
 
-    [Authorize]
+    [AllowAnonymous]
     [HttpPost("logout")]
     public async Task<IActionResult> OnLogout() {
         await HttpContext.SignOutAsync();

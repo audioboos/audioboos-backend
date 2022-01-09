@@ -11,6 +11,7 @@ interface ITagService : IDisposable {
     string GetTrackName();
     string GetTrackComments();
     int GetTrackNumber();
+    int GetDuration();
     Task<string> GetChecksum();
 
     bool SetTrackTitle(string title);

@@ -22,10 +22,10 @@ public class ArtistsController : ControllerBase {
     }
 
     [HttpGet]
-    [Authorize]
     public async Task<ActionResult<List<ArtistDto>>> Get() {
         var artists = await _artistRepository
             .GetAll()
+            .AsNoTracking()
             .Include(a => a.Albums)
             .ThenInclude(a => a.Tracks)
             .OrderBy(r => r.Name)
@@ -38,9 +38,26 @@ public class ArtistsController : ControllerBase {
     public async Task<ActionResult<ArtistDto>> Get(string artistName) {
         var artist = await _artistRepository
             .GetAll()
+            .AsNoTracking()
             .Include(a => a.Albums)
             .ThenInclude(a => a.Tracks.OrderBy(t => t.TrackNumber))
             .FirstOrDefaultAsync(r => r.Name.Equals(artistName));
         return artist != null ? Ok(artist.Adapt<ArtistDto>()) : NotFound();
     }
+
+    [HttpGet("search")]
+    public async Task<ActionResult<List<ArtistDto>>> Search([FromQuery] string term) {
+        if (string.IsNullOrEmpty(term)) {
+            return NoContent();
+        }
+
+        var artists = await _artistRepository
+            .GetAll()
+            .Include(a => a.Albums)
+            .ThenInclude(a => a.Tracks.OrderBy(t => t.TrackNumber))
+            .Where(r => r.Name.ToLower().Contains(term.ToLower()))
+            .ToListAsync();
+        return artists != null ? Ok(artists.Adapt<List<ArtistDto>>()) : NoContent();
+    }
+
 }

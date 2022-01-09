@@ -1,6 +1,6 @@
 #nullable enable
 
-namespace AudioBoos.Data.Models.DTO; 
+namespace AudioBoos.Data.Models.DTO;
 
 public record ArtistDto(
     string Name,
@@ -10,6 +10,7 @@ public record ArtistDto(
     string? SmallImage,
     string? LargeImage,
     string? SiteId,
+    DateTime? FirstSeen = null,
     List<string>? Aliases = null,
     List<AlbumDto>? Albums = null,
     string? Id = null

@@ -30,7 +30,7 @@ public class UpdateLibraryJob : IAudioBoosJob {
         if (!string.IsNullOrEmpty(artistName)) {
             await _scanner.UpdateArtist(artistName, context.CancellationToken);
         } else {
-            await _scanner.ScanLibrary(false, string.Empty, context.CancellationToken);
+            // await _scanner.ScanLibrary(false, string.Empty, context.CancellationToken);
             await _scanner.UpdateUnscannedArtists(context.CancellationToken);
             await _scanner.UpdateUnscannedAlbums(context.CancellationToken);
             await _scanner.UpdateChecksums(context.CancellationToken);

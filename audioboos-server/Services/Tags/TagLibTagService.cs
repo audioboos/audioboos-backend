@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using AudioBoos.Server.Services;
 
-namespace AudioBoos.Server.Services.Tags; 
+namespace AudioBoos.Server.Services.Tags;
 
 public class TagLibTagService : MustInitialize<string>, ITagService {
     private readonly TagLib.File _file;
@@ -50,6 +50,10 @@ public class TagLibTagService : MustInitialize<string>, ITagService {
 
     public int GetTrackNumber() {
         return Convert.ToInt32(_file.Tag.Track);
+    }
+
+    public int GetDuration() {
+        return Convert.ToInt32(_file.Properties.Duration.TotalSeconds);
     }
 
     public async Task<string> GetChecksum() {

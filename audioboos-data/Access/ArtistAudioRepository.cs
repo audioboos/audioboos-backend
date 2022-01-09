@@ -6,7 +6,7 @@ using AudioBoos.Data.Store;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace AudioBoos.Data.Access; 
+namespace AudioBoos.Data.Access;
 
 public class ArtistAudioRepository : AbstractAudioRepository<Artist> {
     private readonly ILogger<ArtistAudioRepository> _logger;
@@ -26,12 +26,11 @@ public class ArtistAudioRepository : AbstractAudioRepository<Artist> {
     public override async Task<Artist>
         InsertOrUpdate(Artist entity, CancellationToken cancellationToken = default) {
         var existing =
-                await _context.Artists
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(
-                        a => a.Name.Equals(entity.Name),
-                        cancellationToken: cancellationToken)
-            ;
+            await _context.Artists
+                .AsNoTracking()
+                .FirstOrDefaultAsync(
+                    a => a.Name.Equals(entity.Name),
+                    cancellationToken);
 
         if (existing is not null) {
             entity.Id = existing.Id;

@@ -1,5 +1,5 @@
 ﻿#nullable enable
-namespace AudioBoos.Data.Models.DTO; 
+namespace AudioBoos.Data.Models.DTO;
 
 public class TrackDto {
     public TrackDto(string artistName) {
@@ -10,6 +10,7 @@ public class TrackDto {
     public string Name { get; set; }
     public string AlbumName { get; set; }
     public int TrackNumber { get; set; }
+    public int Duration { get; set; }
     public string AudioUrl { get; set; }
     public string SiteId { get; set; }
 

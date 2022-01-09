@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace AudioBoos.Data.Extensions; 
+namespace AudioBoos.Data.Extensions;
 
 public static class ModelBuilderExtensions {
     private static IEnumerable<UniqueKeyAttribute> _getUniqueKeyAttributes(this IMutableEntityType entityType,
@@ -81,23 +81,30 @@ public static class ModelBuilderExtensions {
     }
 
     public static void SeedRoles(this ModelBuilder builder) {
-        var adminRoleId = Guid.NewGuid().ToString();
-        var editorRoleId = Guid.NewGuid().ToString();
-        var viewerRoleId = Guid.NewGuid().ToString();
+        var adminRoleId = Guid.Parse("b8e58349-3353-4aac-91a2-7146bb1a64cb").ToString();
+        var editorRoleId = Guid.Parse("ad46f0b2-8ced-4786-93af-0306ba77d522").ToString();
+        var viewerRoleId = Guid.Parse("0f50900a-19dd-48d5-9aa9-e2f298ef4ef1").ToString();
+
+        var adminConcurrencyStamp = Guid.Parse("0bd4d47e-8d86-4d75-a3ca-8dc175af4564").ToString();
+        var editorConcurrencyStamp = Guid.Parse("014638e8-fcff-4f9d-bc60-ce6ed0250965").ToString();
+        var viewerConcurrencyStamp = Guid.Parse("4db8a34e-3084-4f5d-abdb-9da2265b824f").ToString();
 
         builder.Entity<IdentityRole>().HasData(new List<IdentityRole> {
             new() {
                 Id = adminRoleId,
+                ConcurrencyStamp = adminConcurrencyStamp,
                 Name = "Admin",
                 NormalizedName = "ADMIN"
             },
             new() {
                 Id = editorRoleId,
+                ConcurrencyStamp = editorConcurrencyStamp,
                 Name = "Editor",
                 NormalizedName = "EDITOR"
             },
             new() {
                 Id = viewerRoleId,
+                ConcurrencyStamp = viewerConcurrencyStamp,
                 Name = "Viewer",
                 NormalizedName = "VIEWER"
             },

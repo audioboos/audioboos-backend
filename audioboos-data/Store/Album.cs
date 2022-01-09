@@ -20,6 +20,7 @@ public record Album : BaseAudioEntity {
     public string? LargeImage { get; set; }
 
     public List<Track> Tracks { get; set; }
+    public List<string>? Genres { get; set; }
 
     [Required] public Guid ArtistId { get; set; }
     [Required] public Artist Artist { get; set; }
