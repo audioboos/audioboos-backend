@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AudioBoos.Data.Access;
+using AudioBoos.Data.Interfaces;
 using AudioBoos.Data.Models.DTO;
 using AudioBoos.Data.Store;
 using Mapster;
@@ -14,9 +16,12 @@ namespace AudioBoos.Server.Controllers;
 [Route("[controller]")]
 public class AlbumsController : ControllerBase {
     private readonly IAudioRepository<Album> _albumsRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public AlbumsController(IAudioRepository<Album> albumsRepository) {
+
+    public AlbumsController(IAudioRepository<Album> albumsRepository, IUnitOfWork unitOfWork) {
         _albumsRepository = albumsRepository;
+        _unitOfWork = unitOfWork;
     }
 
     //TODO: API methods are a bit unclear here
@@ -36,6 +41,30 @@ public class AlbumsController : ControllerBase {
             .Adapt<List<AlbumDto>>();
 
         return response;
+    }
+
+    [HttpPatch]
+    public async Task<ActionResult<AlbumDto>> Patch([FromBody] AlbumDto incomingAlbum) {
+        if (!ModelState.IsValid || string.IsNullOrEmpty(incomingAlbum.Id)) {
+            return StatusCode(500);
+        }
+
+        var album = await _albumsRepository
+            .GetAll()
+            .Include(a => a.Artist)
+            .FirstOrDefaultAsync(a => a.Id.Equals(Guid.Parse(incomingAlbum.Id)));
+
+        if (album is null) {
+            return NotFound();
+        }
+
+        if (!incomingAlbum.Name.Equals(album.Name)) {
+            album.Name = incomingAlbum.Name;
+            _albumsRepository.InsertOrUpdate(album);
+            await _unitOfWork.Complete();
+        }
+
+        return Ok(album.Adapt<AlbumDto>());
     }
 
     [HttpGet("")]
@@ -71,5 +100,4 @@ public class AlbumsController : ControllerBase {
 
         return Ok(album.Adapt<AlbumDto>());
     }
-
 }

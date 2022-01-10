@@ -50,7 +50,7 @@ public class ArtistsController : ControllerBase {
 
     [HttpPatch]
     public async Task<ActionResult<ArtistDto>> Patch([FromBody] ArtistDto incomingArtist) {
-        if (!ModelState.IsValid) {
+        if (!ModelState.IsValid || string.IsNullOrEmpty(incomingArtist.Id)) {
             return StatusCode(500);
         }
 
