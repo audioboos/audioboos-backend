@@ -60,6 +60,7 @@ public class AlbumsController : ControllerBase {
 
         if (!incomingAlbum.Name.Equals(album.Name)) {
             album.Name = incomingAlbum.Name;
+            album.Immutable = true;
             _albumsRepository.InsertOrUpdate(album);
             await _unitOfWork.Complete();
         }

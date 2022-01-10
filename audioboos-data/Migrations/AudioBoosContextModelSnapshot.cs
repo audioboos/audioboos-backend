@@ -250,6 +250,10 @@ namespace AudioBoos.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("header_image");
 
+                    b.Property<bool>("Immutable")
+                        .HasColumnType("boolean")
+                        .HasColumnName("immutable");
+
                     b.Property<string>("LargeImage")
                         .HasColumnType("text")
                         .HasColumnName("large_image");

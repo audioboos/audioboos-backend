@@ -18,6 +18,7 @@ public record Artist(string Name) : BaseAudioEntity(Name) {
     public List<string>? Aliases { get; set; }
 
     public ICollection<Album>? Albums { get; set; }
+    public bool Immutable { get; set; }
 
     public static bool IsIncomplete(BaseAudioEntity audioEntity) =>
         !BaseAudioEntity.IsIncomplete(audioEntity) ||
