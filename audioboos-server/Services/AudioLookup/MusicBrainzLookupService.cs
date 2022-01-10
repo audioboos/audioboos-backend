@@ -85,8 +85,6 @@ public class MusicBrainzLookupService : IAudioLookupService {
             var id = details.Item.Id;
             var art = await _coverArtService.GetCoverart(id.ToString());
             //TODO: probably shouldn't be caching here
-            var cacheFile = Path.Combine(_systemSettings.ImagePath, "album", albumId);
-            var file = await HttpHelpers.DownloadFile(art, cacheFile);
 
             return new AlbumInfoLookupDto(
                 artistName,
@@ -95,13 +93,15 @@ public class MusicBrainzLookupService : IAudioLookupService {
                 details.Item.Genres?
                     .Where(r => !string.IsNullOrEmpty(r.Name))
                     .Select(r => r.Name).ToList(),
-                file,
-                file,
+                art,
+                art,
                 details.Item.Id.ToString()
             );
         } catch (Exception e) {
-            _logger.LogError("Error looking up album\n\t{Error}", e.Message);
+            _logger.LogError("Error finding cover art\n\t{Error}", e.Message);
             throw new AlbumNotFoundException($"Album: {albumName} not found");
         }
+
+        return null;
     }
 }

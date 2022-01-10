@@ -99,6 +99,8 @@ internal abstract class LibraryScanner : ILibraryScanner {
             }
 
             var updated = remoteAlbumInfo.Adapt(album);
+            if (string.IsNullOrEmpty(updated.LargeImage)) updated.LargeImage = remoteAlbumInfo.LargeImage;
+            if (string.IsNullOrEmpty(updated.SmallImage)) updated.SmallImage = remoteAlbumInfo.SmallImage;
             updated.TaggingStatus = TaggingStatus.RemoteLookup;
             updated.LastScanDate = DateTime.Now;
             await albumRepository.InsertOrUpdate(updated, cancellationToken);

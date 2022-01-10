@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -18,17 +19,22 @@ public class CoverArtLookupService {
 
     public async Task<string> GetCoverart(string releaseId) {
         _logger.LogDebug("Finding cover art for {release}", releaseId);
-        using var client = _httpClientFactory.CreateClient("coverart");
+        try {
+            using var client = _httpClientFactory.CreateClient("coverart");
 
-        var response = await client.GetAsync($"/release/{releaseId}");
-        response.EnsureSuccessStatusCode();
+            var response = await client.GetAsync($"/release/{releaseId}");
+            response.EnsureSuccessStatusCode();
 
-        var results = await JsonSerializer.DeserializeAsync<CoverArtSearchResult>(
-            await response.Content.ReadAsStreamAsync());
-        if (results is not null) {
-            return results.images
-                .Select(r => r.image.Replace("http://", "https://"))
-                .FirstOrDefault();
+            var results = await JsonSerializer.DeserializeAsync<CoverArtSearchResult>(
+                await response.Content.ReadAsStreamAsync());
+            if (results is not null) {
+                return results.images
+                    .Where(r => r.front)
+                    .Select(r => r.image.Replace("http://", "https://"))
+                    .FirstOrDefault();
+            }
+        } catch (Exception e) {
+            _logger.LogError("Error finding cover art for {release}", releaseId);
         }
 
         return string.Empty;
