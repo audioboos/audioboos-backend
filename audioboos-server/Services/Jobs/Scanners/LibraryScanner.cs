@@ -65,6 +65,7 @@ internal abstract class LibraryScanner : ILibraryScanner {
                 .AsNoTracking()
                 .Include(a => a.Artist)
                 .Where(a => a.TaggingStatus != TaggingStatus.ManualUpdate)
+                .Where(a => !a.Immutable)
                 .ToList()
                 .Where(a => Album.IsIncomplete(a) || a.TaggingStatus.Equals(TaggingStatus.MP3TagsOnly))
             // .Where(a => a.Artist.Name.Equals("Bauhaus"))
@@ -79,6 +80,10 @@ internal abstract class LibraryScanner : ILibraryScanner {
 
     public async Task UpdateAlbum(Album album, CancellationToken cancellationToken) {
         try {
+            if (album.Immutable) {
+                _logger.LogWarning("Album {Album} has been marked as immutable, will not scan", album.Name);
+            }
+
             using var scope = _serviceProvider.CreateScope();
             var albumRepository = scope.ServiceProvider.GetService<IAudioRepository<Album>>();
             var unitOfWork = scope.ServiceProvider.GetService<IUnitOfWork>();
@@ -123,6 +128,7 @@ internal abstract class LibraryScanner : ILibraryScanner {
             .GetAll()
             .AsNoTracking()
             .Where(a => a.TaggingStatus != TaggingStatus.ManualUpdate) //never auto scan manually updated artists
+            .Where(a => !a.Immutable)
             .ToList()
             .Where(a => Artist.IsIncomplete(a) || a.TaggingStatus.Equals(TaggingStatus.MP3TagsOnly));
 
@@ -141,6 +147,11 @@ internal abstract class LibraryScanner : ILibraryScanner {
             .Include(a => a.Albums)
             .Where(a => a.Name.Equals(artistName))
             .FirstOrDefaultAsync(cancellationToken);
+        if (artist.Immutable) {
+            _logger.LogWarning("Artist {Artist} has been marked as immutable, will not scan", artist.Name);
+            return;
+        }
+
         try {
             var remoteArtistInfo = await _lookupService.LookupArtistInfo(
                 artist.Name,
@@ -166,7 +177,7 @@ internal abstract class LibraryScanner : ILibraryScanner {
 
             _logger.LogDebug("Scanning albums for {Artist}", artistName);
             foreach (var album in artist.Albums) {
-                UpdateAlbum(album, cancellationToken);
+                await UpdateAlbum(album, cancellationToken);
             }
         } catch (ArtistNotFoundException) {
             _logger.LogWarning("Artist {Artist} not found in {Scanner}", artist.Name, _lookupService.Name);

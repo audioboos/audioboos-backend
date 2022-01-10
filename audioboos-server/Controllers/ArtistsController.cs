@@ -63,7 +63,7 @@ public class ArtistsController : ControllerBase {
         if (!incomingArtist.Name.Equals(artist.Name)) {
             artist.Name = incomingArtist.Name;
             artist.Immutable = true;
-            _artistRepository.InsertOrUpdate(artist);
+            await _artistRepository.InsertOrUpdate(artist);
             await _unitOfWork.Complete();
         }
 

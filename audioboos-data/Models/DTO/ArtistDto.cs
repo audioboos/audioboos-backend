@@ -15,6 +15,7 @@ public record ArtistDto(
     List<AlbumDto>? Albums = null,
     string? Id = null
 ) {
+
     public static bool IsNullOrIncomplete(ArtistDto? artistDto) {
         return artistDto is null || string.IsNullOrEmpty(artistDto.Name) ||
                string.IsNullOrEmpty(artistDto.Description) ||

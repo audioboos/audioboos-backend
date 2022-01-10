@@ -88,6 +88,7 @@ public class AuthController : ControllerBase {
         return Ok();
     }
 
+    [AllowAnonymous]
     [HttpPost("refresh")]
     public async Task<ActionResult<AuthResultDto>> OnRefreshTokenAsync() {
         var refreshToken = Request.Cookies[Constants.RefreshTokenCookie];
@@ -99,7 +100,8 @@ public class AuthController : ControllerBase {
 
         var userId = validatedToken.Claims.Single(r => r.Type == ClaimTypes.NameIdentifier).Value;
         var user = await _userManager.FindByIdAsync(userId);
-        var storedRefreshToken = _context.RefreshTokens
+        var storedRefreshToken = _context
+            .RefreshTokens
             .SingleOrDefault(t => t.Token.Equals(refreshToken) && !t.Revoked && t.User.Id == userId);
         if (storedRefreshToken is null) {
             return Unauthorized();
@@ -150,7 +152,7 @@ public class AuthController : ControllerBase {
             return StatusCode(500);
         }
 
-        var user = new AppUser {UserName = request.Email, Email = request.Email};
+        var user = new AppUser { UserName = request.Email, Email = request.Email };
         var result = await _userManager.CreateAsync(user, request.Password);
         if (result.Succeeded) {
             _logger.LogInformation("User created a new account with password");

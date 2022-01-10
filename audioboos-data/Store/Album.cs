@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace AudioBoos.Data.Store;
@@ -16,7 +17,9 @@ public record Album : BaseAudioEntity {
     public DateTime? ReleaseDate { get; set; }
 
     public string? SiteId { get; set; }
+    [AdaptIgnore]
     public string? SmallImage { get; set; }
+    [AdaptIgnore]
     public string? LargeImage { get; set; }
 
     public List<Track> Tracks { get; set; }
