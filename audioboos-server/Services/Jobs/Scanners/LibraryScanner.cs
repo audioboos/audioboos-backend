@@ -44,13 +44,11 @@ internal abstract class LibraryScanner : ILibraryScanner {
     protected async Task<string> _libraryPath() {
         using var scope = _serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetService<AudioBoosContext>();
-        return true
-            ? "/mnt/frasier/media/audio/MuziQ/Pedestrian/Store"
-            : await context
-                .Settings
-                .Where(r => r.Key.ToLower().Equals("librarypath"))
-                .Select(s => s.Value)
-                .FirstOrDefaultAsync();
+        return await context
+            .Settings
+            .Where(r => r.Key.ToLower().Equals("librarypath"))
+            .Select(s => s.Value)
+            .FirstOrDefaultAsync();
     }
 
 
