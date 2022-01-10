@@ -14,6 +14,13 @@ public static class MappingStartup {
         var largeWidth = config["ImageOptions:LargeImageWidth"];
         var largeHeight = config["ImageOptions:LargeImageHeight"];
 
+        TypeAdapterConfig<AppUser, ProfileDto>
+            .NewConfig()
+            .Map(dest => dest.Email, src => src.Email);
+
+        TypeAdapterConfig<ProfileDto, AppUser>
+            .NewConfig();
+
         TypeAdapterConfig<ArtistDto, Artist>
             .NewConfig()
             .ConstructUsing(src => new Artist(src.Name));
@@ -74,7 +81,7 @@ public static class MappingStartup {
             .Map(dest => dest.DatePlayed, src => src.UpdateDate)
             .Map(dest => dest.PlayedByIp, src => src.IPAddress.ToString())
             .Map(dest => dest.PlayedByUser, src => src.User.UserName);
-        
+
         return services;
     }
 }

@@ -13,6 +13,7 @@ using AudioBoos.Data.Models.Settings;
 using AudioBoos.Data.Store;
 using AudioBoos.Server.Helpers;
 using AudioBoos.Server.Services.Email;
+using Mapster;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -128,7 +129,7 @@ public class AuthController : ControllerBase {
     public async Task<ActionResult<ProfileDto>> GetProfile() {
         var user = await _userManager.GetUserAsync(this.User);
         if (user is not null) {
-            return Ok(new ProfileDto(user.UserName));
+            return Ok(user.Adapt<ProfileDto>());
         }
 
         return Unauthorized();

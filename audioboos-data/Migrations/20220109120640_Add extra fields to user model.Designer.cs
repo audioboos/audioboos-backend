@@ -5,6 +5,7 @@ using System.Net;
 using AudioBoos.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -13,9 +14,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AudioBoos.Data.Migrations
 {
     [DbContext(typeof(AudioBoosContext))]
-    partial class AudioBoosContextModelSnapshot : ModelSnapshot
+    [Migration("20220109120640_Add extra fields to user model")]
+    partial class Addextrafieldstousermodel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -120,10 +122,12 @@ namespace AudioBoos.Data.Migrations
                         .HasColumnName("concurrency_stamp");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("description");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)")
                         .HasColumnName("email");
@@ -133,6 +137,7 @@ namespace AudioBoos.Data.Migrations
                         .HasColumnName("email_confirmed");
 
                     b.Property<string>("FirstName")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("first_name");
 
@@ -143,6 +148,11 @@ namespace AudioBoos.Data.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("lockout_end");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -167,10 +177,12 @@ namespace AudioBoos.Data.Migrations
                         .HasColumnName("phone_number_confirmed");
 
                     b.Property<string>("Photo")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("photo");
 
                     b.Property<string>("SecondName")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("second_name");
 
