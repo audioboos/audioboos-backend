@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using AudioBoos.Data.Access;
 using AudioBoos.Data.Models.Settings;
@@ -10,6 +11,7 @@ using AudioBoos.Server.Services.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Quartz;
 
 namespace AudioBoos.Server.Services.Jobs.Scanners;
 
@@ -19,19 +21,15 @@ namespace AudioBoos.Server.Services.Jobs.Scanners;
 /// </summary>
 internal class UnstructuredLibraryScanner : LibraryScanner {
     public UnstructuredLibraryScanner(ILogger<UnstructuredLibraryScanner> logger,
-        AudioBoosContext context,
-        IAudioRepository<AudioFile> audioFileRepository,
-        IAudioRepository<Artist> artistRepository,
-        IAudioRepository<Album> albumRepository,
-        IAudioRepository<Track> trackRepository,
         IHubContext<JobHub> messageClient,
-        IUnitOfWork unitOfWork,
         IAudioLookupService lookupService,
-        IOptions<SystemSettings> systemSettings) : base(logger, context, audioFileRepository, artistRepository,
-        albumRepository, trackRepository, messageClient, unitOfWork, lookupService, systemSettings) {
+        ISchedulerFactory schedulerFactory,
+        IServiceProvider serviceProvider) : base(logger, messageClient, lookupService, schedulerFactory,
+        serviceProvider) {
     }
 
-    public override async Task<(int, int, int)> ScanLibrary(bool deepScan, string childFolder, CancellationToken cancellationToken) {
+    public override async Task<(int, int, int)> ScanLibrary(bool deepScan, string childFolder,
+        CancellationToken cancellationToken) {
         _logger.LogInformation("Starting unstructured library scan");
         return await Task.FromResult((0, 0, 0));
     }

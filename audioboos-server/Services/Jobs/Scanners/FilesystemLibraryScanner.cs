@@ -16,24 +16,21 @@ using AudioBoos.Server.Services.Tags;
 using Mapster;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Quartz;
 
 namespace AudioBoos.Server.Services.Jobs.Scanners;
 
 internal class FilesystemLibraryScanner : LibraryScanner {
     public FilesystemLibraryScanner(
         ILogger<FilesystemLibraryScanner> logger,
-        AudioBoosContext context,
-        IAudioRepository<AudioFile> audioFileRepository,
-        IAudioRepository<Artist> artistRepository,
-        IAudioRepository<Album> albumRepository,
-        IAudioRepository<Track> trackRepository,
         IHubContext<JobHub> messageClient,
-        IUnitOfWork unitOfWork,
         IAudioLookupService lookupService,
-        IOptions<SystemSettings> systemSettings) : base(logger, context, audioFileRepository, artistRepository,
-        albumRepository, trackRepository, messageClient, unitOfWork, lookupService, systemSettings) {
+        ISchedulerFactory schedulerFactory,
+        IServiceProvider serviceProvider) : base(logger, messageClient, lookupService, schedulerFactory,
+        serviceProvider) {
     }
 
 
@@ -45,7 +42,12 @@ internal class FilesystemLibraryScanner : LibraryScanner {
 
         await __scanLock.WaitAsync(cancellationToken);
         _logger.LogInformation("*** START SCANNING ***");
-
+        using var scope = _serviceProvider.CreateScope();
+        var trackRepository = scope.ServiceProvider.GetService<IAudioRepository<Track>>();
+        var audioFileRepository = scope.ServiceProvider.GetService<IAudioRepository<AudioFile>>();
+        var artistRepository = scope.ServiceProvider.GetService<IAudioRepository<Artist>>();
+        var albumRepository = scope.ServiceProvider.GetService<IAudioRepository<Album>>();
+        var unitOfWork = scope.ServiceProvider.GetService<IUnitOfWork>();
         await _messageClient.Clients.All.SendAsync("QueueJobMessage", new JobMessage {
             Message = "Starting scan job",
             Percentage = 0
@@ -88,7 +90,7 @@ internal class FilesystemLibraryScanner : LibraryScanner {
                     continue;
                 }
 
-                var fileModel = await _audioFileRepository
+                var fileModel = await audioFileRepository
                                     .GetByFile(file, cancellationToken) ??
                                 new AudioFile(
                                     file,
@@ -98,31 +100,31 @@ internal class FilesystemLibraryScanner : LibraryScanner {
 
                 // fileModel.LastScanDate = DateTime.UtcNow;
                 fileModel.Checksum = checksum;
-                await _audioFileRepository.InsertOrUpdate(
+                await audioFileRepository.InsertOrUpdate(
                     fileModel,
                     cancellationToken);
 
                 var artist = await _processArtistInfo(file, artistName, cancellationToken);
-                await _artistRepository.InsertOrUpdate(
+                await artistRepository.InsertOrUpdate(
                     artist,
                     cancellationToken);
                 // fileModel.Artist = artist;
 
                 var album = await _processAlbumInfo(file, artist, albumName, cancellationToken);
-                await _albumRepository.InsertOrUpdate(
+                await albumRepository.InsertOrUpdate(
                     album,
                     cancellationToken);
                 // fileModel.Album = album;
 
                 var track = await _processTrackInfo(file, album, trackName, trackNumber, cancellationToken);
-                await _trackRepository.InsertOrUpdate(
+                await trackRepository.InsertOrUpdate(
                     track,
                     cancellationToken);
                 // fileModel.Track = track;
 
                 trackScans++;
 
-                await _unitOfWork.Complete();
+                await unitOfWork.Complete();
             } catch (ArtistNotFoundException e) {
                 //TODO: dunno.... guess we should do something??
                 _logger.LogError("Error scanning {File}", e.Message);
@@ -151,9 +153,12 @@ internal class FilesystemLibraryScanner : LibraryScanner {
 
     private async Task<Artist> _processArtistInfo(string file, string artistName,
         CancellationToken cancellationToken) {
-        var artist = await _artistRepository.GetByFile(file, cancellationToken) ??
-                     await _artistRepository.GetByName(artistName, cancellationToken) ??
-                     await _artistRepository.GetByAlternativeNames(cancellationToken, artistName) ??
+        using var scope = _serviceProvider.CreateScope();
+        var artistRepository = scope.ServiceProvider.GetService<IAudioRepository<Artist>>();
+
+        var artist = await artistRepository.GetByFile(file, cancellationToken) ??
+                     await artistRepository.GetByName(artistName, cancellationToken) ??
+                     await artistRepository.GetByAlternativeNames(cancellationToken, artistName) ??
                      new Artist(artistName);
 
         if (!string.IsNullOrEmpty(artist.LargeImage) && !string.IsNullOrEmpty(artist.SmallImage)) {
@@ -181,9 +186,12 @@ internal class FilesystemLibraryScanner : LibraryScanner {
 
     private async Task<Album> _processAlbumInfo(string file, Artist artist, string albumName,
         CancellationToken cancellationToken) {
-        var album = await _albumRepository.GetByFile(file, cancellationToken) ??
-                    await _albumRepository.GetByName(albumName, cancellationToken) ??
-                    await _albumRepository.GetByAlternativeNames(cancellationToken, albumName) ??
+        using var scope = _serviceProvider.CreateScope();
+        var albumRepository = scope.ServiceProvider.GetService<IAudioRepository<Album>>();
+
+        var album = await albumRepository.GetByFile(file, cancellationToken) ??
+                    await albumRepository.GetByName(albumName, cancellationToken) ??
+                    await albumRepository.GetByAlternativeNames(cancellationToken, albumName) ??
                     new Album(artist, albumName);
 
         if (!string.IsNullOrEmpty(album.LargeImage) && !string.IsNullOrEmpty(album.SmallImage)) {
@@ -219,10 +227,12 @@ internal class FilesystemLibraryScanner : LibraryScanner {
 
     private async Task<Track> _processTrackInfo(string file, Album album, string trackName,
         int trackNumber, CancellationToken cancellationToken) {
-        var track = await _trackRepository.GetByFile(file, cancellationToken) ??
+        using var scope = _serviceProvider.CreateScope();
+        var trackRepository = scope.ServiceProvider.GetService<IAudioRepository<Track>>();
+        var track = await trackRepository.GetByFile(file, cancellationToken) ??
                     // don't get by name - as it will return a track from a different album
                     // await _trackRepository.GetByName(trackName, cancellationToken) ??
-                    await _trackRepository.GetByAlternativeNames(cancellationToken, trackName) ??
+                    await trackRepository.GetByAlternativeNames(cancellationToken, trackName) ??
                     new Track(album.Id, trackName, trackNumber, file);
 
         return track;

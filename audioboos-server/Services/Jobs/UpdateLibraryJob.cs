@@ -24,7 +24,7 @@ public class UpdateLibraryJob : IAudioBoosJob {
     public async Task Execute(IJobExecutionContext context) {
         var scheduler = await _schedulerFactory.GetScheduler(context.CancellationToken);
         var artistName = context.MergedJobDataMap
-            .Where(r => r.Key.Equals("Folder"))
+            .Where(r => r.Key.Equals("ArtistName"))
             .Select(r => r.Value.ToString())
             .FirstOrDefault();
         if (!string.IsNullOrEmpty(artistName)) {

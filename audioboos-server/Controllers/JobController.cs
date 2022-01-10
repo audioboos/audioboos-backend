@@ -45,7 +45,7 @@ public class JobController : ControllerBase {
                 new JobKey("UpdateLibrary", "DEFAULT"),
                 new JobDataMap(
                     new Dictionary<string, string> {
-                        {"Folder", artistName}
+                        {"ArtistName", artistName}
                     }
                 ),
                 cancellationToken);

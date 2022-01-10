@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using AudioBoos.Data.Access;
-using AudioBoos.Data.Models.Settings;
 using AudioBoos.Data;
+using AudioBoos.Data.Access;
 using AudioBoos.Data.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 using AudioBoos.Data.Store;
 using AudioBoos.Server.Services.AudioLookup;
 using AudioBoos.Server.Services.Exceptions.AudioLookup;
@@ -15,61 +16,53 @@ using Mapster;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using Quartz;
 
 namespace AudioBoos.Server.Services.Jobs.Scanners;
 
 internal abstract class LibraryScanner : ILibraryScanner {
     protected readonly ILogger _logger;
-    private readonly AudioBoosContext _context;
-    protected readonly IAudioRepository<AudioFile> _audioFileRepository;
-    protected readonly IAudioRepository<Artist> _artistRepository;
-    protected readonly IAudioRepository<Album> _albumRepository;
-    protected readonly IAudioRepository<Track> _trackRepository;
     protected readonly IHubContext<JobHub> _messageClient;
-    protected readonly IUnitOfWork _unitOfWork;
     protected readonly IAudioLookupService _lookupService;
-    private readonly IOptions<SystemSettings> _systemSettings;
-
+    private readonly ISchedulerFactory _schedulerFactory;
     protected readonly SemaphoreSlim __scanLock = new(1, 1);
 
+    protected readonly IServiceProvider _serviceProvider;
 
     protected LibraryScanner(ILogger<LibraryScanner> logger,
-        AudioBoosContext context,
-        IAudioRepository<AudioFile> audioFileRepository,
-        IAudioRepository<Artist> artistRepository,
-        IAudioRepository<Album> albumRepository,
-        IAudioRepository<Track> trackRepository,
         IHubContext<JobHub> messageClient,
-        IUnitOfWork unitOfWork,
         IAudioLookupService lookupService,
-        IOptions<SystemSettings> systemSettings
-    ) {
+        ISchedulerFactory schedulerFactory,
+        IServiceProvider serviceProvider) {
         _logger = logger;
-        _context = context;
-        _audioFileRepository = audioFileRepository;
-        _artistRepository = artistRepository;
-        _albumRepository = albumRepository;
-        _trackRepository = trackRepository;
         _messageClient = messageClient;
-        _unitOfWork = unitOfWork;
         _lookupService = lookupService;
-        _systemSettings = systemSettings;
+        _schedulerFactory = schedulerFactory;
+        _serviceProvider = serviceProvider;
     }
 
-    protected async Task<string> _libraryPath() => await _context
-        .Settings
-        .Where(r => r.Key.ToLower().Equals("librarypath"))
-        .Select(s => s.Value)
-        .FirstOrDefaultAsync();
+    protected async Task<string> _libraryPath() {
+        using var scope = _serviceProvider.CreateScope();
+        var context = scope.ServiceProvider.GetService<AudioBoosContext>();
+        return true
+            ? "/mnt/frasier/media/audio/MuziQ/Pedestrian/Store"
+            : await context
+                .Settings
+                .Where(r => r.Key.ToLower().Equals("librarypath"))
+                .Select(s => s.Value)
+                .FirstOrDefaultAsync();
+    }
 
 
     public abstract Task<(int, int, int)> ScanLibrary(bool deepScan, string childFolder,
         CancellationToken cancellationToken);
 
     public async Task UpdateUnscannedAlbums(CancellationToken cancellationToken) {
+        using var scope = _serviceProvider.CreateScope();
+        var albumRepository = scope.ServiceProvider.GetService<IAudioRepository<Album>>();
         _logger.LogInformation("Scanning unscanned albums");
-        var unscannedAlbums = _albumRepository
+
+        var unscannedAlbums = albumRepository
                 .GetAll()
                 .AsNoTracking()
                 .Include(a => a.Artist)
@@ -80,32 +73,55 @@ internal abstract class LibraryScanner : ILibraryScanner {
             ;
 
         foreach (var album in unscannedAlbums) {
-            try {
-                _logger.LogInformation("Scanning {Album}", album.Name);
-                var remoteAlbumInfo = await _lookupService.LookupAlbumInfo(
-                    album.Artist.Name,
-                    album.Name,
-                    album.Id.ToString(),
-                    cancellationToken);
-                if (remoteAlbumInfo is null) {
-                    continue;
-                }
-
-                var updated = remoteAlbumInfo.Adapt(album);
-                updated.TaggingStatus = TaggingStatus.RemoteLookup;
-                updated.LastScanDate = DateTime.Now;
-                await _albumRepository.InsertOrUpdate(updated, cancellationToken);
-                await _unitOfWork.Complete();
-            } catch (AlbumNotFoundException) {
-                _logger.LogError("Unable to find album info for {Artist} - {Album}", album.Artist.Name, album.Name);
-            }
+            await UpdateAlbum(album, cancellationToken);
         }
 
         _logger.LogInformation("Finished scanning albums");
     }
 
+    public async Task UpdateAlbum(Album album, CancellationToken cancellationToken) {
+        try {
+            using var scope = _serviceProvider.CreateScope();
+            var albumRepository = scope.ServiceProvider.GetService<IAudioRepository<Album>>();
+            var unitOfWork = scope.ServiceProvider.GetService<IUnitOfWork>();
+            _logger.LogInformation("Scanning {Album}", album.Name);
+            var remoteAlbumInfo = await _lookupService.LookupAlbumInfo(
+                album.Artist.Name,
+                album.Name,
+                album.Id.ToString(),
+                cancellationToken);
+
+            if (remoteAlbumInfo is null) {
+                return;
+            }
+
+            var updated = remoteAlbumInfo.Adapt(album);
+            updated.TaggingStatus = TaggingStatus.RemoteLookup;
+            updated.LastScanDate = DateTime.Now;
+            await albumRepository.InsertOrUpdate(updated, cancellationToken);
+            await unitOfWork.Complete();
+            var scheduler = await _schedulerFactory.GetScheduler(cancellationToken);
+            await scheduler.TriggerJob(
+                new JobKey("CacheImages", "DEFAULT"),
+                new JobDataMap(
+                    new Dictionary<string, string> {
+                        {"AlbumName", album.Name}
+                    }
+                ),
+                cancellationToken);
+        } catch (AlbumNotFoundException) {
+            _logger.LogError("Unable to find album info for {Artist} - {Album}", album.Artist.Name, album.Name);
+        } catch (Exception e) {
+            _logger.LogError("Exception updating info for {Artist} - {Album} - {Error}", album.Artist.Name, album.Name,
+                e.Message);
+        }
+    }
+
+
     public async Task UpdateUnscannedArtists(CancellationToken cancellationToken) {
-        var unscannedArtists = _artistRepository
+        using var scope = _serviceProvider.CreateScope();
+        var artistRepository = scope.ServiceProvider.GetService<IAudioRepository<Artist>>();
+        var unscannedArtists = artistRepository
             .GetAll()
             .AsNoTracking()
             .Where(a => a.TaggingStatus != TaggingStatus.ManualUpdate) //never auto scan manually updated artists
@@ -119,7 +135,14 @@ internal abstract class LibraryScanner : ILibraryScanner {
 
     public async Task UpdateArtist(string artistName, CancellationToken cancellationToken) {
         _logger.LogDebug("Looking up info for {Artist}", artistName);
-        var artist = await _artistRepository.GetByName(artistName, cancellationToken);
+        using var scope = _serviceProvider.CreateScope();
+        var artistRepository = scope.ServiceProvider.GetService<IAudioRepository<Artist>>();
+        var unitOfWork = scope.ServiceProvider.GetService<IUnitOfWork>();
+        var artist = await artistRepository
+            .GetAll()
+            .Include(a => a.Albums)
+            .Where(a => a.Name.Equals(artistName))
+            .FirstOrDefaultAsync(cancellationToken);
         try {
             var remoteArtistInfo = await _lookupService.LookupArtistInfo(
                 artist.Name,
@@ -131,8 +154,22 @@ internal abstract class LibraryScanner : ILibraryScanner {
             var updated = remoteArtistInfo.Adapt(artist);
             updated.TaggingStatus = TaggingStatus.RemoteLookup;
 
-            await _artistRepository.InsertOrUpdate(updated, cancellationToken);
-            await _unitOfWork.Complete();
+            await artistRepository.InsertOrUpdate(updated, cancellationToken);
+            await unitOfWork.Complete();
+            var scheduler = await _schedulerFactory.GetScheduler(cancellationToken);
+            await scheduler.TriggerJob(
+                new JobKey("CacheImages", "DEFAULT"),
+                new JobDataMap(
+                    new Dictionary<string, string> {
+                        {"ArtistName", artist.Name}
+                    }
+                ),
+                cancellationToken);
+
+            _logger.LogDebug("Scanning albums for {Artist}", artistName);
+            foreach (var album in artist.Albums) {
+                UpdateAlbum(album, cancellationToken);
+            }
         } catch (ArtistNotFoundException) {
             _logger.LogWarning("Artist {Artist} not found in {Scanner}", artist.Name, _lookupService.Name);
         } catch (Exception e) {
@@ -144,7 +181,10 @@ internal abstract class LibraryScanner : ILibraryScanner {
     }
 
     public async Task UpdateChecksums(CancellationToken cancellationToken) {
-        var unscannedFiles = await _audioFileRepository
+        using var scope = _serviceProvider.CreateScope();
+        var audioFileRepository = scope.ServiceProvider.GetService<IAudioRepository<AudioFile>>();
+        var unitOfWork = scope.ServiceProvider.GetService<IUnitOfWork>();
+        var unscannedFiles = await audioFileRepository
             .GetAll()
             .Where(a => string.IsNullOrEmpty(a.Checksum))
             .ToListAsync(cancellationToken);
@@ -154,9 +194,9 @@ internal abstract class LibraryScanner : ILibraryScanner {
             using var tagger = new TagLibTagService(audioFile.PhysicalPath);
             var checksum = await tagger.GetChecksum();
             audioFile.Checksum = checksum;
-            await _audioFileRepository.InsertOrUpdate(audioFile, cancellationToken);
+            await audioFileRepository.InsertOrUpdate(audioFile, cancellationToken);
         }
 
-        await _unitOfWork.Complete();
+        await unitOfWork.Complete();
     }
 }
