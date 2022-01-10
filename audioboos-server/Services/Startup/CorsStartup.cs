@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,6 +15,7 @@ public static class CorsStartup {
                 builder => {
                     builder.AllowCredentials();
                     builder.AllowAnyHeader();
+                    builder.WithMethods("PUT", "GET", "PATCH", "DELETE");
                     builder.WithOrigins(
                         config.GetValue<string>("System:WebClientUrl"),
                         "http://localhost:19006",

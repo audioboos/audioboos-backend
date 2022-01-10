@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using AudioBoos.Data.Interfaces;
 using Mapster;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace AudioBoos.Data.Store;
 
@@ -15,8 +16,12 @@ public abstract record BaseEntity {
     public DateTime UpdateDate { get; set; }
 }
 
-public abstract record BaseAudioEntity(
-    [Required] string Name) : BaseEntity, IBaseAudioEntity {
+public abstract record BaseAudioEntity() : BaseEntity, IBaseAudioEntity {
+    protected BaseAudioEntity(string name) : this() {
+        Name = name;
+    }
+
+    [Required] public string Name { get; set; }
     public string? Description { get; set; }
 
     [Required] public TaggingStatus TaggingStatus { get; set; } = TaggingStatus.None;

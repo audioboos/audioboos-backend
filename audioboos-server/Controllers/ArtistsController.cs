@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AudioBoos.Data.Access;
+using AudioBoos.Data.Interfaces;
 using AudioBoos.Data.Models.DTO;
 using AudioBoos.Data.Store;
 using Microsoft.AspNetCore.Mvc;
@@ -16,9 +17,11 @@ namespace AudioBoos.Server.Controllers;
 [Route("[controller]")]
 public class ArtistsController : ControllerBase {
     private readonly IAudioRepository<Artist> _artistRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public ArtistsController(IAudioRepository<Artist> artistRepository) {
+    public ArtistsController(IAudioRepository<Artist> artistRepository, IUnitOfWork unitOfWork) {
         _artistRepository = artistRepository;
+        _unitOfWork = unitOfWork;
     }
 
     [HttpGet]
@@ -45,6 +48,28 @@ public class ArtistsController : ControllerBase {
         return artist != null ? Ok(artist.Adapt<ArtistDto>()) : NotFound();
     }
 
+    [HttpPatch]
+    public async Task<ActionResult<ArtistDto>> Patch([FromBody] ArtistDto incomingArtist) {
+        if (!ModelState.IsValid) {
+            return StatusCode(500);
+        }
+
+        var artist = await _artistRepository
+            .GetById(incomingArtist.Id);
+        if (artist is null) {
+            return NotFound();
+        }
+
+        if (!incomingArtist.Name.Equals(artist.Name)) {
+            artist.Name = incomingArtist.Name;
+        }
+
+        _artistRepository.InsertOrUpdate(artist);
+        await _unitOfWork.Complete();
+
+        return Ok(artist.Adapt<ArtistDto>());
+    }
+
     [HttpGet("search")]
     public async Task<ActionResult<List<ArtistDto>>> Search([FromQuery] string term) {
         if (string.IsNullOrEmpty(term)) {
@@ -59,5 +84,4 @@ public class ArtistsController : ControllerBase {
             .ToListAsync();
         return artists != null ? Ok(artists.Adapt<List<ArtistDto>>()) : NoContent();
     }
-
 }
