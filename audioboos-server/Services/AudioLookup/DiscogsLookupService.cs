@@ -68,7 +68,7 @@ public class DiscogsLookupService : IAudioLookupService {
                 _logger.LogError("Error getting info for artist: {ArtistName}\n\t{Error}", artistName, e.Message);
             }
         } catch (Exception e) {
-            _logger.LogError("Unable to create discogs http client {Error}", e.Message);
+            _logger.LogError("Error finding artist -  {Error}", e.Message);
             throw;
         }
 
@@ -179,7 +179,7 @@ public class DiscogsLookupService : IAudioLookupService {
             throw new AlbumNotFoundException(
                 $"Album {artistName} - {albumName} not found in discogs\n\tRequest: ${client.BaseAddress}/{request}");
         } catch (Exception e) {
-            _logger.LogError("Unable to create discogs http client {Message}",
+            _logger.LogError("Error finding album client {Message}",
                 e.Message);
             throw;
         }

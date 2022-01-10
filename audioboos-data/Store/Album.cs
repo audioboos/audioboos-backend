@@ -25,6 +25,11 @@ public record Album : BaseAudioEntity {
     [Required] public Guid ArtistId { get; set; }
     [Required] public Artist Artist { get; set; }
 
+    /// <summary>
+    /// Album has been edited well, we don't want it in the scans anymore
+    /// </summary>
+    public bool Immutable { get; set; }
+
     public static bool IsIncomplete(BaseAudioEntity audioEntity) =>
         !BaseAudioEntity.IsIncomplete(audioEntity) ||
         !string.IsNullOrEmpty((audioEntity as Album)?.SmallImage) ||

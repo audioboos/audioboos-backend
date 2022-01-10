@@ -12,12 +12,36 @@ RUN dotnet publish -c Release -o out /p:UseAppHost=false --no-restore
 
 
 # Build runtime image
-#FROM mcr.microsoft.com/dotnet/aspnet:6.0-alpine
-FROM mcr.microsoft.com/dotnet/aspnet:6.0
+FROM mcr.microsoft.com/dotnet/aspnet:6.0-alpine
+
+RUN apk update
+RUN apk add tzdata
+RUN cp /usr/share/zoneinfo/Europe/Dublin /etc/localtime
+RUN rm -r /usr/share/zoneinfo/Africa && \
+    rm -r /usr/share/zoneinfo/Antarctica && \
+    rm -r /usr/share/zoneinfo/Arctic && \
+    rm -r /usr/share/zoneinfo/Asia && \
+    rm -r /usr/share/zoneinfo/Atlantic && \
+    rm -r /usr/share/zoneinfo/Australia && \
+    rm -r /usr/share/zoneinfo/Europe  && \
+    rm -r /usr/share/zoneinfo/Indian && \
+    rm -r /usr/share/zoneinfo/Mexico && \
+    rm -r /usr/share/zoneinfo/Pacific && \
+    rm -r /usr/share/zoneinfo/Chile && \
+    rm -r /usr/share/zoneinfo/Canada
+RUN echo "Europe/Dublin" >  /etc/timezone
+
+ENV TZ Europe/Dublin
+ENV LANG en_IE.UTF-8
+ENV LANGUAGE en_IE.UTF-8
+ENV LC_ALL en_IE.UTF-8
+
+RUN apk --update add imagemagick
+RUN apk add --no-cache file
+
 WORKDIR /app
 COPY --from=build-env /app/audioboos-server/out .
 EXPOSE 80
 ENV ASPNETCORE_ENVIRONMENT=Production
-RUN apt-get update && apt-get -y install imagemagick
-#RUN apk --update add imagemagick
+
 ENTRYPOINT ["dotnet", "AudioBoos.Server.dll"]
