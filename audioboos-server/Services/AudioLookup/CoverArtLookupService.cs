@@ -25,9 +25,12 @@ public class CoverArtLookupService {
 
         var results = await JsonSerializer.DeserializeAsync<CoverArtSearchResult>(
             await response.Content.ReadAsStreamAsync());
+        if (results is not null) {
+            return results.images
+                .Select(r => r.image.Replace("http://", "https://"))
+                .FirstOrDefault();
+        }
 
-        return results.images
-            .Select(r => r.image.Replace("http://", "https://"))
-            .FirstOrDefault();
+        return string.Empty;
     }
 }

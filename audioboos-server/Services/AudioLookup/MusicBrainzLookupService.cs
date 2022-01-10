@@ -91,8 +91,8 @@ public class MusicBrainzLookupService : IAudioLookupService {
             return new AlbumInfoLookupDto(
                 artistName,
                 details.Item.Title,
-                details.Item.Annotation,
-                details.Item.Genres
+                details.Item.Annotation ?? string.Empty,
+                details.Item.Genres?
                     .Where(r => !string.IsNullOrEmpty(r.Name))
                     .Select(r => r.Name).ToList(),
                 file,
