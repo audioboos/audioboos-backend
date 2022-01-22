@@ -191,7 +191,7 @@ internal abstract class LibraryScanner : ILibraryScanner {
                     new Dictionary<string, string> {
                         {"ArtistName", artist.Name},
                         //TODO: keep this at true for now, until all the stale images are cached
-                        {"Overwrite", (newImage || true).ToString()}
+                        {"Overwrite", newImage.ToString()}
                     }
                 ),
                 cancellationToken);

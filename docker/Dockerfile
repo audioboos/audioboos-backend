@@ -1,4 +1,6 @@
-FROM mcr.microsoft.com/dotnet/sdk:6.0-bullseye-slim-amd64 AS build-env
+FROM mcr.microsoft.com/dotnet/sdk:6.0-bullseye-slim-amd64  AS build-env
+#FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim-amd64 AS build
+
 WORKDIR /app
 
 COPY ./audioboos-data/. ./audioboos-data/
@@ -8,8 +10,9 @@ WORKDIR /app/audioboos-server
 RUN dotnet restore
 
 WORKDIR /app/audioboos-server
-RUN dotnet publish -c Release -o out /p:UseAppHost=false --no-restore
-
+#RUN dotnet publish -c Release -o out /p:UseAppHost=false --no-restore
+#RUN dotnet publish -c release -o app -r linux-arm --self-contained false --no-restore
+RUN dotnet publish -c release -o /app /p:UseAppHost=false --no-restore
 
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:6.0-alpine
