@@ -9,9 +9,7 @@ namespace AudioBoos.Data.Store;
 public record Artist(string Name) : BaseAudioEntity(Name) {
     public string? Style { get; set; }
     public string? Genre { get; set; }
-    [AdaptIgnore]
     public string? SmallImage { get; set; }
-    [AdaptIgnore]
     public string? LargeImage { get; set; }
     public string? HeaderImage { get; set; }
 

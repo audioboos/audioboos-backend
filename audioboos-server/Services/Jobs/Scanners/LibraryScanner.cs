@@ -8,6 +8,7 @@ using AudioBoos.Data.Access;
 using AudioBoos.Data.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using AudioBoos.Data.Store;
+using AudioBoos.Server.Helpers;
 using AudioBoos.Server.Services.AudioLookup;
 using AudioBoos.Server.Services.Exceptions.AudioLookup;
 using AudioBoos.Server.Services.Hubs;
@@ -44,11 +45,14 @@ internal abstract class LibraryScanner : ILibraryScanner {
     protected async Task<string> _libraryPath() {
         using var scope = _serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetService<AudioBoosContext>();
-        return await context
-            .Settings
-            .Where(r => r.Key.ToLower().Equals("librarypath"))
-            .Select(s => s.Value)
-            .FirstOrDefaultAsync();
+
+        return Constants.DebugMode
+            ? "/mnt/frasier/audio/MuziQ/Pedestrian/Store"
+            : await context
+                .Settings
+                .Where(r => r.Key.ToLower().Equals("librarypath"))
+                .Select(s => s.Value)
+                .FirstOrDefaultAsync();
     }
 
 
@@ -99,8 +103,6 @@ internal abstract class LibraryScanner : ILibraryScanner {
             }
 
             var updated = remoteAlbumInfo.Adapt(album);
-            if (string.IsNullOrEmpty(updated.LargeImage)) updated.LargeImage = remoteAlbumInfo.LargeImage;
-            if (string.IsNullOrEmpty(updated.SmallImage)) updated.SmallImage = remoteAlbumInfo.SmallImage;
             updated.TaggingStatus = TaggingStatus.RemoteLookup;
             updated.LastScanDate = DateTime.Now;
             await albumRepository.InsertOrUpdate(updated, cancellationToken);
@@ -144,11 +146,22 @@ internal abstract class LibraryScanner : ILibraryScanner {
         using var scope = _serviceProvider.CreateScope();
         var artistRepository = scope.ServiceProvider.GetService<IAudioRepository<Artist>>();
         var unitOfWork = scope.ServiceProvider.GetService<IUnitOfWork>();
+        if (artistRepository is null || unitOfWork is null) {
+            _logger.LogError("Unable to scope unit of work & repositories");
+            return;
+        }
+
         var artist = await artistRepository
             .GetAll()
             .Include(a => a.Albums)
             .Where(a => a.Name.Equals(artistName))
             .FirstOrDefaultAsync(cancellationToken);
+
+        if (artist is null) {
+            _logger.LogError("Artist {Artist} is not in repository", artistName);
+            return;
+        }
+
         if (artist.Immutable) {
             _logger.LogWarning("Artist {Artist} has been marked as immutable, will not scan", artist.Name);
             return;
@@ -162,8 +175,12 @@ internal abstract class LibraryScanner : ILibraryScanner {
                 return;
             }
 
+            bool newImage = !remoteArtistInfo.LargeImage.Equals(artist.LargeImage) ||
+                            !remoteArtistInfo.SmallImage.Equals(artist.SmallImage);
+
             var updated = remoteArtistInfo.Adapt(artist);
             updated.TaggingStatus = TaggingStatus.RemoteLookup;
+            updated.LastScanDate = DateTime.Now;
 
             await artistRepository.InsertOrUpdate(updated, cancellationToken);
             await unitOfWork.Complete();
@@ -172,7 +189,9 @@ internal abstract class LibraryScanner : ILibraryScanner {
                 new JobKey("CacheImages", "DEFAULT"),
                 new JobDataMap(
                     new Dictionary<string, string> {
-                        {"ArtistName", artist.Name}
+                        {"ArtistName", artist.Name},
+                        //TODO: keep this at true for now, until all the stale images are cached
+                        {"Overwrite", (newImage || true).ToString()}
                     }
                 ),
                 cancellationToken);

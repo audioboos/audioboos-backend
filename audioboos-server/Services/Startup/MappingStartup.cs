@@ -23,22 +23,28 @@ public static class MappingStartup {
 
         TypeAdapterConfig<Artist, ArtistDto>
             .NewConfig()
-        .Map(dest => dest.Id, src => src.Id.ToString())
-        .Map(dest => dest.Name, src => src.Name)
-        .Map(dest => dest.NormalisedName, src => src.GetNormalisedName())
-        .Map(dest => dest.FirstSeen, src => src.CreateDate)
-        .Map(dest => dest.SmallImage,
-            src =>
-                $"{config.GetSection("System").GetValue<string>("BaseUrl")}/images/artist/{src.Id}.jpg?width={smallWidth}&height={smallHeight}")
-        .Map(dest => dest.LargeImage,
-            src =>
-                $"{config.GetSection("System").GetValue<string>("BaseUrl")}/images/artist/{src.Id}.jpg?width={largeWidth}&height={largeHeight}");
+            .Map(dest => dest.Id, src => src.Id.ToString())
+            .Map(dest => dest.Name, src => src.Name)
+            .Map(dest => dest.NormalisedName, src => src.GetNormalisedName())
+            .Map(dest => dest.FirstSeen, src => src.CreateDate)
+            .Map(dest => dest.SmallImage,
+                src =>
+                    $"{config.GetSection("System").GetValue<string>("BaseUrl")}/images/artist/{src.Id}.jpg?width={smallWidth}&height={smallHeight}")
+            .Map(dest => dest.LargeImage,
+                src =>
+                    $"{config.GetSection("System").GetValue<string>("BaseUrl")}/images/artist/{src.Id}.jpg?width={largeWidth}&height={largeHeight}");
 
 
         TypeAdapterConfig<AlbumDto, Album>
             .NewConfig()
             .Ignore(r => r.SmallImage)
             .Ignore(r => r.LargeImage);
+
+        TypeAdapterConfig<AlbumInfoLookupDto, Album>
+            .NewConfig()
+            .IgnoreNullValues(true)
+            .Map(src => src.SmallImage, dest => dest.SmallImage)
+            .Map(src => src.LargeImage, dest => dest.LargeImage);
 
         TypeAdapterConfig<Album, AlbumDto>
             .NewConfig()
@@ -68,8 +74,8 @@ public static class MappingStartup {
             .Map(dest => dest.AudioUrl,
                 src => new Url(config.GetSection("System").GetValue<string>("StreamUrl"))
                     .SetQueryParams(new {
-                        trackId = src.Id
-                    },
+                            trackId = src.Id
+                        },
                         NullValueHandling.Remove));
 
         TypeAdapterConfig<TrackPlayLog, TrackPlayDto>

@@ -10,6 +10,7 @@
     "profiles": {
         "dev": {
             "environmentVariables": {
+                "DEBUGGINGLIVE": 1,
                 "ASPNETCORE_ENVIRONMENT": "Development",
                 "ASPNETCORE_System__AudioLookupService": "musicbrainz",
                 "ASPNETCORE_URLS": "http://10.1.1.1:5000;https://10.1.1.1:5001, "

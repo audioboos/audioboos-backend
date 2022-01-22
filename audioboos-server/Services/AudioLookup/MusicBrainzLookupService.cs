@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using AudioBoos.Data.Models.DTO;
 using AudioBoos.Data.Models.Settings;
 using AudioBoos.Server.Helpers;
@@ -74,7 +75,8 @@ public class MusicBrainzLookupService : IAudioLookupService {
         CancellationToken cancellationToken = default) {
         var albumQuery = _buildQuery();
         var remoteInfo =
-            await albumQuery.FindReleasesAsync($"title:{albumName} AND artist:{artistName}");
+            await albumQuery.FindReleasesAsync(
+                $"title:{Uri.EscapeDataString(albumName)} AND artist:{Uri.EscapeDataString(artistName)}");
 
         if (remoteInfo is null || remoteInfo.Results.Count == 0) {
             throw new AlbumNotFoundException($"Album: {albumName} not found");
