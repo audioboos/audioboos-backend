@@ -29,7 +29,7 @@ public class CoverArtLookupService {
 
             // var stream = await response.Content.ReadAsStreamAsync();
             // var json = stream.ToEncodedString(Encoding.UTF8);
-            _logger.LogInformation("Data from coverart lookup is \n{Json}", json);
+            // _logger.LogInformation("Data from coverart lookup is \n{Json}", json);
 
             var results =
                 await JsonSerializer.DeserializeAsync<CoverArtSearchResult>(await response.Content.ReadAsStreamAsync());
