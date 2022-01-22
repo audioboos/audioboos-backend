@@ -35,6 +35,8 @@ public class CoverArtLookupService {
             }
         } catch (Exception e) {
             _logger.LogError("Error finding cover art for {release}", releaseId);
+            _logger.LogError(e.Message);
+            _logger.LogError(e.StackTrace);
         }
 
         return string.Empty;
