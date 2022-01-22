@@ -10,9 +10,7 @@ WORKDIR /app/audioboos-server
 RUN dotnet restore
 
 WORKDIR /app/audioboos-server
-#RUN dotnet publish -c Release -o out /p:UseAppHost=false --no-restore
-#RUN dotnet publish -c release -o app -r linux-arm --self-contained false --no-restore
-RUN dotnet publish -c release -o /app /p:UseAppHost=false --no-restore
+RUN dotnet publish -c release -o out /p:UseAppHost=false --no-restore
 
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:6.0-alpine
