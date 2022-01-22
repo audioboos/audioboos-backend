@@ -27,8 +27,8 @@ public class CoverArtLookupService {
             var response = await client.GetAsync($"/release/{releaseId}");
             response.EnsureSuccessStatusCode();
 
-            var stream = await response.Content.ReadAsStreamAsync();
-            var json = stream.ToEncodedString(Encoding.UTF8);
+            // var stream = await response.Content.ReadAsStreamAsync();
+            // var json = stream.ToEncodedString(Encoding.UTF8);
             _logger.LogInformation("Data from coverart lookup is \n{Json}", json);
 
             var results =
