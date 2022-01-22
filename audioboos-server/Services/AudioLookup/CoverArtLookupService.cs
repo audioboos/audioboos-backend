@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using AudioBoos.Data.Models.AudioLookups;
+using AudioBoos.Server.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace AudioBoos.Server.Services.AudioLookup;
@@ -25,8 +27,12 @@ public class CoverArtLookupService {
             var response = await client.GetAsync($"/release/{releaseId}");
             response.EnsureSuccessStatusCode();
 
-            var results = await JsonSerializer.DeserializeAsync<CoverArtSearchResult>(
-                await response.Content.ReadAsStreamAsync());
+            var stream = await response.Content.ReadAsStreamAsync();
+            var json = stream.ToEncodedString(Encoding.UTF8);
+            _logger.LogInformation("Data from coverart lookup is \n{Json}", json);
+
+            var results =
+                await JsonSerializer.DeserializeAsync<CoverArtSearchResult>(await response.Content.ReadAsStreamAsync());
             if (results is not null) {
                 return results.images
                     .Where(r => r.front)

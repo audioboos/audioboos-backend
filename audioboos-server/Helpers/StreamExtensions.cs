@@ -14,6 +14,17 @@ public static class StreamExtensions {
         return bytes;
     }
 
+    public static String ToEncodedString(this Stream stream, Encoding enc = null) {
+        enc = enc ?? Encoding.UTF8;
+
+        byte[] bytes = new byte[stream.Length];
+        stream.Position = 0;
+        stream.Read(bytes, 0, (int)stream.Length);
+        string data = enc.GetString(bytes);
+
+        return enc.GetString(bytes);
+    }
+
     public static async Task<string> SaveToLocalFile(this Stream stream, string fileName,
         CancellationToken cancellationToken = default) {
         var bytes = await stream.ToBytes(cancellationToken);
