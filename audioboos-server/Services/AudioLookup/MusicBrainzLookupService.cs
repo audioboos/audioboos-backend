@@ -74,9 +74,10 @@ public class MusicBrainzLookupService : IAudioLookupService {
     public async Task<AlbumInfoLookupDto> LookupAlbumInfo(string artistName, string albumName, string albumId,
         CancellationToken cancellationToken = default) {
         var albumQuery = _buildQuery();
-        var remoteInfo =
-            await albumQuery.FindReleasesAsync(
-                $"title:{Uri.EscapeDataString(albumName)} AND artist:{Uri.EscapeDataString(artistName)}");
+        var remoteInfo = await albumQuery
+            .FindReleasesAsync(
+                $"title:{Uri.EscapeDataString(albumName)} AND artist:{Uri.EscapeDataString(artistName)}"
+            );
 
         if (remoteInfo is null || remoteInfo.Results.Count == 0) {
             throw new AlbumNotFoundException($"Album: {albumName} not found");

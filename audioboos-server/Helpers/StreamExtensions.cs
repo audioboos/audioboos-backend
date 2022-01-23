@@ -14,13 +14,16 @@ public static class StreamExtensions {
         return bytes;
     }
 
-    public static String ToEncodedString(this Stream stream, Encoding enc = null) {
+    public static String ToEncodedString(this Stream stream, Encoding enc = null, bool resetAfterRead = false) {
         enc = enc ?? Encoding.UTF8;
 
         byte[] bytes = new byte[stream.Length];
         stream.Position = 0;
         stream.Read(bytes, 0, (int)stream.Length);
         string data = enc.GetString(bytes);
+        if (resetAfterRead) {
+            stream.Seek(0, SeekOrigin.Begin);
+        }
 
         return enc.GetString(bytes);
     }

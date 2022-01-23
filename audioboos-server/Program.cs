@@ -7,17 +7,12 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
+using Serilog.Sinks.SystemConsole.Themes;
 
 namespace AudioBoos.Server;
 
 public class Program {
     public static void Main(string[] args) {
-        Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Verbose()
-            .Enrich.FromLogContext()
-            .WriteTo.Console()
-            .CreateLogger();
-
         var config = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", optional: false)
@@ -26,6 +21,10 @@ public class Program {
             .AddEnvironmentVariables()
             .AddCommandLine(args)
             .Build();
+
+        Log.Logger = new LoggerConfiguration()
+            .ReadFrom.Configuration(config)
+            .CreateLogger();
 
         CreateHostBuilder(args, config).Build().Run();
     }

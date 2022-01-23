@@ -18,6 +18,7 @@ public static class CorsStartup {
                     builder.WithMethods("PUT", "GET", "PATCH", "DELETE");
                     builder.WithOrigins(
                         config.GetValue<string>("System:WebClientUrl"),
+                        "http://dev.audioboos.info:8081",
                         "http://localhost:19006",
                         "http://localhost:19006",
                         "http://localhost:19006",

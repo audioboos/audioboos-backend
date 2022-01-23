@@ -44,3 +44,4 @@ appsettings.Production.json
 
 prod.env
 scripts/reset_db.sh
+audioboos-server/Logs

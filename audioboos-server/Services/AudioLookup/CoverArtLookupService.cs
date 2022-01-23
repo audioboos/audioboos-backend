@@ -20,16 +20,16 @@ public class CoverArtLookupService {
     }
 
     public async Task<string> GetCoverart(string releaseId) {
-        _logger.LogDebug("Finding cover art for {release}", releaseId);
+        _logger.LogDebug("Finding cover art for {Release}", releaseId);
         try {
             using var client = _httpClientFactory.CreateClient("coverart");
 
             var response = await client.GetAsync($"/release/{releaseId}");
             response.EnsureSuccessStatusCode();
 
-            // var stream = await response.Content.ReadAsStreamAsync();
-            // var json = stream.ToEncodedString(Encoding.UTF8);
-            // _logger.LogInformation("Data from coverart lookup is \n{Json}", json);
+            var stream = await response.Content.ReadAsStreamAsync();
+            var json = stream.ToEncodedString(Encoding.UTF8, true);
+            _logger.LogInformation("Data from coverart lookup is \n{Json}", json);
 
             var results =
                 await JsonSerializer.DeserializeAsync<CoverArtSearchResult>(await response.Content.ReadAsStreamAsync());
