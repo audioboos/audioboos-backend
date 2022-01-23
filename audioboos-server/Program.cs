@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using AudioBoos.Server.Helpers;
 using AudioBoos.Server.Services.Startup.SSL;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -16,8 +17,10 @@ public class Program {
 #if DEBUG
     private const string MONIKER = "DEBUG";
 #else
-const string MONIKER = "PROD";
+const string MONIKER = "PRODUCTION";
 #endif
+    private const string BUILD_MODE = Constants.DebugMode ? "DEBUG" : "RELEASE";
+
     public static string GetAssemblyDetails() {
         var assembly = typeof(Program).Assembly;
         return
@@ -27,7 +30,7 @@ const string MONIKER = "PROD";
     }
 
     public static void Main(string[] args) {
-        Console.WriteLine($"Bootstrapping AudioBoos {MONIKER}\n\n{GetAssemblyDetails()}");
+        Console.WriteLine($"Bootstrapping AudioBoos {MONIKER} - {BUILD_MODE}\n\n{GetAssemblyDetails()}");
         var config = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", optional: false)

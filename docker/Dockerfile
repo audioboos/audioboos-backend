@@ -13,12 +13,12 @@ WORKDIR /app/audioboos-server
 RUN dotnet restore
 
 WORKDIR /app/audioboos-server
-RUN dotnet publish -c release -o out /p:UseAppHost=false --no-restore \
-    /p:Version=$VERSION \
-    /p:AssemblyVersion=$ASSEMBLY_VERSION \
-    /p:FileVersion=$ASSEMBLY_VERSION \
-    /p:InformationalVersion=$SHA
-
+#RUN dotnet publish -c Release -o out /p:UseAppHost=false --no-restore \
+#    /p:Version=$VERSION \
+#    /p:AssemblyVersion=$ASSEMBLY_VERSION \
+#    /p:FileVersion=$ASSEMBLY_VERSION \
+#    /p:InformationalVersion=$SHA
+RUN dotnet publish -c Release -o out --no-restore 
 
 FROM mcr.microsoft.com/dotnet/aspnet:6.0-alpine
 
