@@ -3,6 +3,8 @@ FROM mcr.microsoft.com/dotnet/sdk:6.0-bullseye-slim-amd64  AS build-env
 
 WORKDIR /app
 ARG VERSION=0.0.1
+ARG ASSEMBLY_VERSION=0.0.1
+ARG SHA=0.0.1-default
 
 COPY ./audioboos-data/. ./audioboos-data/
 COPY ./audioboos-server/. ./audioboos-server/
@@ -11,9 +13,13 @@ WORKDIR /app/audioboos-server
 RUN dotnet restore
 
 WORKDIR /app/audioboos-server
-RUN dotnet publish -c release -o out /p:UseAppHost=false -p:Version=$VERSION --no-restore
-/p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemFileVer }} /p:FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }} /p:InformationalVersion=${{ steps.gitversion.outputs.Sha }}
-# Build runtime image
+RUN dotnet publish -c release -o out /p:UseAppHost=false --no-restore \
+    /p:Version=$VERSION \
+    /p:AssemblyVersion=$ASSEMBLY_VERSION \
+    /p:FileVersion=$ASSEMBLY_VERSION \
+    /p:InformationalVersion=$SHA
+
+
 FROM mcr.microsoft.com/dotnet/aspnet:6.0-alpine
 
 RUN apk update
