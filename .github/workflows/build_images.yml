@@ -30,6 +30,7 @@ jobs:
         run: |
           echo "MajorMinorPatch: ${{ steps.gitversion.outputs.majorMinorPatch }}"
           echo "SemVer: ${{ steps.gitversion.outputs.SemVer }}"   
+          echo "PreReleaseTag: ${{ steps.gitversion.outputs.GitVersion_PreReleaseTag }}"   
           echo "CommitsSinceVersionSource: ${{ steps.gitversion.outputs.CommitsSinceVersionSource }}"      
 
       #build the docker images
@@ -50,13 +51,8 @@ jobs:
         run: |
           IMAGE_ID=$(echo ghcr.io/${{ github.repository }} | tr '[A-Z]' '[a-z]')
           
-          # Strip git ref prefix from version
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-          
-          # Strip "v" prefix from tag name
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-
           # when the branch is trunk, replace trunk with latest
+          $VERSION=${{ steps.gitversion.outputs.SemVer }}
           [ "$VERSION" == "trunk" ] && VERSION=latest
 
           echo IMAGE_ID=$IMAGE_ID
@@ -64,6 +60,9 @@ jobs:
           
           # Build and Publish container image
           docker buildx build --file docker/Dockerfile --push \
-          --tag $IMAGE_ID:$VERSION \
-          --progress=plain \
-          --platform linux/amd64,linux/arm/v7,linux/arm64 .
+            --build-arg ASSEMBLY-VERSION=${{ steps.gitversion.outputs.assemblySemFileVer }} \
+            --build-arg FILE_VERSION=${{ steps.gitversion.outputs.assemblySemFileVer }} \
+            --build-arg INFORMATIONAL_VERSOIN=${{ steps.gitversion.outputs.Sha }} \
+            --tag $IMAGE_ID:$VERSION \
+            --progress=plain \
+            --platform linux/amd64,linux/arm/v7,linux/arm64 .

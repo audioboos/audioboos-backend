@@ -12,7 +12,12 @@ using Serilog.Sinks.SystemConsole.Themes;
 namespace AudioBoos.Server;
 
 public class Program {
+    public static string GetAssemblyVersion() {
+        return typeof(Program).Assembly?.GetName()?.Version?.ToString();
+    }
+
     public static void Main(string[] args) {
+        Console.WriteLine($"Bootstrapping AudioBoos v{GetAssemblyVersion()}");
         var config = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", optional: false)
