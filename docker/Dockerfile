@@ -10,7 +10,7 @@ WORKDIR /app/audioboos-server
 RUN dotnet restore
 
 WORKDIR /app/audioboos-server
-RUN dotnet publish -c release -o out /p:UseAppHost=false --no-restore
+RUN dotnet publish -c release -o out /p:UseAppHost=false -p:Version=1.3.2 --no-restore
 
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:6.0-alpine
