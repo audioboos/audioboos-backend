@@ -27,7 +27,7 @@ const string MONIKER = "PROD";
     }
 
     public static void Main(string[] args) {
-        Console.WriteLine($"Bootstrapping AudioBoos {MONIKER}");
+        Console.WriteLine($"Bootstrapping AudioBoos {MONIKER}\n\n{GetAssemblyDetails()}");
         var config = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", optional: false)
