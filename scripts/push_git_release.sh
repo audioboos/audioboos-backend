@@ -1,3 +1,6 @@
+#!/usr/bin/env bash
+
+git checkout trunk
 git push
 git push --tags
 git checkout develop
