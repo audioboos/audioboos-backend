@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 docker build \
-    -t fergalmoran/audioboos-backend \
+    -t fergalmoran/audioboos-backend:4.6 \
+    -t fergalmoran/audioboos-backend:latest \
     --build-arg VERSION=6.6.6-staging \
     -f docker/Dockerfile \
     . --load

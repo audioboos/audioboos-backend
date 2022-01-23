@@ -65,5 +65,6 @@ jobs:
             --build-arg ASSEMBLY_VERSION=${{ steps.gitversion.outputs.assemblySemFileVer }} \
             --build-arg SHA=${{ steps.gitversion.outputs.Sha }} \
             --tag $IMAGE_ID:"$VERSION" \
+            --tag $IMAGE_ID:latest \
             --progress=plain \
             --platform linux/amd64,linux/arm/v7,linux/arm64 .
