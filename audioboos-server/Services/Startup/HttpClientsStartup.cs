@@ -43,16 +43,16 @@ public static class HttpClientsStartup {
                 c.DefaultRequestHeaders.Add("User-Agent", USER_AGENT);
             });
 
-        services.AddHttpClient("coverart", c => {
-                c.BaseAddress = new Uri("https://coverartarchive.org/");
-            })
-            .ConfigureHttpClient(c => {
-                c.DefaultRequestHeaders.Add("Accept", "application/json");
-                c.DefaultRequestHeaders.Add("User-Agent", USER_AGENT);
-            }).ConfigurePrimaryHttpMessageHandler(x => new HttpClientHandler {
-                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
-                ServerCertificateCustomValidationCallback = (_, _, _, _) => true
-            });
+        // services.AddHttpClient("coverart", c => {
+        //         c.BaseAddress = new Uri("https://coverartarchive.org/");
+        //     })
+        //     .ConfigureHttpClient(c => {
+        //         c.DefaultRequestHeaders.Add("Accept", "application/json");
+        //         c.DefaultRequestHeaders.Add("User-Agent", USER_AGENT);
+        //     }).ConfigurePrimaryHttpMessageHandler(x => new HttpClientHandler {
+        //         AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+        //         ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+        //     });
         return services;
     }
 }

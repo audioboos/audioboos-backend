@@ -4,6 +4,18 @@ using System.Globalization;
 namespace AudioBoos.Server.Helpers;
 
 public static class StringExtensions {
+    public static string QuoteString(this string s) {
+        if (string.IsNullOrEmpty(s)) {
+            return "";
+        }
+
+        if (s.IndexOf(' ') < 0) {
+            return s;
+        }
+
+        return "\"" + s + "\"";
+    }
+
     public static string ToTitleCase(this string source) =>
         new CultureInfo(CultureInfo.CurrentCulture.Name, false).TextInfo.ToTitleCase(source);
 

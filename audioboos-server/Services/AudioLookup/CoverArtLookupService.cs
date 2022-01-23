@@ -1,12 +1,17 @@
 ﻿using System;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using AudioBoos.Data.Models.AudioLookups;
 using AudioBoos.Server.Helpers;
+using AudioBoos.Server.Services.Exceptions.AudioLookup;
+using MetaBrainz.MusicBrainz.CoverArt;
 using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing;
 
 namespace AudioBoos.Server.Services.AudioLookup;
 
@@ -19,25 +24,17 @@ public class CoverArtLookupService {
         _logger = logger;
     }
 
-    public async Task<string> GetCoverart(string releaseId) {
+    public async Task<string> GetCoverart(Guid releaseId) {
         _logger.LogDebug("Finding cover art for {Release}", releaseId);
         try {
-            using var client = _httpClientFactory.CreateClient("coverart");
-
-            var response = await client.GetAsync($"/release/{releaseId}");
-            response.EnsureSuccessStatusCode();
-
-            var stream = await response.Content.ReadAsStreamAsync();
-            var json = stream.ToEncodedString(Encoding.UTF8, true);
-            _logger.LogInformation("Data from coverart lookup is \n{Json}", json);
-
-            var results =
-                await JsonSerializer.DeserializeAsync<CoverArtSearchResult>(await response.Content.ReadAsStreamAsync());
-            if (results is not null) {
-                return results.images
-                    .Where(r => r.front)
-                    .Select(r => r.image.Replace("http://", "https://"))
-                    .FirstOrDefault();
+            var covertArt = new CoverArt(
+                ProductHeaderValue.Parse("AudioBoos"),
+                "https://audioboos.info"
+            );
+            var release = await covertArt.FetchReleaseAsync(releaseId);
+            if (release?.Images?.Count > 0) {
+                var image = release.Images.Where(i => i.Front);
+                return image.Select(i => i.Location).FirstOrDefault().ToString();
             }
         } catch (Exception e) {
             _logger.LogError("Error finding cover art for {release}", releaseId);
@@ -45,6 +42,6 @@ public class CoverArtLookupService {
             _logger.LogError(e.StackTrace);
         }
 
-        return string.Empty;
+        throw new CoverArtNotFoundException($"Unable to find cover art for {releaseId}");
     }
 }

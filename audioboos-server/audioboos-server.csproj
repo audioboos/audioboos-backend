@@ -13,7 +13,7 @@
         <PackageReference Include="CliWrap" Version="3.3.3" />
         <PackageReference Include="Flurl" Version="3.0.2" />
         <PackageReference Include="mapster" Version="7.2.0" />
-        <PackageReference Include="MetaBrainz.MusicBrainz" Version="3.0.2" />
+        <PackageReference Include="MetaBrainz.MusicBrainz.CoverArt" Version="4.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.1" />
         <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.0" />
@@ -27,6 +27,7 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.12.1" />
+        <PackageReference Include="MusicBrainzAPI" Version="2.5.0" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.0" />
         <PackageReference Include="Quartz" Version="3.3.3" />
         <PackageReference Include="Quartz.AspNetCore" Version="3.3.3" />
