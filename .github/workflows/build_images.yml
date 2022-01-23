@@ -53,8 +53,9 @@ jobs:
           
           # when the branch is main, replace main with latest
           VERSION=${{ steps.gitversion.outputs.SemVer }}
-          [ "$VERSION" == "main" ] && VERSION=latest
-
+          
+          # Ignore latest fuckery for now
+          # [ "$VERSION" == "main" ] && VERSION=latest
           echo $IMAGE_ID
           echo $VERSION
           
