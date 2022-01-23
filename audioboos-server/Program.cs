@@ -11,7 +11,6 @@ using Serilog.Sinks.SystemConsole.Themes;
 
 namespace AudioBoos.Server;
 
-[assembly: System.Reflection.AssemblyVersion("1.0.*")]
 public class Program {
     public static void Main(string[] args) {
         var config = new ConfigurationBuilder()

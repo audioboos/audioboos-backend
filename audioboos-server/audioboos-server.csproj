@@ -7,9 +7,6 @@
         <AssemblyName>AudioBoos.Server</AssemblyName>
         <Nullable>disable</Nullable>
         <EnablePreviewFeatures>True</EnablePreviewFeatures>
-
-        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-        <Deterministic>False</Deterministic>
     </PropertyGroup>
 
     <ItemGroup>
