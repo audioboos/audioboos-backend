@@ -60,9 +60,9 @@ jobs:
           
           # Build and Publish container image
           docker buildx build --file docker/Dockerfile --push \
-            --build-arg VERSION="${{ steps.gitversion.outputs.SemVer }}" \
-            --build-arg ASSEMBLY_VERSION="${{ steps.gitversion.outputs.assemblySemFileVer }}" \
-            --build-arg SHA="${{ steps.gitversion.outputs.Sha }}" \
+            --build-arg VERSION=${{ steps.gitversion.outputs.SemVer }} \
+            --build-arg ASSEMBLY_VERSION=${{ steps.gitversion.outputs.assemblySemFileVer }} \
+            --build-arg SHA=${{ steps.gitversion.outputs.Sha }} \
             --tag $IMAGE_ID:"$VERSION" \
             --progress=plain \
             --platform linux/amd64,linux/arm/v7,linux/arm64 .
