@@ -14,8 +14,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AudioBoos.Data.Migrations
 {
     [DbContext(typeof(AudioBoosContext))]
-    [Migration("20220109204833_Remove duplicate user model fields")]
-    partial class Removeduplicateusermodelfields
+    [Migration("20220123230716_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -53,6 +53,10 @@ namespace AudioBoos.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
+                    b.Property<int?>("DiscogsId")
+                        .HasColumnType("integer")
+                        .HasColumnName("discogs_id");
+
                     b.Property<DateTime>("FirstScanDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("first_scan_date");
@@ -61,6 +65,10 @@ namespace AudioBoos.Data.Migrations
                         .HasColumnType("text[]")
                         .HasColumnName("genres");
 
+                    b.Property<bool>("Immutable")
+                        .HasColumnType("boolean")
+                        .HasColumnName("immutable");
+
                     b.Property<string>("LargeImage")
                         .HasColumnType("text")
                         .HasColumnName("large_image");
@@ -68,6 +76,10 @@ namespace AudioBoos.Data.Migrations
                     b.Property<DateTime>("LastScanDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_scan_date");
+
+                    b.Property<Guid?>("MusicBrainzId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("music_brainz_id");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -228,8 +240,8 @@ namespace AudioBoos.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
-                    b.Property<string>("DiscogsId")
-                        .HasColumnType("text")
+                    b.Property<int?>("DiscogsId")
+                        .HasColumnType("integer")
                         .HasColumnName("discogs_id");
 
                     b.Property<string>("Fanart")
@@ -248,6 +260,10 @@ namespace AudioBoos.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("header_image");
 
+                    b.Property<bool>("Immutable")
+                        .HasColumnType("boolean")
+                        .HasColumnName("immutable");
+
                     b.Property<string>("LargeImage")
                         .HasColumnType("text")
                         .HasColumnName("large_image");
@@ -256,8 +272,8 @@ namespace AudioBoos.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_scan_date");
 
-                    b.Property<string>("MusicBrainzId")
-                        .HasColumnType("text")
+                    b.Property<Guid?>("MusicBrainzId")
+                        .HasColumnType("uuid")
                         .HasColumnName("music_brainz_id");
 
                     b.Property<string>("Name")

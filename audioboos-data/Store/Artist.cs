@@ -14,11 +14,14 @@ public record Artist(string Name) : BaseAudioEntity(Name) {
     public string? HeaderImage { get; set; }
 
     public string? Fanart { get; set; }
-    public string? MusicBrainzId { get; set; }
-    public string? DiscogsId { get; set; }
+
     public List<string>? Aliases { get; set; }
 
     public ICollection<Album>? Albums { get; set; }
+    
+    public Guid? MusicBrainzId { get; set; }
+    public int? DiscogsId { get; set; }
+
     public bool Immutable { get; set; }
 
     public static bool IsIncomplete(BaseAudioEntity audioEntity) =>

@@ -46,7 +46,7 @@ internal abstract class LibraryScanner : ILibraryScanner {
         using var scope = _serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetService<AudioBoosContext>();
 
-        return Constants.DebugMode
+        return Constants.DebugMode && false
             ? "/mnt/frasier/audio/MuziQ/Pedestrian/Store"
             : await context
                 .Settings
@@ -95,7 +95,7 @@ internal abstract class LibraryScanner : ILibraryScanner {
             var remoteAlbumInfo = await _lookupService.LookupAlbumInfo(
                 album.Artist.Name,
                 album.Name,
-                album.Id.ToString(),
+                album.Artist.MusicBrainzId.ToString(),
                 cancellationToken);
 
             if (remoteAlbumInfo is null) {
@@ -117,7 +117,7 @@ internal abstract class LibraryScanner : ILibraryScanner {
                 ),
                 cancellationToken);
         } catch (AlbumNotFoundException) {
-            _logger.LogError("Unable to find album info for {Artist} - {Album}", album.Artist.Name, album.Name);
+            _logger.LogWarning("Unable to find album info for {Artist} - {Album}", album.Artist.Name, album.Name);
         } catch (Exception e) {
             _logger.LogError("Exception updating info for {Artist} - {Album} - {Error}", album.Artist.Name, album.Name,
                 e.Message);

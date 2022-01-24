@@ -10,6 +10,7 @@ using AudioBoos.Data.Models.Settings;
 using AudioBoos.Server.Helpers;
 using AudioBoos.Server.Services.Exceptions.AudioLookup;
 using Hqub.MusicBrainz.API;
+using Hqub.MusicBrainz.API.Entities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -54,58 +55,71 @@ public class MusicBrainzLookupService : IAudioLookupService {
         //There's definitely a better way of doing this but this will do for now
         var image = await _discogsLookupService.GetArtistImage(artistName, cancellationToken);
 
-        if (!string.IsNullOrEmpty(remoteInfo.Id)) {
-            return new ArtistInfoLookupDto(
-                artistName,
-                string.Empty, //TODO: find out where the artist description is remoteInfo.Annotation,
-                remoteInfo.Genres is not null && remoteInfo.Genres.Count != 0
-                    ? string.Join(',', remoteInfo.Genres?.Select(r => r.Name))
-                    : string.Empty, image,
-                image,
-                remoteInfo.Id.ToString(),
-                remoteInfo.Aliases?
-                    .Select(r => r.Name)
-                    .ToList());
+        if (string.IsNullOrEmpty(remoteInfo.Id)) {
+            throw new ArtistNotFoundException($"Artist: {artistName} not found");
         }
 
-        throw new ArtistNotFoundException($"Artist: {artistName} not found");
+        var artist = new ArtistInfoLookupDto(
+            artistName,
+            string.Empty, //TODO: find out where the artist description is remoteInfo.Annotation,
+            remoteInfo.Genres is not null && remoteInfo.Genres.Count != 0
+                ? string.Join(',', remoteInfo.Genres?.Select(r => r.Name))
+                : string.Empty, image,
+            image,
+            remoteInfo.Id.ToString(),
+            remoteInfo.Aliases?
+                .Select(r => r.Name)
+                .ToList()) {
+            MusicBrainzId = Guid.Parse(remoteInfo.Id)
+        };
+        return artist;
     }
 
-    public async Task<AlbumInfoLookupDto> LookupAlbumInfo(string artistName, string albumName, string albumId,
+    public async Task<AlbumInfoLookupDto> LookupAlbumInfo(string artistName, string albumName, string artistId,
         CancellationToken cancellationToken = default) {
-        // var albumQuery = _buildQuery();
-        // var remoteInfo = await albumQuery
-        //     .FindReleasesAsync(
-        //         $"title:{Uri.EscapeDataString(albumName)} AND artist:{Uri.EscapeDataString(artistName)}"
-        //     );
-        var remoteInfo = await _client.Releases.SearchAsync(
-            $"title:{Uri.EscapeDataString(albumName)} AND artist:{Uri.EscapeDataString(artistName)}"
-        );
+        var artistQuery = string.IsNullOrEmpty(artistId) ? $"artistName:{artistName.Trim()}" : $"arid:{artistId}";
+        var query = $"{artistQuery} AND release:{albumName}";
+        _logger.LogDebug("Querying for album {Artist} - {Album} using {Query}",
+            artistName, albumName, _client.Releases.GetQueryUrl("release", query));
+        var remoteInfo = await _client.Releases.SearchAsync(query);
         if (remoteInfo is null || remoteInfo.Count == 0) {
             throw new AlbumNotFoundException($"Album: {albumName} not found");
         }
 
-        var details = remoteInfo.FirstOrDefault();
+        Release details;
+        string art = string.Empty;
+        var results = remoteInfo.ToList();
+        //loop through all the releases until we have one with cover art
+        foreach (var result in results) {
+            art = await _coverArtService.GetCoverart(Guid.Parse(result.Id));
+            if (string.IsNullOrEmpty(art)) {
+                continue;
+            }
+
+            details = result;
+            break;
+        }
+
+        details = remoteInfo.FirstOrDefault();
 
         if (details is null) {
             throw new AlbumNotFoundException($"Album: {albumName} not found");
         }
 
         try {
-            var art = await _coverArtService.GetCoverart(Guid.Parse(details.Id));
             //TODO: probably shouldn't be caching here
 
-            return new AlbumInfoLookupDto(
+            var dto = new AlbumInfoLookupDto(
                 artistName,
                 details.Title,
                 string.Empty, //TODO: details.Annotation ?? string.Empty,
                 details.Genres?
                     .Where(r => !string.IsNullOrEmpty(r.Name))
                     .Select(r => r.Name).ToList(),
-                art,
-                art,
-                details.Id.ToString()
+                SmallImage: art,
+                LargeImage: art
             );
+            dto.MusicBrainzId = Guid.Parse(details.Id);
         } catch (Exception e) {
             _logger.LogError("Error finding cover art\n\t{Error}", e.Message);
             throw new AlbumNotFoundException($"Album: {albumName} not found");

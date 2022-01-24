@@ -29,7 +29,7 @@ public static class ImageCacher {
             //image is a local file in the audio folder
             File.Copy(
                 //TODO: hack for using live db in debug
-                Constants.DebugMode
+                Constants.DebugMode && false
                     ? imageFile.Replace("/audio/", "/mnt/frasier/audio/MuziQ/Pedestrian/Store/")
                     : imageFile,
                 cacheFile);

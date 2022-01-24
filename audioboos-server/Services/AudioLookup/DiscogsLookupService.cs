@@ -112,6 +112,7 @@ public class DiscogsLookupService : IAudioLookupService {
                 .aliases?.Select(r => r.name)
                 .ToList() ?? Array.Empty<string>().ToList()
         );
+        parsed.DicogsId = artist.id;
         return parsed;
     }
 
@@ -161,9 +162,9 @@ public class DiscogsLookupService : IAudioLookupService {
                         album.style.Count != 0 ? string.Join("\n", album.style) : string.Empty,
                         album.genre,
                         album.cover_image,
-                        album.cover_image,
-                        album.id.ToString()
+                        album.cover_image
                     );
+                    parsed.DiscogsId = album.id;
                     return parsed;
                 } catch (Exception parsedException) {
                     _logger.LogError(

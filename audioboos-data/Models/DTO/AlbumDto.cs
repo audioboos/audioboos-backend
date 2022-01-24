@@ -22,7 +22,9 @@ public record AlbumDto() {
 
     public List<TrackDto>? Tracks { get; set; }
     public List<String>? Genres { get; set; }
-    public string? SiteId { get; set; }
+    
+    public int? DiscogsId { get; set; }
+    public Guid? MusicBrainzId { get; set; }
 
     public static bool IsNullOrIncomplete(AlbumDto? albumDto) {
         return albumDto is null || string.IsNullOrEmpty(albumDto.ArtistName) ||

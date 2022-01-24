@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -29,9 +30,10 @@ namespace AudioBoos.Data.Migrations
                     large_image = table.Column<string>(type: "text", nullable: true),
                     header_image = table.Column<string>(type: "text", nullable: true),
                     fanart = table.Column<string>(type: "text", nullable: true),
-                    music_brainz_id = table.Column<string>(type: "text", nullable: true),
-                    discogs_id = table.Column<string>(type: "text", nullable: true),
                     aliases = table.Column<string>(type: "text", nullable: true),
+                    music_brainz_id = table.Column<Guid>(type: "uuid", nullable: true),
+                    discogs_id = table.Column<int>(type: "integer", nullable: true),
+                    immutable = table.Column<bool>(type: "boolean", nullable: false),
                     create_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     update_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     name = table.Column<string>(type: "text", nullable: false),
@@ -80,6 +82,10 @@ namespace AudioBoos.Data.Migrations
                 columns: table => new
                 {
                     id = table.Column<string>(type: "text", nullable: false),
+                    first_name = table.Column<string>(type: "text", nullable: true),
+                    second_name = table.Column<string>(type: "text", nullable: true),
+                    description = table.Column<string>(type: "text", nullable: true),
+                    photo = table.Column<string>(type: "text", nullable: true),
                     user_name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     normalized_user_name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -110,7 +116,11 @@ namespace AudioBoos.Data.Migrations
                     site_id = table.Column<string>(type: "text", nullable: true),
                     small_image = table.Column<string>(type: "text", nullable: true),
                     large_image = table.Column<string>(type: "text", nullable: true),
+                    genres = table.Column<List<string>>(type: "text[]", nullable: true),
                     artist_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    discogs_id = table.Column<int>(type: "integer", nullable: true),
+                    music_brainz_id = table.Column<Guid>(type: "uuid", nullable: true),
+                    immutable = table.Column<bool>(type: "boolean", nullable: false),
                     create_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     update_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     name = table.Column<string>(type: "text", nullable: false),
@@ -250,11 +260,36 @@ namespace AudioBoos.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "refresh_tokens",
+                schema: "app",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    token = table.Column<string>(type: "text", nullable: false),
+                    jwt_token = table.Column<string>(type: "text", nullable: false),
+                    revoked = table.Column<bool>(type: "boolean", nullable: false),
+                    user_id = table.Column<string>(type: "text", nullable: true),
+                    create_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    update_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_refresh_tokens", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_refresh_tokens_users_user_id",
+                        column: x => x.user_id,
+                        principalSchema: "app",
+                        principalTable: "users",
+                        principalColumn: "id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "tracks",
                 schema: "app",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
+                    duration = table.Column<int>(type: "integer", nullable: false),
                     track_number = table.Column<int>(type: "integer", nullable: false),
                     comments = table.Column<string>(type: "text", nullable: true),
                     audio_url = table.Column<string>(type: "text", nullable: true),
@@ -363,9 +398,9 @@ namespace AudioBoos.Data.Migrations
                 columns: new[] { "id", "concurrency_stamp", "name", "normalized_name" },
                 values: new object[,]
                 {
-                    { "2e5dbaac-2235-48cd-b75a-76bf1302f7e0", "1c972aaa-3f26-4ca2-8c6c-f901ad7a2946", "Viewer", "VIEWER" },
-                    { "603ed329-5c2b-4d3b-99ce-f5ccd84dbb7e", "9363a959-a325-4cdb-a743-c8172ae2b298", "Editor", "EDITOR" },
-                    { "912392a7-bfbc-4ced-961f-2faef09c8b2a", "c7511f48-0884-4e2c-b348-56296a87190f", "Admin", "ADMIN" }
+                    { "0f50900a-19dd-48d5-9aa9-e2f298ef4ef1", "4db8a34e-3084-4f5d-abdb-9da2265b824f", "Viewer", "VIEWER" },
+                    { "ad46f0b2-8ced-4786-93af-0306ba77d522", "014638e8-fcff-4f9d-bc60-ce6ed0250965", "Editor", "EDITOR" },
+                    { "b8e58349-3353-4aac-91a2-7146bb1a64cb", "0bd4d47e-8d86-4d75-a3ca-8dc175af4564", "Admin", "ADMIN" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -439,6 +474,26 @@ namespace AudioBoos.Data.Migrations
                 column: "role_id");
 
             migrationBuilder.CreateIndex(
+                name: "ix_refresh_tokens_jwt_token",
+                schema: "app",
+                table: "refresh_tokens",
+                column: "jwt_token",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_refresh_tokens_token",
+                schema: "app",
+                table: "refresh_tokens",
+                column: "token",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_refresh_tokens_user_id",
+                schema: "app",
+                table: "refresh_tokens",
+                column: "user_id");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_settings_key",
                 schema: "app",
                 table: "settings",
@@ -509,6 +564,10 @@ namespace AudioBoos.Data.Migrations
             migrationBuilder.DropTable(
                 name: "IdentityUserToken",
                 schema: "auth");
+
+            migrationBuilder.DropTable(
+                name: "refresh_tokens",
+                schema: "app");
 
             migrationBuilder.DropTable(
                 name: "settings",

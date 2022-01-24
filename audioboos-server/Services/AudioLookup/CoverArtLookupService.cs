@@ -36,12 +36,14 @@ public class CoverArtLookupService {
                 var image = release.Images.Where(i => i.Front);
                 return image.Select(i => i.Location).FirstOrDefault().ToString();
             }
+        } catch (MetaBrainz.MusicBrainz.CoverArt.CoverArtNotFoundException ce) {
+            _logger.LogError("No cover art available for {release}", releaseId);
         } catch (Exception e) {
             _logger.LogError("Error finding cover art for {release}", releaseId);
             _logger.LogError(e.Message);
             _logger.LogError(e.StackTrace);
         }
 
-        throw new CoverArtNotFoundException($"Unable to find cover art for {releaseId}");
+        return string.Empty;
     }
 }

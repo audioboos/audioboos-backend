@@ -51,6 +51,10 @@ namespace AudioBoos.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
+                    b.Property<int?>("DiscogsId")
+                        .HasColumnType("integer")
+                        .HasColumnName("discogs_id");
+
                     b.Property<DateTime>("FirstScanDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("first_scan_date");
@@ -70,6 +74,10 @@ namespace AudioBoos.Data.Migrations
                     b.Property<DateTime>("LastScanDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_scan_date");
+
+                    b.Property<Guid?>("MusicBrainzId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("music_brainz_id");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -230,8 +238,8 @@ namespace AudioBoos.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
-                    b.Property<string>("DiscogsId")
-                        .HasColumnType("text")
+                    b.Property<int?>("DiscogsId")
+                        .HasColumnType("integer")
                         .HasColumnName("discogs_id");
 
                     b.Property<string>("Fanart")
@@ -262,8 +270,8 @@ namespace AudioBoos.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_scan_date");
 
-                    b.Property<string>("MusicBrainzId")
-                        .HasColumnType("text")
+                    b.Property<Guid?>("MusicBrainzId")
+                        .HasColumnType("uuid")
                         .HasColumnName("music_brainz_id");
 
                     b.Property<string>("Name")

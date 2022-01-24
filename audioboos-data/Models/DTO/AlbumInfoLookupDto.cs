@@ -6,6 +6,8 @@ public record AlbumInfoLookupDto(
     string Description,
     List<string>? Genres,
     string SmallImage,
-    string LargeImage,
-    string SiteId
-);
+    string LargeImage
+) {
+    public int? DiscogsId { get; set; }
+    public Guid? MusicBrainzId { get; set; }
+}

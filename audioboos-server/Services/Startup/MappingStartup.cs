@@ -21,12 +21,16 @@ public static class MappingStartup {
         TypeAdapterConfig<ProfileDto, AppUser>
             .NewConfig();
 
+        TypeAdapterConfig<ArtistDto, Artist>
+            .NewConfig();
+        
         TypeAdapterConfig<Artist, ArtistDto>
             .NewConfig()
             .Map(dest => dest.Id, src => src.Id.ToString())
             .Map(dest => dest.Name, src => src.Name)
             .Map(dest => dest.NormalisedName, src => src.GetNormalisedName())
             .Map(dest => dest.FirstSeen, src => src.CreateDate)
+            .Map(dest => dest.MusicBrainzId, src => src.MusicBrainzId)
             .Map(dest => dest.SmallImage,
                 src =>
                     $"{config.GetSection("System").GetValue<string>("BaseUrl")}/images/artist/{src.Id}.jpg?width={smallWidth}&height={smallHeight}")
@@ -48,8 +52,6 @@ public static class MappingStartup {
 
         TypeAdapterConfig<Album, AlbumDto>
             .NewConfig()
-            .MapToConstructor(false)
-            .ConstructUsing(src => new AlbumDto(src.Artist.Name))
             .Map(dest => dest.Id, src => src.Id.ToString())
             .Map(dest => dest.ArtistName, src => src.Artist.Name)
             .Map(dest => dest.SmallImage,
@@ -80,10 +82,23 @@ public static class MappingStartup {
 
         TypeAdapterConfig<TrackPlayLog, TrackPlayDto>
             .NewConfig()
+            .Map(dest => dest.TrackName, src => src.Track.Name)
+            .Map(dest => dest.AlbumName, src => src.Track.Album.Name)
+            .Map(dest => dest.ArtistName, src => src.Track.Album.Artist.Name)
+            .Map(dest => dest.DatePlayed, src => src.UpdateDate)
+            .Map(dest => dest.PlayedByIp, src => src.IPAddress.ToString())
+            .Map(dest => dest.PlayedByUser, src => src.User.UserName)
+            ;
+
+        /*
+            .Map(dest => dest.ArtistName, src => src.Track.Album.Artist.Name)
+            .Map(dest => dest.AlbumName, src => src.Track.Album.Name)
+            .Map(dest => dest.TrackName, src => src.Track.Name)
+            .Map(dest => dest.TotalPlays, src => src.Track.Name)
             .Map(dest => dest.DatePlayed, src => src.UpdateDate)
             .Map(dest => dest.PlayedByIp, src => src.IPAddress.ToString())
             .Map(dest => dest.PlayedByUser, src => src.User.UserName);
-
+ */
         return services;
     }
 }

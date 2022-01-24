@@ -8,6 +8,6 @@ public interface IAudioLookupService {
     string Name { get; }
     Task<ArtistInfoLookupDto> LookupArtistInfo(string artistName, CancellationToken cancellationToken = default);
 
-    Task<AlbumInfoLookupDto> LookupAlbumInfo(string artistName, string albumName, string albumId,
+    Task<AlbumInfoLookupDto> LookupAlbumInfo(string artistName, string albumName, string artistId,
         CancellationToken cancellationToken);
 }

@@ -22,12 +22,14 @@ public class UpdateLibraryJob : IAudioBoosJob {
     }
 
     public async Task Execute(IJobExecutionContext context) {
+        _logger.LogInformation("Starting UpdateLibraryJob");
         var scheduler = await _schedulerFactory.GetScheduler(context.CancellationToken);
         var artistName = context.MergedJobDataMap
             .Where(r => r.Key.Equals("ArtistName"))
             .Select(r => r.Value.ToString())
             .FirstOrDefault();
         if (!string.IsNullOrEmpty(artistName)) {
+            _logger.LogInformation("Scanning {Artist}", artistName);
             await _scanner.UpdateArtist(artistName, context.CancellationToken);
         } else {
             await _scanner.ScanLibrary(false, string.Empty, context.CancellationToken);

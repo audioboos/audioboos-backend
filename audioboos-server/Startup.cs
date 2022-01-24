@@ -8,8 +8,10 @@ using AudioBoos.Data.Store;
 using AudioBoos.Server.Services.Startup;
 using AudioBoos.Server.Services.Email;
 using AudioBoos.Server.Services.Hubs;
+using EntityFrameworkCore.Triggered;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -45,13 +47,16 @@ public class Startup {
         var provider = Configuration.GetValue("Provider", "postgres");
 
         services.AddDbContext<AudioBoosContext>(
-            options => _ = provider switch {
-                "postgres" => options.UseNpgsql(
-                    Configuration.GetConnectionString("PostgresConnection"),
-                    x => x.MigrationsAssembly("AudioBoos.Data")
-                ),
-                _ => throw new Exception($"Unsupported provider: {provider}")
-            });
+                options => _ = provider switch {
+                    "postgres" => options.UseNpgsql(
+                        Configuration.GetConnectionString("PostgresConnection"),
+                        x => x.MigrationsAssembly("AudioBoos.Data")
+                            .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)
+                    ).UseTriggers(),
+                    _ => throw new Exception($"Unsupported provider: {provider}")
+                })
+            .AddTransient<IBeforeSaveTrigger<Artist>, AudioBoos.Data.Triggers.RetainArtistImageData>()
+            .AddTransient<IBeforeSaveTrigger<Album>, AudioBoos.Data.Triggers.RetainAlbumImageData>();
 
         services.AddAudioBoosOptions(Configuration)
             .AddAudioBoosJobs(Configuration)
@@ -64,6 +69,7 @@ public class Startup {
         services.AddTransient<IAudioRepository<Artist>, ArtistAudioRepository>();
         services.AddTransient<IAudioRepository<Album>, AlbumAudioRepository>();
         services.AddTransient<IAudioRepository<Track>, TrackRepository>();
+        services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
         services.AddTransient<IEmailSender, EmailSender>();
 
