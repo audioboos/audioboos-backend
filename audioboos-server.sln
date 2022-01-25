@@ -9,10 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "audioboos-server-tests", "a
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "audioboos-data", "audioboos-data\audioboos-data.csproj", "{2F3E73E3-0799-4E3E-95C3-BFBF7FCE1CCB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hqub.MusicBrainz.API", "..\..\working\MusicBrainz\Hqub.MusicBrainz\Hqub.MusicBrainz.API\Hqub.MusicBrainz.API.csproj", "{DD94FDC8-A43E-40E4-801F-B1EBD2EB19BF}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetaBrainz.MusicBrainz.CoverArt", "..\..\working\MetaBrainz.MusicBrainz.CoverArt\MetaBrainz.MusicBrainz.CoverArt\MetaBrainz.MusicBrainz.CoverArt.csproj", "{E038C268-96F3-4A79-9A77-D77E773130EA}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{C7A38351-554B-4E61-B77B-02F9673365B6}"
 EndProject
 Global
@@ -36,14 +32,6 @@ Global
 		{2F3E73E3-0799-4E3E-95C3-BFBF7FCE1CCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F3E73E3-0799-4E3E-95C3-BFBF7FCE1CCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F3E73E3-0799-4E3E-95C3-BFBF7FCE1CCB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DD94FDC8-A43E-40E4-801F-B1EBD2EB19BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DD94FDC8-A43E-40E4-801F-B1EBD2EB19BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DD94FDC8-A43E-40E4-801F-B1EBD2EB19BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DD94FDC8-A43E-40E4-801F-B1EBD2EB19BF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E038C268-96F3-4A79-9A77-D77E773130EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E038C268-96F3-4A79-9A77-D77E773130EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E038C268-96F3-4A79-9A77-D77E773130EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E038C268-96F3-4A79-9A77-D77E773130EA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection

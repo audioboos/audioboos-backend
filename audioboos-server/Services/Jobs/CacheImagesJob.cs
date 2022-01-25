@@ -82,7 +82,7 @@ public class CacheImagesJob : IAudioBoosJob {
         _logger.LogInformation("**Finished caching album images**");
         var albums = _albumRepository
             .GetAll()
-            .Where(a => a.LargeImage.StartsWith("http")); //ignore local album art
+            .Where(a => !string.IsNullOrEmpty(a.LargeImage)); //ignore local album art
 
         foreach (var album in albums) {
             await _cacheAlbumImage(album, cachePath);
