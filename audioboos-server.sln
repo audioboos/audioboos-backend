@@ -1,23 +1,18 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30114.105
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33110.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "audioboos-server", "audioboos-server\audioboos-server.csproj", "{E8CB3A30-1848-4340-841D-C2A5FC7200E6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "audioboos-server", "audioboos-server\audioboos-server.csproj", "{E8CB3A30-1848-4340-841D-C2A5FC7200E6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "audioboos-server-tests", "audioboos-server-tests\audioboos-server-tests.csproj", "{253D5B22-AB70-45AB-B94B-092D30B1E62C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "audioboos-server-tests", "audioboos-server-tests\audioboos-server-tests.csproj", "{253D5B22-AB70-45AB-B94B-092D30B1E62C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "audioboos-data", "audioboos-data\audioboos-data.csproj", "{2F3E73E3-0799-4E3E-95C3-BFBF7FCE1CCB}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{C7A38351-554B-4E61-B77B-02F9673365B6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "audioboos-data", "audioboos-data\audioboos-data.csproj", "{2F3E73E3-0799-4E3E-95C3-BFBF7FCE1CCB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{E8CB3A30-1848-4340-841D-C2A5FC7200E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -33,6 +28,10 @@ Global
 		{2F3E73E3-0799-4E3E-95C3-BFBF7FCE1CCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F3E73E3-0799-4E3E-95C3-BFBF7FCE1CCB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {599E5CF5-B1E5-4148-9641-F2656B6C74B0}
 	EndGlobalSection
 EndGlobal

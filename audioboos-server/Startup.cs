@@ -84,7 +84,6 @@ public class Startup {
                     options.MemoryStreamManager = new RecyclableMemoryStreamManager();
                     options.BrowserMaxAge = TimeSpan.FromDays(7);
                     options.CacheMaxAge = TimeSpan.FromDays(365);
-                    options.CachedNameLength = 8;
                 }).SetRequestParser<QueryCollectionRequestParser>()
             .Configure<PhysicalFileSystemCacheOptions>(options => {
                 options.CacheFolder = Path.Combine(Configuration.GetSection("System").GetValue<string>("CachePath"),
