@@ -4,8 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AudioBoos.Data.Access;
-using AudioBoos.Data.Models.Settings;
-using AudioBoos.Data;
 using AudioBoos.Data.Interfaces;
 using AudioBoos.Data.Store;
 using AudioBoos.Server.Helpers;
@@ -18,7 +16,6 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Quartz;
 
 namespace AudioBoos.Server.Services.Jobs.Scanners;
@@ -28,8 +25,9 @@ internal class FastFilesystemLibraryScanner : LibraryScanner {
         IHubContext<JobHub> messageClient,
         IAudioLookupService lookupService,
         ISchedulerFactory schedulerFactory,
-        IServiceProvider serviceProvider) : base(logger, messageClient, lookupService, schedulerFactory,
-        serviceProvider) {
+        IServiceProvider serviceProvider) : base(
+        logger, messageClient, lookupService,
+        schedulerFactory, serviceProvider) {
     }
 
     public override async Task<(int, int, int)> ScanLibrary(bool deepScan, string childFolder,
@@ -46,6 +44,10 @@ internal class FastFilesystemLibraryScanner : LibraryScanner {
         var artistRepository = scope.ServiceProvider.GetService<IAudioRepository<Artist>>();
         var albumRepository = scope.ServiceProvider.GetService<IAudioRepository<Album>>();
         var unitOfWork = scope.ServiceProvider.GetService<IUnitOfWork>();
+
+        if (trackRepository is null) {
+            throw new NullReferenceException(nameof(trackRepository));
+        }
 
         await _messageClient.Clients.All.SendAsync("QueueJobMessage", new JobMessage() {
             Message = "Starting scan job",
@@ -164,6 +166,8 @@ internal class FastFilesystemLibraryScanner : LibraryScanner {
         TagLibTagService tagger, CancellationToken cancellationToken) {
         using var scope = _serviceProvider.CreateScope();
         var artistRepository = scope.ServiceProvider.GetService<IAudioRepository<Artist>>();
+        if (artistRepository is null) { throw new NullReferenceException(nameof(artistRepository)); }
+
         //TODO: Use LinqExtension.MostCommon to find the most common artist name in the folder
         var artist = await artistRepository.GetByFile(file, cancellationToken) ??
                      await artistRepository.GetByName(artistName, cancellationToken) ??

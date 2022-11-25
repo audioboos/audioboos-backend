@@ -62,6 +62,8 @@ internal abstract class LibraryScanner : ILibraryScanner {
     public async Task UpdateUnscannedAlbums(CancellationToken cancellationToken) {
         using var scope = _serviceProvider.CreateScope();
         var albumRepository = scope.ServiceProvider.GetService<IAudioRepository<Album>>();
+        if (albumRepository is null) throw new NullReferenceException(nameof(albumRepository));
+
         _logger.LogInformation("Scanning unscanned albums");
 
         var unscannedAlbums = albumRepository
@@ -90,22 +92,15 @@ internal abstract class LibraryScanner : ILibraryScanner {
 
             using var scope = _serviceProvider.CreateScope();
             var albumRepository = scope.ServiceProvider.GetService<IAudioRepository<Album>>();
+            if (albumRepository is null) throw new NullReferenceException(nameof(albumRepository));
+
             var unitOfWork = scope.ServiceProvider.GetService<IUnitOfWork>();
+            if (unitOfWork is null) throw new NullReferenceException(nameof(unitOfWork));
             _logger.LogInformation("Scanning {Album}", album.Name);
-            var remoteAlbumInfo = await _lookupService.LookupAlbumInfo(
-                album.Artist.Name,
-                album.Name,
-                album.Artist.MusicBrainzId.ToString(),
-                cancellationToken);
 
-            if (remoteAlbumInfo is null) {
-                return;
-            }
-
-            var updated = remoteAlbumInfo.Adapt(album);
-            updated.TaggingStatus = TaggingStatus.RemoteLookup;
-            updated.LastScanDate = DateTime.Now;
-            await albumRepository.InsertOrUpdate(updated, cancellationToken);
+            album.TaggingStatus = TaggingStatus.RemoteLookup;
+            album.LastScanDate = DateTime.Now;
+            await albumRepository.InsertOrUpdate(album, cancellationToken);
             await unitOfWork.Complete();
             var scheduler = await _schedulerFactory.GetScheduler(cancellationToken);
             await scheduler.TriggerJob(
@@ -128,6 +123,7 @@ internal abstract class LibraryScanner : ILibraryScanner {
     public async Task UpdateUnscannedArtists(CancellationToken cancellationToken) {
         using var scope = _serviceProvider.CreateScope();
         var artistRepository = scope.ServiceProvider.GetService<IAudioRepository<Artist>>();
+        if (artistRepository is null) throw new NullReferenceException(nameof(artistRepository));
         var unscannedArtists = artistRepository
             .GetAll()
             .AsNoTracking()
@@ -146,10 +142,8 @@ internal abstract class LibraryScanner : ILibraryScanner {
         using var scope = _serviceProvider.CreateScope();
         var artistRepository = scope.ServiceProvider.GetService<IAudioRepository<Artist>>();
         var unitOfWork = scope.ServiceProvider.GetService<IUnitOfWork>();
-        if (artistRepository is null || unitOfWork is null) {
-            _logger.LogError("Unable to scope unit of work & repositories");
-            return;
-        }
+        if (artistRepository is null) throw new NullReferenceException(nameof(artistRepository));
+        if (unitOfWork is null) throw new NullReferenceException(nameof(unitOfWork));
 
         var artist = await artistRepository
             .GetAll()
@@ -168,21 +162,13 @@ internal abstract class LibraryScanner : ILibraryScanner {
         }
 
         try {
-            var remoteArtistInfo = await _lookupService.LookupArtistInfo(
-                artist.Name,
-                cancellationToken);
-            if (remoteArtistInfo is null) {
-                return;
-            }
+            bool newImage = !artist.LargeImage.Equals(artist.LargeImage) ||
+                            !artist.SmallImage.Equals(artist.SmallImage);
 
-            bool newImage = !remoteArtistInfo.LargeImage.Equals(artist.LargeImage) ||
-                            !remoteArtistInfo.SmallImage.Equals(artist.SmallImage);
+            artist.TaggingStatus = TaggingStatus.RemoteLookup;
+            artist.LastScanDate = DateTime.Now;
 
-            var updated = remoteArtistInfo.Adapt(artist);
-            updated.TaggingStatus = TaggingStatus.RemoteLookup;
-            updated.LastScanDate = DateTime.Now;
-
-            await artistRepository.InsertOrUpdate(updated, cancellationToken);
+            await artistRepository.InsertOrUpdate(artist, cancellationToken);
             await unitOfWork.Complete();
             var scheduler = await _schedulerFactory.GetScheduler(cancellationToken);
             await scheduler.TriggerJob(

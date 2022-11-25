@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net7.0</TargetFramework>
         <RootNamespace>AudioBoos.Data</RootNamespace>
         <AssemblyName>AudioBoos.Data</AssemblyName>
         <ImplicitUsings>enable</ImplicitUsings>
@@ -10,11 +10,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="EFCore.NamingConventions" Version="6.0.0-rc.1" />
+        <PackageReference Include="EFCore.NamingConventions" Version="7.0.0" />
         <PackageReference Include="EntityFrameworkCore.Triggered" Version="3.0.0" />
         <PackageReference Include="Mapster.Core" Version="1.2.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.0" />
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.0" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.0" />
     </ItemGroup>
 
     <ItemGroup>
